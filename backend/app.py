@@ -11,12 +11,7 @@ def runApp():
     CORS(
         app,
         supports_credentials=True,
-        # resources={
-        #     r"/api/v1/*": {
-        #         "origins": ["http://127.0.0.1:8000", "http://10.183.85.239:8000"]
-        #     }
-        # },
-        origins=["http://127.0.0.1:8000", "http://10.183.85.239:8000"],
+        origins=["http://127.0.0.1:8000"],
     )
 
     app.config["path"] = ".backend/public"
