@@ -18,5 +18,4 @@ alembic
 **/.env
 
 # Logs
-** logs
-** logs/*
+**/logs
