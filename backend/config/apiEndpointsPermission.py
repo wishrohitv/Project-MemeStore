@@ -1,0 +1,198 @@
+from backend.config.roles import ROLE
+from backend.utils.formateToCamel import formateToCamel
+from backend.utils.routeAccess import RouteAccess
+
+
+class API_ENDPOINTS:
+    """
+    Role of users who can access api endpoints based on their role
+    defined here
+    """
+
+    # Auth
+    signupUser = RouteAccess(
+        routeName="/auth/signup",
+        methods=["POST"],
+        rolePermission=[],
+    )
+    loginUser = RouteAccess(
+        routeName="/auth/login",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+        partialAccess=True,
+    )
+    logoutUser = RouteAccess(
+        routeName="/auth/logout",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+        partialAccess=True,
+    )
+    refreshToken = RouteAccess(
+        routeName="/auth/refresh",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    # User route
+    deleteUser = RouteAccess(
+        routeName="/user/delete",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["DELETE"],
+    )
+    suspendUser = RouteAccess(
+        routeName="/user/suspend",
+        rolePermission=[ROLE.MODERATOR, ROLE.SUPER_ADMIN],
+        methods=["PUT"],
+    )
+    userProfile = RouteAccess(
+        routeName="/user/profile",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    banUser = RouteAccess(
+        routeName="/user/ban",
+        rolePermission=[ROLE.SUPER_ADMIN],
+        methods=["PUT"],
+    )
+    addFollower = RouteAccess(
+        routeName="/user/follow",
+        rolePermission=[ROLE.USER],
+        methods=["POST"],
+    )
+    removeFollower = RouteAccess(
+        routeName="/users/unfollow",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+
+    # Feed
+    getFeed = RouteAccess(
+        routeName="/feed",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    # Profile
+    uploadProfileImage = RouteAccess(
+        routeName="/users/profile/image",
+        methods=["POST"],
+        rolePermission=[ROLE.USER],
+    )
+    getProfileImage = RouteAccess(
+        routeName="/users/profile/image",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    updateProfile = RouteAccess(
+        routeName="/users/profile/update",
+        rolePermission=[ROLE.USER],
+        methods=["PUT"],
+    )
+    deleteProfile = RouteAccess(
+        routeName="/users/profile/delete",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+    # Posts
+    posts = RouteAccess(
+        routeName="/posts",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    uploadPosts = RouteAccess(
+        routeName="/posts/upload",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+    )
+    postLike = RouteAccess(
+        routeName="/posts/like",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["PUT"],
+    )
+    deletePost = RouteAccess(
+        routeName="/posts/delete",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["DELETE"],
+    )
+    updatePost = RouteAccess(
+        routeName="/posts/update",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+    )
+
+    # Comments
+    comments = RouteAccess(
+        routeName="/comments",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+    )
+    createComments = RouteAccess(
+        routeName="/comments/create",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+    )
+    deleteComment = RouteAccess(
+        routeName="/comments/delete",
+        rolePermission=[ROLE.USER, ROLE.MODERATOR, ROLE.SUPER_ADMIN],
+        methods=["DELETE"],
+    )
+    updateComment = RouteAccess(
+        routeName="/comments/update",
+        rolePermission=[ROLE.USER, ROLE.MODERATOR, ROLE.SUPER_ADMIN],
+        methods=["PUT"],
+    )
+    # Collection
+    collection = RouteAccess(
+        routeName="/collections", rolePermission=[ROLE.USER], methods=["GET"]
+    )
+    createCollection = RouteAccess(
+        routeName="/collections/create", rolePermission=[ROLE.USER], methods=["POST"]
+    )
+    addPostToCollection = RouteAccess(
+        routeName="/collections/addPost", rolePermission=[ROLE.USER], methods=["POST"]
+    )
+    removePostFromCollection = RouteAccess(
+        routeName="/collections/removePost",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+    deleteCollection = RouteAccess(
+        routeName="/collections/deleteCollection",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+    templatePost = RouteAccess(
+        routeName="/collections/templatePost",
+        rolePermission=[ROLE.USER],
+        methods=["POST"],
+    )
+    removeTemplatePost = RouteAccess(
+        routeName="/collections/removeTemplatePost",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+
+    @property
+    def apiEndpoints(self) -> dict[str, RouteAccess]:
+        """
+        endpoint name : route name
+        """
+        return {
+            v.routeName: v
+            for k, v in self.__class__.__dict__.items()
+            if isinstance(v, RouteAccess)
+        }
+
+    @property
+    def apiEndpointsPartialAccess(self) -> dict[str, bool]:
+        """
+        endpoint name : access rule
+        """
+        return {
+            v.routeName: v.partialAccess
+            for k, v in self.__class__.__dict__.items()
+            if isinstance(v, RouteAccess)
+        }

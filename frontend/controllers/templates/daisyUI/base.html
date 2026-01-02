@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Meme Store</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            rel="icon"
+            href="{{ url_for('static' , filename = 'assets/appLogo/icon.png') }}"
+            type="image/x-icon"
+        />
+        <!--  DaisyUI cdn  -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@5"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <!-- Theme -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <!-- Customized components -->
+        <!-- <link href="https://cdn.jsdelivr.net/combine/npm/daisyui@5/base/scrollbar.css,npm/daisyui@5/base/svg.css,npm/daisyui@5/base/reset.css,npm/daisyui@5/base/rootscrollgutter.css,npm/daisyui@5/base/rootcolor.css,npm/daisyui@5/base/properties.css,npm/daisyui@5/base/rootscrolllock.css,npm/daisyui@5/components/input.css,npm/daisyui@5/components/menu.css,npm/daisyui@5/components/toggle.css,npm/daisyui@5/components/button.css,npm/daisyui@5/components/checkbox.css,npm/daisyui@5/components/select.css,npm/daisyui@5/theme/light.css" rel="stylesheet" type="text/css" /> -->
+
+        {% block head %} {% endblock head %}
+    </head>
+
+    <!-- overflow-x remove extra space from right side of screen on mobile-->
+
+    <body style="overflow-x: clip">
+        <!-- Nav bar macro -->
+        <div>
+            {% from 'macrosComponent/navBarMacro.html' import navBarMacro %} {{
+            navBarMacro() }}
+        </div>
+
+        <!-- js file to perform client side work -->
+        <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+
+        <!--  Body block for content  -->
+        {% block body %} {% endblock body %}
+
+        <!--  Footer  -->
+        <div>
+            {% from 'macrosComponent/footerMacro.html' import footerMacro with
+            context %} {{ footerMacro() }}
+        </div>
+
+        <!-- js file to perform client side work -->
+        <!--  <script src="{{ url_for('static', filename='js/base.js') }}"></script>-->
+        <script src="{{ url_for('static', filename='js/themeMode.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/loginUser.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/posts.js') }}"></script>
+    </body>
+</html>

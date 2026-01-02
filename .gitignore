@@ -1,0 +1,22 @@
+./.venv
+./.idea
+**/__pycache__/
+
+tests
+
+# test files
+backend/public/profiles/wishrohitv
+backend/public/profiles/modi
+backend/public/posts/5db858bc-24ea-4c3a-ac66-0b71a322e68d.jpeg
+
+# Migration file
+alembic.ini
+alembic
+
+# Env file
+.env
+**/.env
+
+# Logs
+** logs
+** logs/*

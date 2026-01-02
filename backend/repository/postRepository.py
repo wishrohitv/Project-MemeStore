@@ -1,0 +1,201 @@
+from backend.database import engine
+from backend.models import AgeRating, Likes, Posts, Users
+from backend.modules import (
+    API_ROOT_URL,
+    PUBLIC_DIRECTORY_POSTS,
+    USE_CLOUDINARY_STORAGE,
+    delete,
+    make_response,
+    os,
+    select,
+    sessionmaker,
+    update,
+    url_for,
+)
+from backend.utils import Log, deleteMedia
+
+Session = sessionmaker(bind=engine)
+session = Session()
+
+
+def _createPost(
+    userID,
+    title,
+    tags,
+    mediaUrl,
+    mediaPublicID,
+    fileType,
+    fileExtension,
+    visibility,
+    ageRating,
+    category,
+):
+    try:
+        newPost = Posts(
+            userID=userID,
+            title=title,
+            tags=tags,
+            mediaUrl=mediaUrl,
+            mediaPublicID=mediaPublicID,
+            fileType=fileType,
+            fileExtension=fileExtension,
+            visibility=visibility,
+            ageRating=ageRating,
+            category=category,
+        )
+        session.add(newPost)
+        session.commit()
+        session.close()
+        Log.info("post added to table successfully")
+        return make_response({"message": "post upload successfully"}, 200)
+    except Exception as e:
+        session.rollback()
+        Log.critical(str(e))
+        raise Exception(str(e))
+
+
+def _postToggleLike(sessionUserID: int, postID: int):
+    try:
+        isAlreadyLiked = (
+            session.query(Likes)
+            .filter(Likes.userID == sessionUserID, Likes.postID == postID)
+            .first()
+        )
+        if not isAlreadyLiked:
+            # add like to post
+            likePost = Likes(postID=postID, userID=sessionUserID)
+            session.add(likePost)
+            session.commit()
+            session.close()
+            return "Post liked successfully"
+        else:
+            # remove like from post
+            deLike = delete(Likes).filter(
+                Likes.userID == sessionUserID, Likes.postID == postID
+            )
+            session.execute(deLike)
+            session.commit()
+            return "Post like removed successfully"
+    except Exception as e:
+        raise Exception(str(e))
+
+
+def _deletePost(postID: int, sessionUserID: int):
+    try:
+        result = session.query(Posts).filter_by(id=postID, userID=sessionUserID).first()
+        # Check ownership of the post
+        if not result:
+            raise Exception("You do not have permission to delete this post")
+        # Delete the media
+        if USE_CLOUDINARY_STORAGE:
+            deleteMedia([result.mediaPublicID])
+        else:
+            filepath = os.path.join(
+                PUBLIC_DIRECTORY_POSTS, f"{result.mediaPublicID}.{result.fileType}"
+            )
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        session.delete(result)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise Exception(str(e))
+
+
+def _updatePost(
+    postID: int,
+    sessionUserID: int,
+    title: str | None = None,
+    tags: str | None = None,
+    ageRating: AgeRating | None = None,
+    category: int | None = None,
+    visibility: bool | None = None,
+):
+    try:
+        updateValue = {}
+        if title:
+            updateValue["title"] = title
+        if tags:
+            updateValue["tags"] = tags
+        if ageRating:
+            updateValue["ageRating"] = ageRating
+        if category:
+            updateValue["category"] = category
+        if visibility is not None:
+            updateValue["visibility"] = visibility
+
+        stmt = update(Posts).where(Posts.id == postID).values(updateValue)
+        session.execute(stmt)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise Exception(str(e))
+
+
+def _posts(
+    userName: str,
+    sessionUserID: int | None = None,
+    category: int | None = None,
+    orderBy="recent",
+    limit: int = 12,
+):
+    # Check if user is logged and sessionUserID = userName then fetch private posts too
+    # if user is logged but sessionUserID != userName then fetch public posts only
+    # else fetch public posts only
+
+    filterObj = {}
+
+    if sessionUserID:
+        user = session.query(Users).filter_by(id=sessionUserID).first()
+        if user.userName == userName:
+            # filterObj["visibility"] = True
+            pass
+        else:
+            filterObj["visibility"] = False
+    else:
+        # Here more abstraction can be added for unauthorized user
+        filterObj["visibility"] = False
+
+    # Get feed data from database alog with userName of author of post
+    getFeedData = (
+        select(
+            Users.userName,
+            Posts,
+        )
+        .join_from(Users, Posts)
+        .filter_by(**filterObj)
+    ).where(Users.userName == userName)
+    # print(getFeedData)
+    getFeed = session.execute(getFeedData).all()
+
+    # Close the session
+    session.close()
+    try:
+        if getFeed:
+            feedObj = []
+            for feed in getFeed:
+                data = {
+                    "userName": feed[0],
+                    "postID": feed[1].id,
+                    "userID": feed[1].userID,
+                    "title": feed[1].title,
+                    "tags": feed[1].tags,
+                    "mediaPulicID": feed[1].mediaPublicID,
+                    "fileType": feed[1].fileType,
+                    "fileExtension": feed[1].fileExtension,
+                    "visibility": feed[1].visibility,
+                    "ageRating": feed[
+                        1
+                    ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
+                    "category": feed[1].category,
+                    "postUserPicUrl": f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=feed[0])}",
+                    "postMediaUrl": feed[1].mediaUrl
+                    if USE_CLOUDINARY_STORAGE
+                    else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{feed[1].mediaPublicID}.{feed[1].fileExtension}')}",
+                }
+                feedObj.append(data)
+            return make_response({"payload": feedObj}, 200)
+        else:
+            return make_response({"payload": []}, 200)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)

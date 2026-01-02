@@ -1,0 +1,4 @@
+clear token after logout
+add category in database
+
+postgresql_using='"ageRating"::agerating',

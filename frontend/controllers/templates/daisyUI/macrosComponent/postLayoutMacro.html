@@ -1,0 +1,148 @@
+{% macro postLayoutMacro(link) %}
+
+<!-- Post-card preview -->
+<div class="card bg-base-100 max-w-96 shadow-sm">
+    <figure class="px-10 pt-10">
+        <img
+            src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+            alt="Shoes"
+            class="rounded-xl"
+        />
+    </figure>
+    <div class="card-body items-center text-center">
+        <h2 class="card-title">Card Title</h2>
+        <p>
+            A card component has a figure, a body part, and inside body there
+            are title and actions parts
+        </p>
+        <div class="card-actions">
+            <!--  Like post -->
+            <button class="btn" id="like">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-heart-icon lucide-heart"
+                >
+                    <path
+                        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                    />
+                </svg>
+                Like
+            </button>
+
+            <!--  Save post -->
+            <button class="btn">
+                <!--  Bookmark -->
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-bookmark-icon lucide-bookmark"
+                >
+                    <path
+                        d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"
+                    />
+                </svg>
+                <!-- Bookmark checked -->
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-bookmark-check-icon lucide-bookmark-check"
+                >
+                    <path
+                        d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"
+                    />
+                    <path d="m9 10 2 2 4-4" />
+                </svg>
+                Save
+            </button>
+
+            <!-- Share button -->
+            <button class="btn">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-share2-icon lucide-share-2"
+                >
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+                    <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+                </svg>
+                Share
+            </button>
+
+            <!-- Download button -->
+            <button class="btn btn-primary">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-download-icon lucide-download"
+                >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                Download
+            </button>
+
+            <!-- More option button -->
+            <button class="btn">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
+                >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
+                </svg>
+                More
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
