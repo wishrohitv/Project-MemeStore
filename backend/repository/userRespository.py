@@ -32,7 +32,6 @@ def _createUser(
     userName: str,
     email: str,
     password: str,
-    # joinDate,
     role: int,
     accountStatus: AccountStatus,
     country,
