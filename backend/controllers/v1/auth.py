@@ -40,19 +40,22 @@ def signup():
         name = clientBody.get("name")
         userName = clientBody.get("userName")
         email = clientBody.get("email")
-        password = clientBody.get("password")
+        password1 = clientBody.get("password1")
+        password2 = clientBody.get("password2")
         country = clientBody.get("country") if None else "world"
 
-        if not (userName or email or password):
+        if not (userName or email or password1 or password2):
             return make_response(
                 {"error": "userName, email and password are required"}, 400
             )
+        if password1 != password2:
+            return make_response({"error": "Passwords do not match"}, 400)
 
         return _createUser(
             name=name,
             userName=userName,
             email=email,
-            password=password,
+            password=password1,
             role=ROLE.USER,  # Defualt role,
             accountStatus=AccountStatus.active,
             country=country,
