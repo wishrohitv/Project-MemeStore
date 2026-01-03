@@ -1,41 +1,70 @@
-{% extends 'base.html' %}
-{% block body %}
+{% extends 'base.html' %} {% block body %}
 
 <div class="flex flex-col justify-center items-center mt-[60px] gap-3">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <h1 class="card-title text-2xl font-bold">Join Meme Store</h1>
 
-    <div class="flex flex-col sm:flex-row gap-3">
-        <h1 class="card-title">Join Meme Store</h1>
-
-        <form method="post">
-            <fieldset class="fieldset w-xs bg-base-200 border border-base-300 p-4 rounded-box">
+        <form method="post" id="signupForm">
+            <fieldset
+                class="fieldset w-xs bg-base-200 border border-base-300 p-4 rounded-box"
+            >
                 <legend class="fieldset-legend">Create Account</legend>
 
                 <label class="fieldset-label">Name</label>
-                <input type="text" class="input" placeholder="Name (Optional)" name="name" />
+                <input
+                    type="text"
+                    class="input"
+                    placeholder="Name (Optional)"
+                    name="name"
+                />
 
                 <label class="fieldset-label">UserName</label>
-                <input type="text" class="input" placeholder="Username" name="userName" />
+                <input
+                    type="text"
+                    class="input"
+                    placeholder="Username"
+                    name="userName"
+                />
 
                 <label class="fieldset-label">Email</label>
-                <input type="email" class="input" placeholder="Email" name="email" />
+                <input
+                    type="email"
+                    class="input"
+                    placeholder="Email"
+                    name="email"
+                />
 
                 <label class="fieldset-label">Password</label>
-                <input type="password" class="input" placeholder="Password" name="password1" />
+                <input
+                    type="password"
+                    class="input"
+                    placeholder="Password"
+                    name="password1"
+                />
 
                 <label class="fieldset-label">Password</label>
-                <input type="password" class="input" placeholder="Password" name="password2" />
+                <input
+                    type="password"
+                    class="input"
+                    placeholder="Password"
+                    name="password2"
+                />
 
-                <button class="btn btn-soft btn-accent mt-4" type="submit" name="signup">Create Me</button>
+                <button
+                    class="btn bg-purple-600 text-white mt-4"
+                    type="submit"
+                    name="signup"
+                >
+                    Create Me
+                </button>
             </fieldset>
         </form>
     </div>
-    <p class="mt-4">Already have account / <a href="/auth/login" class="text-purple-600">Login here</a></p>
+    <p class="mt-4">
+        Already have account /
+        <a href="/auth/login" class="text-purple-600">Login here</a>
+    </p>
 </div>
-
-<!--<script>-->
-<!--    var apiEndpoint = "http://127.0.0.1:5000"-->
-<!--    function-->
-<!--</script>-->
 
 <!--Link signup js file-->
 <script src="{{ url_for('signup.static', filename='daisyUI/js/signup.js') }}"></script>

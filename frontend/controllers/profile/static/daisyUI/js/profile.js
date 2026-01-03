@@ -1,16 +1,19 @@
+let profileImg = document.getElementById("profileImg");
+let followerCount = document.getElementById("followerCount");
+let followingCount = document.getElementById("followingCount");
 let name = document.getElementById("uName");
-let userName = document.getElementById("userName");
+let userName_ = document.getElementById("userName");
 let bio = document.getElementById("bio");
 let uid = document.getElementById("uid");
-
+// Container of post preview
+let postContainer = document.getElementById("userPostContainer");
 // function to fetch user's profile data
-console.log(loggedUserName, "alpha");
-async function fetchUserProfileData() {
-  console.log("sssssssssssssssssssssssssssssssss");
+async function fetchUserProfileData(userName) {
+  console.log("fetchUserProfileData");
   try {
-    let connection = await fetch(`${apiUserProfile}/${userName.innerText}`, {
+    let connection = await fetch(`${apiUserProfile}/${userName}`, {
       method: "GET",
-      // credentials: "include",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
@@ -18,46 +21,24 @@ async function fetchUserProfileData() {
     let res = await connection.json();
     if (connection.ok) {
       name.appendChild(document.createTextNode(res.payload["name"]));
-      userName.appendChild(document.createTextNode(res.payload["userName"]));
+      userName_.appendChild(document.createTextNode(res.payload["userName"]));
+      followerCount.innerText = `${res.payload["followerCount"]} follower`;
+      followingCount.innerText = `${res.payload["followingCount"]} following`;
+
+      // Load posts
+      loadHomeFeed(userName);
     }
     console.error(res);
   } catch (e) {
     console.error(e);
   }
 }
-// fetchUserProfileData();
-/// Initialize variable for
-// Template of post preview macro
-let postTemplate;
-// Container of post preview
-let postContainer;
-
-function initializeTemplate() {
-  fetch("/daisyUI/pureMacrosInHtml/postLayoutMacro.html")
-    .then((res) => res.text())
-    .then((templateHtml) => {
-      // Insert the fetched template into a hidden container
-      // console.log(templateHtml);
-      const tempContainer = document.createElement("div");
-      tempContainer.innerHTML = templateHtml;
-
-      // Insert the fetched template into a dom alternative of above code
-      //const doc = new DOMParser().parseFromString(templateHtml, 'text/html');
-      //const template = doc.getElementById('postPreview');
-
-      // Register macro in dome
-      document.body.appendChild(tempContainer); // or keep it detached
-
-      /// Assign html id of content to variable
-      postTemplate = document.getElementById("postPreview");
-      postContainer = document.getElementById("userPostContainer");
-    });
-}
 
 // Function to fetch home feed for user
-async function fetchHomeFeed() {
-  let connection = await fetch(apiUserPostsFeed + uid.value, {
+async function fetchHomeFeed(userName) {
+  let connection = await fetch(`${apiUserPostsFeed}/${userName}`, {
     method: "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json; charset=utf-8",
     },
@@ -75,13 +56,14 @@ async function fetchHomeFeed() {
   }
 }
 
-async function loadHomeFeed() {
+async function loadHomeFeed(userName) {
   /// Fetch home feed data
-  feedData = await fetchHomeFeed();
+  feedData = await fetchHomeFeed(userName);
 
   // Check if feedData is not empty
   if (feedData) {
-    console.log(feedData);
+    // Call postTemplate to load
+    await initializeTemplate();
     // Loop feedData list
     feedData.forEach((post) => {
       const clone = postTemplate.content.cloneNode(true);
@@ -109,15 +91,7 @@ async function loadHomeFeed() {
   }
 }
 
-window.onload = function () {
-  let profileLogo = document.getElementById("loggedProfileImg");
-  if (userName.innerText != null) {
-    fetchProfileImg(userName.innerText, profileLogo);
-
-    initializeTemplate();
-    loadHomeFeed();
-  }
-};
+window.onload = function () {};
 
 // Functon to addFollower
 async function addFollower() {
@@ -134,3 +108,22 @@ async function addFollower() {
 
   console.log(res);
 }
+
+function router() {
+  const path = location.pathname;
+  const paths = path.split("/");
+  // ['', 'user', 'pmModi']
+  if (paths[1] === "user") {
+    fetchUserProfileData(paths[2]);
+    console.log("profile path", profileImg);
+    fetchProfileImg(paths[2], profileImg);
+  }
+}
+
+function navigate(url) {
+  history.pushState({}, "", url);
+  router();
+}
+
+window.addEventListener("popstate", router);
+router();

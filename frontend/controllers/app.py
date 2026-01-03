@@ -1,7 +1,7 @@
 from frontend.modules import (
+    Constants,
     Flask,
     render_template,
-    Constants,
 )
 
 
@@ -15,33 +15,28 @@ def createApp():
     # App secret key
     app.secret_key = Constants.APP_SECRET_KEY
 
-    from frontend.controllers.userSession.userSession import userSessionRoute
-
     ## Context processors
-    from frontend.utils.contextProcessors.dateTime import dateTime
-    from frontend.utils.contextProcessors.constants import constants
+    from frontend.controllers.about.about import aboutBlueprint
+    from frontend.controllers.guidelines.guidelines import guidelinesBlueprint
 
     ## Pages
     from frontend.controllers.index.index import indexBlueprint
-    from frontend.controllers.profile.profile import profileBlueprint
-    from frontend.controllers.about.about import aboutBlueprint
-    from frontend.controllers.signup.signup import signupBlueprint
     from frontend.controllers.login.login import loginBlueprint
     from frontend.controllers.logout.logout import logoutBlueprint
     from frontend.controllers.posts.posts import postsBlueprint
     from frontend.controllers.privacyPolicy.privacyPolicy import privacyPolicyBlueprint
+    from frontend.controllers.profile.profile import profileBlueprint
+    from frontend.controllers.signup.signup import signupBlueprint
     from frontend.controllers.termConditions.termConditions import (
         termConditionsBlueprint,
     )
-    from frontend.controllers.guidelines.guidelines import guidelinesBlueprint
+    from frontend.utils.contextProcessors.constants import constants
+    from frontend.utils.contextProcessors.dateTime import dateTime
 
     ## Register context processors
     app.context_processor(dateTime)
     app.context_processor(constants)
 
-    ## Register context processors
-    # Register Index page
-    app.register_blueprint(userSessionRoute)
     # Register Index page
     app.register_blueprint(indexBlueprint)
     # Register Profile page
