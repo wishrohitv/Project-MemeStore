@@ -5,7 +5,7 @@ APP_NAME: str = "Meme Store"
 APP_VERSION: str = "1.0.0"
 
 # Media storage
-USE_CLOUDINARY_STORAGE: bool = True  # If true then cloudinary service will be used for storing user uploaded media file, else local computer storage will be used to store media files
+USE_CLOUDINARY_STORAGE: bool = False  # If true then cloudinary service will be used for storing user uploaded media file, else local computer storage will be used to store media files
 
 
 USER_ACCOUNT_STATUS: list[str] = ["active", "suspended", "banned", "deleted"]
