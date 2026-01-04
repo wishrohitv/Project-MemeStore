@@ -44,8 +44,8 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.MODERATOR, ROLE.SUPER_ADMIN],
         methods=["PUT"],
     )
-    userProfile = RouteAccess(
-        routeName="/user/profile",
+    user = RouteAccess(
+        routeName="/user",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
         partialAccess=True,
@@ -67,7 +67,7 @@ class API_ENDPOINTS:
     )
 
     # Feed
-    getFeed = RouteAccess(
+    feed = RouteAccess(
         routeName="/feed",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
