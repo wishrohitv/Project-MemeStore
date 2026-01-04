@@ -1,3 +1,4 @@
+from backend.config import API_ENDPOINTS
 from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
 from backend.modules import (
     PUBLIC_DIRECTORY_PROFILES,
@@ -8,16 +9,22 @@ from backend.modules import (
     secure_filename,
 )
 from backend.repository.userRespository import addFollower, getUserProfile
-from backend.utils.loggedUser import LoggedUser
+from backend.utils import LoggedUser
 
 usersBlueprint = Blueprint("users", __name__)
 
+route = API_ENDPOINTS()
 
-@usersBlueprint.route("/users/<string:userName>", methods=["GET"])
-def usersGetInfo(userName=None):
-    userName = userName or request.args.get("userName")
+
+# /user/<string:userName>
+@usersBlueprint.route(
+    f"{route.user.routeName}/<string:userName>", methods=route.user.methods
+)
+@verifyRequestMiddleware(route.user.routeName)
+def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
+    userName: str | None = kwargs.get("userName") or request.args.get("userName")
     userID = request.args.get("userID")
-    userEmail = request.args.get("emailID")
+    userEmail: str | None = request.args.get("emailID")
 
     if not (userName or userID or userEmail):
         return make_response({"error": "Expect any value of userName, userID, emailID"})
@@ -31,6 +38,20 @@ def usersGetInfo(userName=None):
             _userID=userID,
             _userName=userName,
             _email=userEmail,
+        )
+    except Exception as e:
+        return make_response({"error": str(e)}, 300)
+
+
+# /user sessionUser only
+@usersBlueprint.route(f"{route.user.routeName}", methods=route.user.methods)
+@verifyRequestMiddleware(route.user.routeName)
+def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
+    try:
+        print(loggedUser.userID)
+        userID = loggedUser.userID
+        return getUserProfile(
+            _userID=userID,
         )
     except Exception as e:
         return make_response({"error": str(e)}, 300)
