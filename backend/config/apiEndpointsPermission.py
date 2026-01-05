@@ -50,18 +50,33 @@ class API_ENDPOINTS:
         methods=["GET"],
         partialAccess=True,
     )
+    userUpdate = RouteAccess(
+        routeName="/user/update",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["PUT"],
+    )
+    userChangeProfile = RouteAccess(
+        routeName="/user/profileImg/update",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["PUT"],
+    )
+    userInSession = RouteAccess(
+        routeName="/user/auth",  # session user only
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+    )
     banUser = RouteAccess(
         routeName="/user/ban",
         rolePermission=[ROLE.SUPER_ADMIN],
         methods=["PUT"],
     )
-    addFollower = RouteAccess(
+    userAddFollower = RouteAccess(
         routeName="/user/follow",
         rolePermission=[ROLE.USER],
         methods=["POST"],
     )
-    removeFollower = RouteAccess(
-        routeName="/users/unfollow",
+    userRemoveFollower = RouteAccess(
+        routeName="/user/unfollow",
         rolePermission=[ROLE.USER],
         methods=["DELETE"],
     )
