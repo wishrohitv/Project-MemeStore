@@ -17,7 +17,7 @@ from backend.repository.userRespository import (
     _logout,
     _refreshTokens,
 )
-from backend.utils import LoggedUser, decodeJwtToken, generateJwtToken
+from backend.utils import LoggedUser
 
 authBlueprint = Blueprint("auth", __name__)
 """
@@ -126,17 +126,16 @@ def logout(loggedUser: LoggedUser, *args, **kwargs):
 @authBlueprint.route(route.refreshToken.routeName, methods=route.refreshToken.methods)
 def refreshToken():
     # for web
-    refreshToken = (
-        request.cookies.get("refreshToken")
-        or request.headers.get("Authorization", "").split(" ")[1]
+    refreshToken = request.cookies.get("refreshToken") or request.headers.get(
+        "x-refresh-token", None
     )
     if not refreshToken:
-        return make_response({"error": "Refresh token is required"}, 400)
+        return make_response({"error": "Refresh token is required"}, 401)
 
     # verify refresh token
     try:
         newTokens = _refreshTokens(refreshToken)
-
+        print(newTokens)
         res = make_response(
             {"message": "Token refreshed successfully", "payload": newTokens[0]}, 200
         )

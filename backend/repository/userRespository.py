@@ -147,11 +147,10 @@ def _refreshTokens(refreshToken: str):
             .where(Sessions.refreshToken == refreshToken)
         )
         userResult = session.execute(stmt).first()
-        user: Users = userResult[0]
-        storedRefreshToken: str = userResult[1]
         # user = session.scalar(stmt)
-        if not userResult or refreshToken != storedRefreshToken:
+        if not userResult or refreshToken != userResult[1]:
             raise Exception("Invalid refresh token")
+        user: Users = userResult[0]
 
         newAccessToken = generateJwtToken(
             userData={
@@ -184,6 +183,7 @@ def _refreshTokens(refreshToken: str):
             newRefreshToken,
         )
     except Exception as e:
+        print(e)
         raise Exception(e)
 
 
@@ -223,7 +223,7 @@ def addFollower(sessionUserID: int, userID: int):
         )  # Scalar select first row from table
         # print(checkIsAlreadyFollow)
         # print(isAlreadyFollows)
-
+        session.close()
         # If isAlreadyFollows
         if not isAlreadyFollows:
             newFollower = Follower(userID=userID, followerID=sessionUserID)
@@ -237,6 +237,7 @@ def addFollower(sessionUserID: int, userID: int):
                 {"message": "user already follows requested user"}, 409
             )
     except Exception as e:
+        print(e)
         return make_response({"error": f"{e}"}, 500)
 
 
@@ -244,7 +245,7 @@ def getUserProfile(
     _userName: str | None = None,
     _email: str | None = None,
     _userID: int | None = None,
-    _isLogged: bool = False,
+    sessionUserID: int | None = None,
 ):
     """
     Retrieve a user profile based on the input parameters: userName, email, or uid. Only
@@ -266,66 +267,35 @@ def getUserProfile(
     # User's following count
     followingCount = aliased(Follower)
 
-    # Check if any arguments are passed
+    matchBy = {}
     if _userID:
-        # Query the user
-        stmt = (
-            select(
-                Users,
-                Profile.bio,
-                Profile.country,
-                func.count(followerCount.userID).label("followerCount"),
-                func.count(followingCount.followerID).label("followingCount"),
-            )
-            .select_from(Users)
-            .outerjoin(followerCount, followerCount.userID == Users.id)
-            .outerjoin(followingCount, followingCount.followerID == Users.id)
-            .outerjoin(Profile, Profile.userID == Users.id)
-            .where(Users.id == _userID)
-            .group_by(Users.id, Profile.id)
-        )
-        users = session.execute(stmt).all()
-
+        matchBy["id"] = _userID
     elif _userName:
-        # Query the user
-        stmt = (
-            select(
-                Users,
-                Profile.bio,
-                Profile.country,
-                func.count(followerCount.userID).label("followerCount"),
-                func.count(followingCount.followerID).label("followingCount"),
-            )
-            .select_from(Users)
-            .outerjoin(followerCount, followerCount.userID == Users.id)
-            .outerjoin(followingCount, followingCount.followerID == Users.id)
-            .outerjoin(Profile, Profile.userID == Users.id)
-            .where(Users.userName == _userName)
-            .group_by(Users.id, Profile.id)
-        )
-        users = session.execute(stmt).all()
-
+        matchBy["userName"] = _userName
     elif _email:
-        # Query the user
-        stmt = (
-            select(
-                Users,
-                Profile.bio,
-                Profile.country,
-                func.count(followerCount.userID).label("followerCount"),
-                func.count(followingCount.followerID).label("followingCount"),
-            )
-            .select_from(Users)
-            .outerjoin(followerCount, followerCount.userID == Users.id)
-            .outerjoin(followingCount, followingCount.followerID == Users.id)
-            .outerjoin(Profile, Profile.userID == Users.id)
-            .where(Users.email == _email)
-            .group_by(Users.id, Profile.id)
+        matchBy["email"] = _email
+    if len(matchBy) == 0:
+        raise ValueError("No match criteria provided")
+    # Query the user
+    stmt = (
+        select(
+            Users,
+            Profile.bio,
+            Profile.country,
+            func.count(followerCount.userID).label("followerCount"),
+            func.count(followingCount.followerID).label("followingCount"),
+            exists(select(Follower).where(Follower.followerID == sessionUserID)).label(
+                "isFollowing"  # Whether session user follows or not
+            ),
         )
-        users = session.execute(stmt).all()
-
-    else:
-        return make_response({"message": "Invalid argument passed"}, 404)
+        .select_from(Users)
+        .filter_by(**matchBy)  # Apply matches to User only while in context
+        .outerjoin(followerCount, followerCount.userID == Users.id)
+        .outerjoin(followingCount, followingCount.followerID == Users.id)
+        .outerjoin(Profile, Profile.userID == Users.id)
+        .group_by(Users.id, Profile.id)
+    )
+    users = session.execute(stmt).all()
     # Close the session
     session.close()
 
@@ -343,6 +313,7 @@ def getUserProfile(
                 "email": user[0].email,
                 "joinDate": user[0].joinDate.strftime("%Y-%m-%d %H:%M:%S"),
                 "role": user[0].role,
+                "isFollowing": user[5],
                 "accountStatus": user[0].accountStatus.value,
             }
             usersDict.append(userObj)
