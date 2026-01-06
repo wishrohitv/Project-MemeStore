@@ -16,6 +16,21 @@ usersBlueprint = Blueprint("users", __name__)
 route = API_ENDPOINTS()
 
 
+# /user/auth sessionUser only
+@usersBlueprint.route(
+    f"{route.userInSession.routeName}", methods=route.userInSession.methods
+)
+@verifyRequestMiddleware(route.userInSession.routeName)
+def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
+    try:
+        userID = loggedUser.userID
+        return getUserProfile(
+            _userID=userID,
+        )
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)
+
+
 # /user/<string:userName>
 @usersBlueprint.route(
     f"{route.user.routeName}/<string:userName>", methods=route.user.methods
@@ -25,7 +40,6 @@ def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
     userName: str | None = kwargs.get("userName") or request.args.get("userName")
     userID = request.args.get("userID")
     userEmail: str | None = request.args.get("emailID")
-
     if not (userName or userID or userEmail):
         return make_response({"error": "Expect any value of userName, userID, emailID"})
 
@@ -38,33 +52,24 @@ def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
             _userID=userID,
             _userName=userName,
             _email=userEmail,
+            sessionUserID=loggedUser.userID if loggedUser else None,
         )
     except Exception as e:
-        return make_response({"error": str(e)}, 300)
+        return make_response({"error": str(e)}, 500)
 
 
-# /user sessionUser only
-@usersBlueprint.route(f"{route.user.routeName}", methods=route.user.methods)
-@verifyRequestMiddleware(route.user.routeName)
-def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
-    try:
-        print(loggedUser.userID)
-        userID = loggedUser.userID
-        return getUserProfile(
-            _userID=userID,
-        )
-    except Exception as e:
-        return make_response({"error": str(e)}, 300)
-
-
-@usersBlueprint.route("/users/updateInfo", methods=["POST"])
-@verifyRequestMiddleware("updateInfo")
+# /user/update
+@usersBlueprint.route(route.userUpdate.routeName, methods=route.userUpdate.methods)
+@verifyRequestMiddleware(route.userUpdate.routeName)
 def usersUpdateInfo():
     raise NotImplementedError()
 
 
-@usersBlueprint.route("/users/updateProfileImg", methods=["POST"])
-@verifyRequestMiddleware("updateProfileImg")
+# /user/profileImg/update
+@usersBlueprint.route(
+    route.userChangeProfile.routeName, methods=route.userChangeProfile.methods
+)
+@verifyRequestMiddleware(route.userChangeProfile.routeName)
 def usersUpdateProfileImg():
     try:
         print(request.form)
@@ -86,33 +91,35 @@ def usersUpdateProfileImg():
         return make_response({"error": "Bad request", "message": f"{e}"})
 
 
-@usersBlueprint.route("/users/delete", methods=["DELETE"])
-@verifyRequestMiddleware("delete")
+@usersBlueprint.route(route.deleteUser.routeName, methods=route.deleteUser.methods)
+@verifyRequestMiddleware(route.deleteUser.routeName)
 def usersDelete():
     raise NotImplementedError()
 
 
-@usersBlueprint.route("/users/toggleFollower")
+@usersBlueprint.route(
+    route.userRemoveFollower.routeName, methods=route.userRemoveFollower.methods
+)
+@verifyRequestMiddleware(route.userRemoveFollower.routeName)
 def toggleFollower():
     raise NotImplementedError()
 
 
-@usersBlueprint.route("/addFollower", methods=["PUT"])
-@verifyRequestMiddleware("addFollower")
+@usersBlueprint.route(
+    route.userAddFollower.routeName, methods=route.userAddFollower.methods
+)
+@verifyRequestMiddleware(route.userAddFollower.routeName)
 def addFollwer(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
-    if request.method == "PUT":
-        body = request.get_json()
-        if isinstance(body, dict):
-            targetUserID = body.get("userID")
-            if not isinstance(targetUserID, int):
-                return make_response({"error": f"Invalid {targetUserID} datatype"})
-            if targetUserID == sessionUserID:
-                return make_response({"error": "user can't follow himself"}, 409)
-            else:
-                return addFollower(sessionUserID, targetUserID)
-
+    body = request.get_json()
+    if isinstance(body, dict):
+        targetUserID = body.get("userID")
+        if not isinstance(targetUserID, int):
+            return make_response({"error": f"Invalid {targetUserID} datatype"})
+        if targetUserID == sessionUserID:
+            return make_response({"error": "user can't follow himself"}, 409)
         else:
-            return make_response({"error": "Expect json body"}, 401)
+            return addFollower(sessionUserID, targetUserID)
+
     else:
-        return make_response({"error": "method not allowed"}, 401)
+        return make_response({"error": "Expect json body"}, 401)
