@@ -127,7 +127,7 @@ def logout(loggedUser: LoggedUser, *args, **kwargs):
 def refreshToken():
     # for web
     refreshToken = request.cookies.get("refreshToken") or request.headers.get(
-        "x-refresh-token", None
+        "refreshToken", None
     )
     if not refreshToken:
         return make_response({"error": "Refresh token is required"}, 401)
@@ -135,7 +135,6 @@ def refreshToken():
     # verify refresh token
     try:
         newTokens = _refreshTokens(refreshToken)
-        print(newTokens)
         res = make_response(
             {"message": "Token refreshed successfully", "payload": newTokens[0]}, 200
         )
@@ -152,7 +151,7 @@ def refreshToken():
             httponly=HTTP_ONLY,
             secure=SECURE_COOKIE,
             samesite="Lax",
-            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 6,
+            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
         )
         return res
     except Exception as e:
