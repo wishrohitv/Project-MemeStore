@@ -5,9 +5,7 @@
 tests
 
 # test files
-backend/public/profiles/wishrohitv
-backend/public/profiles/modi
-backend/public/posts/5db858bc-24ea-4c3a-ac66-0b71a322e68d.jpeg
+backend/public/posts
 
 # Migration file
 alembic.ini
