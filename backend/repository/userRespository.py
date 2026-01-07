@@ -124,7 +124,7 @@ def _authenticateUser(userName, email, password):
         session.close()
 
         return (
-            {"userID": users.id, "userName": users.userName},
+            {"id": users.id, "userName": users.userName},
             accessToken,
             refreshToken,
         )
