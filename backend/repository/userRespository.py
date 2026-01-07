@@ -173,7 +173,7 @@ def _refreshTokens(refreshToken: str):
             expireInMinute=REFRESH_TOKEN_EXPIRY_MINUTES,
         )
         session.close()
-        stmt = Sessions(userID=user.id, refreshToken=refreshToken)
+        stmt = Sessions(userID=user.id, refreshToken=newRefreshToken)
         session.add(stmt)
         session.commit()
         session.close()
