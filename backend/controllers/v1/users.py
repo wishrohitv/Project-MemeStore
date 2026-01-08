@@ -70,7 +70,7 @@ def usersUpdateInfo():
     route.userChangeProfile.routeName, methods=route.userChangeProfile.methods
 )
 @verifyRequestMiddleware(route.userChangeProfile.routeName)
-def usersUpdateProfileImg():
+def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
     try:
         print(request.form)
         userName = request.form.get("userName")
@@ -91,12 +91,14 @@ def usersUpdateProfileImg():
         return make_response({"error": "Bad request", "message": f"{e}"})
 
 
+# /user/delete
 @usersBlueprint.route(route.deleteUser.routeName, methods=route.deleteUser.methods)
 @verifyRequestMiddleware(route.deleteUser.routeName)
 def usersDelete():
     raise NotImplementedError()
 
 
+# /user/unfollow
 @usersBlueprint.route(
     route.userRemoveFollower.routeName, methods=route.userRemoveFollower.methods
 )
