@@ -57,6 +57,7 @@ from sqlalchemy import (
     TIMESTAMP,
     Enum,
     ForeignKey,
+    Integer,
     String,
     delete,
     exists,
