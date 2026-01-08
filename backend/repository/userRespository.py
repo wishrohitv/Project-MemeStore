@@ -2,9 +2,12 @@ from backend.database import engine
 from backend.models import AccountStatus, Follower, Profile, Sessions, Users
 from backend.modules import (
     ACCESS_TOKEN_EXPIRY_MINUTES,
+    API_ROOT_URL,
     HTTP_ONLY,
+    PUBLIC_DIRECTORY_PROFILES,
     REFRESH_TOKEN_EXPIRY_MINUTES,
     SECURE_COOKIE,
+    USE_CLOUDINARY_STORAGE,
     aliased,
     delete,
     exists,
@@ -12,12 +15,15 @@ from backend.modules import (
     jsonify,
     make_response,
     or_,
+    os,
     select,
     sessionmaker,
     update,
+    url_for,
 )
 from backend.utils import (
     decodeJwtToken,
+    deleteMedia,
     generateJwtToken,
     matchPassword,
     returnHashedBytes,
@@ -282,6 +288,9 @@ def getUserProfile(
             Users,
             Profile.bio,
             Profile.country,
+            Profile.mediaUrl,
+            Profile.mediaPublicID,
+            Profile.fileExtension,
             func.count(followerCount.userID).label("followerCount"),
             func.count(followingCount.followerID).label("followingCount"),
             exists(select(Follower).where(Follower.followerID == sessionUserID)).label(
@@ -306,18 +315,71 @@ def getUserProfile(
                 "id": user[0].id,
                 "name": user[0].name,
                 "userName": user[0].userName,
-                "followerCount": user[3],
-                "followingCount": user[4],
                 "bio": user[1],
                 "country": user[2],
                 "email": user[0].email,
                 "joinDate": user[0].joinDate.strftime("%Y-%m-%d %H:%M:%S"),
                 "role": user[0].role,
-                "isFollowing": user[5],
                 "accountStatus": user[0].accountStatus.value,
+                "profileImgUrl": user[3]
+                if USE_CLOUDINARY_STORAGE
+                else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{user[4]}.{user[5]}')}",
+                "followerCount": user[6],
+                "followingCount": user[7],
+                "isFollowing": user[8],
             }
             usersDict.append(userObj)
             print(usersDict)
         return make_response({"payload": usersDict[0]}, 200)
     else:
         return make_response({"message": "user does not exist"}, 404)
+
+
+def updateProfile(sessionUserID: int, bio: str, country: str):
+    stmt = Profile
+
+
+def updateProfileImg(
+    sessionUserID: int,
+    mediaPublicID: str,
+    fileExtension: str,
+    fileType: str,
+    mediaUrl: str | None = None,
+):
+    try:
+        userProfile = (
+            session.query(Profile).where(Profile.userID == sessionUserID).first()
+        )
+        session.close()
+        if not userProfile:
+            return make_response({"message": "user does not exist"}, 404)
+
+        # Delete previous profile image if exists
+        if userProfile.mediaPublicID:
+            if USE_CLOUDINARY_STORAGE:
+                deleteMedia([userProfile.mediaPublicID])
+            else:
+                filepath = os.path.join(
+                    PUBLIC_DIRECTORY_PROFILES,
+                    f"{userProfile.mediaPublicID}.{userProfile.fileType}",
+                )
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+
+        stmt = (
+            update(Profile)
+            .where(Profile.userID == sessionUserID)
+            .values(
+                mediaPublicID=mediaPublicID,
+                fileExtension=fileExtension,
+                fileType=fileType,
+                mediaUrl=mediaUrl,
+            )
+        )
+        session.execute(stmt)
+        session.commit()
+        session.close()
+        return make_response({"message": "profile image updated successfully"}, 201)
+    except Exception as e:
+        print(f"Error updating profile image: {e}")
+        return make_response({"message": "failed to update profile image"}, 500)
