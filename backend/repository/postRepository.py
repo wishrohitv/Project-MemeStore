@@ -67,7 +67,7 @@ def _postToggleLike(sessionUserID: int, postID: int):
             session.add(likePost)
             session.commit()
             session.close()
-            return "Post liked successfully"
+            return {"isLiked": True, "message": "Post liked successfully"}
         else:
             # remove like from post
             deLike = delete(Likes).filter(
@@ -75,7 +75,7 @@ def _postToggleLike(sessionUserID: int, postID: int):
             )
             session.execute(deLike)
             session.commit()
-            return "Post like removed successfully"
+            return {"isLiked": False, "message": "Post like removed successfully"}
     except Exception as e:
         raise Exception(str(e))
 
