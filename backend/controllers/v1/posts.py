@@ -133,7 +133,7 @@ def toggleLike(loggedUser: LoggedUser, *agrs, **kwargs):
     try:
         res = _postToggleLike(sessionUserID=sessionUserID, postID=postID)
 
-        return make_response({"message": res}, 201)
+        return make_response(res, 201)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
