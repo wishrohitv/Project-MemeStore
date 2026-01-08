@@ -1,15 +1,24 @@
 from backend.config import API_ENDPOINTS
+from backend.constant import ALLOWED_POST_FILE_SIZE
 from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
 from backend.modules import (
+    ALLOWED_PROFILE_FILE_MIMETYPE,
+    ALLOWED_PROFILE_FILE_SIZE,
     PUBLIC_DIRECTORY_PROFILES,
+    USE_CLOUDINARY_STORAGE,
     Blueprint,
     make_response,
     os,
     request,
     secure_filename,
+    uuid,
 )
-from backend.repository.userRespository import addFollower, getUserProfile
-from backend.utils import LoggedUser
+from backend.repository.userRespository import (
+    addFollower,
+    getUserProfile,
+    updateProfileImg,
+)
+from backend.utils import LoggedUser, uploadMedia
 
 usersBlueprint = Blueprint("users", __name__)
 
@@ -61,7 +70,7 @@ def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
 # /user/update
 @usersBlueprint.route(route.userUpdate.routeName, methods=route.userUpdate.methods)
 @verifyRequestMiddleware(route.userUpdate.routeName)
-def usersUpdateInfo():
+def usersUpdateInfo(loggedUser: LoggedUser, *args, **kwargs):
     raise NotImplementedError()
 
 
@@ -72,21 +81,50 @@ def usersUpdateInfo():
 @verifyRequestMiddleware(route.userChangeProfile.routeName)
 def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
     try:
-        print(request.form)
-        userName = request.form.get("userName")
-        files = request.files.getlist("files")
-        print(files)
-        print(request.files)
-        file = request.files["files"]
+        profileMediaUid = str(uuid.uuid4())
+        sessionUserID = loggedUser.userID
+        # files = request.files.getlist("file")
+        # print(files)
+        # print(request.files)
+        file = request.files["file"]
+        print(file)
         print(file.mimetype)
         file.seek(0, 2)  # move to end of file
         size = file.tell()  # get current position, which is file size
         file.seek(0)  # reset file pointer
-        print(f"Actual file size: {(size / 1020) / 1024} bytes")
-        file.save(
-            os.path.join(PUBLIC_DIRECTORY_PROFILES, secure_filename(f"{userName}"))
+        print(size)
+        print(f"Actual file size: {(size / 1020) / 1024} MB")
+        if file.mimetype not in ALLOWED_PROFILE_FILE_MIMETYPE:
+            return make_response({"error": "Invalid file type"}, 400)
+        if size > ALLOWED_PROFILE_FILE_SIZE.get(file.mimetype):
+            return make_response(
+                {
+                    "error": f"File size exceeds limit, Please upload a smaller file below {ALLOWED_PROFILE_FILE_SIZE.get(file.mimetype) / 1024 / 1024} MB."
+                },
+                400,
+            )
+
+        fileExtension = file.filename.split(".")[-1]
+        _mediaUrl = None
+        _mediaPublicID = None
+        if USE_CLOUDINARY_STORAGE:
+            cloudResponse = uploadMedia(file=file.stream, public_id=profileMediaUid)
+            _mediaUrl = cloudResponse.get("url")
+            _mediaPublicID = cloudResponse.get("public_id")
+        else:
+            file.save(
+                os.path.join(
+                    PUBLIC_DIRECTORY_PROFILES,
+                    secure_filename(f"{profileMediaUid}.{fileExtension}"),
+                )
+            )
+            _mediaPublicID = profileMediaUid
+        return updateProfileImg(
+            sessionUserID=sessionUserID,
+            mediaPublicID=_mediaPublicID,
+            fileExtension=fileExtension,
+            fileType=file.mimetype.split("/")[0],
         )
-        return make_response({"message": "File uploaded successfully"}, 200)
     except Exception as e:
         return make_response({"error": "Bad request", "message": f"{e}"})
 
