@@ -1,8 +1,8 @@
 from backend.config import API_ENDPOINTS
 from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
 from backend.modules import (
-    ALLOWED_FILE_MIMETYPE_FOR_POST,
-    ALLOWED_FILE_SIZE,
+    ALLOWED_POST_FILE_MIMETYPE,
+    ALLOWED_POST_FILE_SIZE,
     PUBLIC_DIRECTORY_POSTS,
     USE_CLOUDINARY_STORAGE,
     Blueprint,
@@ -56,8 +56,8 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         print(request.form)
         file = request.files["files"]
         fileMimeType = file.mimetype
-        if fileMimeType in ALLOWED_FILE_MIMETYPE_FOR_POST:
-            fileExtension = ALLOWED_FILE_MIMETYPE_FOR_POST.get(fileMimeType)
+        if fileMimeType in ALLOWED_POST_FILE_MIMETYPE:
+            fileExtension = ALLOWED_POST_FILE_MIMETYPE.get(fileMimeType)
 
         else:
             return make_response({"error": "unsupported file type"}, 401)
@@ -65,7 +65,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         try:
             fileSize = file.stream.seek(0, os.SEEK_END)
 
-            allowedFileSize = ALLOWED_FILE_SIZE.get(fileMimeType)
+            allowedFileSize = ALLOWED_POST_FILE_SIZE.get(fileMimeType)
             if not (fileSize <= allowedFileSize):
                 return make_response(
                     {
