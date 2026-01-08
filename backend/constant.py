@@ -10,24 +10,40 @@ USE_CLOUDINARY_STORAGE: bool = False  # If true then cloudinary service will be 
 
 USER_ACCOUNT_STATUS: list[str] = ["active", "suspended", "banned", "deleted"]
 
-ALLOWED_FILE_MIMETYPE_FOR_POST: dict = {
-    # mimeType : extension
-    "image/jpeg": "jpeg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "video/mp4": "mp4",
-}
 SEREVR_ALLOWED_UPLOAD_FILE_SIZE: int = 20 * 1024 * 1024  # 20 MB
 ALLOWED_IMG_FILE_SIZE: int = 5 * 1024 * 1024  # 5 MB
 ALLOWED_VID_FILE_SIZE: int = SEREVR_ALLOWED_UPLOAD_FILE_SIZE  # 20 MB
 
-ALLOWED_FILE_SIZE: dict = {
+# Allowed file size for posts
+ALLOWED_POST_FILE_SIZE: dict[str, int] = {
     "image/jpeg": ALLOWED_IMG_FILE_SIZE,
     "image/png": ALLOWED_IMG_FILE_SIZE,
     "image/webp": ALLOWED_IMG_FILE_SIZE,
     "video/mp4": ALLOWED_VID_FILE_SIZE,
 }
 
+ALLOWED_PROFILE_FILE_MIMETYPE: dict[str, str] = {
+    # mimeType : extension
+    "image/jpeg": "jpeg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+}
+ALLOWED_PROFILE_FILE_SIZE: dict[str, int] = {
+    "image/jpeg": 2 * 1024 * 1024,  # 2 MB
+    "image/png": 2 * 1024 * 1024,  # 2 MB
+    "image/webp": 2 * 1024 * 1024,  # 2 MB
+    "image/gif": 2 * 1024 * 1024,  # 2 MB
+}
+
+# Allowed file size for user profile
+ALLOWED_POST_FILE_MIMETYPE: dict[str, str] = {
+    # mimeType : extension
+    "image/jpeg": "jpeg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "video/mp4": "mp4",
+}
 PASS_HASH_KEY: bytes = b"hellofromjapan"
 
 JWT_HASH_KEY: str = "YourSuperSecreteJwtHashKsy"
