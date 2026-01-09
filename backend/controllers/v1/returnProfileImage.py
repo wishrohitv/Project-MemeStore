@@ -30,7 +30,6 @@ def getProfileImage(userName):
 
 @getProfileImageRouteBlueprint.route("/userProfile/<path:fileName>")
 def serveImage(fileName):
-    print(fileName)
     if os.path.exists(os.path.join(PUBLIC_DIRECTORY_PROFILES, fileName)):
         Log.info(f"userProfile {fileName} found")
         return send_file(

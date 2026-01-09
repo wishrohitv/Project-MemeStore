@@ -309,7 +309,6 @@ def getUserProfile(
     users = session.execute(stmt).all()
     # Close the session
     session.close()
-    print(users)
     if users:
         usersDict = []
         for user in users:
