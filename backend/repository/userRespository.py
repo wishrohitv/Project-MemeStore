@@ -1,3 +1,5 @@
+from turtle import up
+
 from backend.database import engine
 from backend.models import AccountStatus, Follower, Profile, Sessions, Users
 from backend.modules import (
@@ -307,7 +309,7 @@ def getUserProfile(
     users = session.execute(stmt).all()
     # Close the session
     session.close()
-
+    print(users)
     if users:
         usersDict = []
         for user in users:
@@ -315,12 +317,12 @@ def getUserProfile(
                 "id": user[0].id,
                 "name": user[0].name,
                 "userName": user[0].userName,
-                "bio": user[1],
-                "country": user[2],
                 "email": user[0].email,
                 "joinDate": user[0].joinDate.strftime("%Y-%m-%d %H:%M:%S"),
                 "role": user[0].role,
                 "accountStatus": user[0].accountStatus.value,
+                "bio": user[1],
+                "country": user[2],
                 "profileImgUrl": user[3]
                 if USE_CLOUDINARY_STORAGE
                 else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{user[4]}.{user[5]}')}",
@@ -383,3 +385,43 @@ def updateProfileImg(
     except Exception as e:
         print(f"Error updating profile image: {e}")
         return make_response({"message": "failed to update profile image"}, 500)
+
+
+def updateUser(
+    sessionUserID: int,
+    name: str | None,
+    bio: str | None,
+    age: int | None,
+    country: str | None,
+):
+    try:
+        user = session.query(Users).where(Users.id == sessionUserID).first()
+        if not user:
+            return make_response({"message": "user does not exist"}, 404)
+
+        if name:
+            # Update the name
+            user.name = name
+            session.commit()
+            session.close()
+        updateObj = {}
+        if bio:
+            updateObj["bio"] = bio
+        if age:
+            updateObj["age"] = age
+        if country:
+            updateObj["country"] = country
+
+        if len(updateObj) > 0:
+            stmt = (
+                update(Profile)
+                .where(Profile.userID == sessionUserID)
+                .values(**updateObj)
+            )
+            session.execute(stmt)
+            session.commit()
+            session.close()
+        return make_response({"message": "user updated successfully"}, 201)
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return make_response({"message": "failed to update user"}, 500)

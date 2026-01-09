@@ -17,6 +17,7 @@ from backend.repository.userRespository import (
     addFollower,
     getUserProfile,
     updateProfileImg,
+    updateUser,
 )
 from backend.utils import LoggedUser, uploadMedia
 
@@ -71,7 +72,22 @@ def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
 @usersBlueprint.route(route.userUpdate.routeName, methods=route.userUpdate.methods)
 @verifyRequestMiddleware(route.userUpdate.routeName)
 def usersUpdateInfo(loggedUser: LoggedUser, *args, **kwargs):
-    raise NotImplementedError()
+    sessionUserID = loggedUser.userID
+    try:
+        body = request.get_json()
+        if not body:
+            return make_response({"error": "Invalid request body"}, 400)
+
+        name = body.get("name")
+        bio = body.get("bio")
+        country = body.get("country")
+        age = body.get("age")
+
+        return updateUser(
+            sessionUserID=sessionUserID, name=name, bio=bio, country=country, age=age
+        )
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)
 
 
 # /user/profileImg/update
@@ -87,12 +103,9 @@ def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
         # print(files)
         # print(request.files)
         file = request.files["file"]
-        print(file)
-        print(file.mimetype)
         file.seek(0, 2)  # move to end of file
-        size = file.tell()  # get current position, which is file size
+        size = file.tell()  # get current position, which is file size in bytes
         file.seek(0)  # reset file pointer
-        print(size)
         print(f"Actual file size: {(size / 1020) / 1024} MB")
         if file.mimetype not in ALLOWED_PROFILE_FILE_MIMETYPE:
             return make_response({"error": "Invalid file type"}, 400)
@@ -145,6 +158,7 @@ def toggleFollower():
     raise NotImplementedError()
 
 
+# /user/follow
 @usersBlueprint.route(
     route.userAddFollower.routeName, methods=route.userAddFollower.methods
 )
