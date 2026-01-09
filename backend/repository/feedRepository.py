@@ -1,5 +1,5 @@
 from backend.database import engine
-from backend.models import Bookmark, Category, Likes, Posts, Users
+from backend.models import Bookmark, Category, Likes, Posts, Profile, Users
 from backend.modules import (
     API_ROOT_URL,
     USE_CLOUDINARY_STORAGE,
@@ -30,6 +30,9 @@ def getHomeFeed(
         select(
             Users.userName,
             Posts,
+            Profile.mediaUrl,
+            Profile.mediaPublicID,
+            Profile.fileExtension,
             func.count(likeCount.userID).label("likeCount"),
             func.count(bookmarkCount.userID).label("bookmarkCount"),
             exists(
@@ -44,10 +47,17 @@ def getHomeFeed(
             ).label("isBookmarked"),
         )
         .join_from(Users, Posts)
+        .join_from(Users, Profile)
         .where(Posts.visibility)  # = True
         .outerjoin(likeCount, likeCount.postID == Posts.id)
         .outerjoin(bookmarkCount, bookmarkCount.postID == Posts.id)
-        .group_by(Posts.id, Users.userName)
+        .group_by(
+            Posts.id,
+            Users.userName,
+            Profile.mediaUrl,
+            Profile.mediaPublicID,
+            Profile.fileExtension,
+        )
     )
     getFeed = session.execute(getFeedData).all()
 
@@ -71,14 +81,16 @@ def getHomeFeed(
                         1
                     ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
                     "category": feed[1].category,
-                    "postUserPicUrl": f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=feed[0])}",
                     "postMediaUrl": feed[1].mediaUrl
                     if USE_CLOUDINARY_STORAGE
                     else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{feed[1].mediaPublicID}.{feed[1].fileExtension}')}",
-                    "likeCount": feed[2],
-                    "bookmarkCount": feed[3],
-                    "isLiked": feed[4],
-                    "isBookmarked": feed[5],
+                    "profileImgUrl": feed[2]
+                    if USE_CLOUDINARY_STORAGE
+                    else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{feed[3]}.{feed[4]}')}",
+                    "likeCount": feed[5],
+                    "bookmarkCount": feed[6],
+                    "isLiked": feed[7],
+                    "isBookmarked": feed[8],
                 }
                 feedObj.append(data)
             return make_response({"payload": feedObj}, 200)
