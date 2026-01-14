@@ -1,0 +1,84 @@
+import HomeView from "./views/home/HomeView.js";
+import GuidelinesView from "./views/guidelines/GuidelinesView.js";
+import AboutView from "./views/about/AboutView.js";
+import TermconditionView from "./views/termConditions/TermconditionView.js";
+import PrivacypolicyView from "./views/privacyPolicy/PrivacypolicyView.js";
+import LoginView from "./views/login/LoginView.js";
+import SignupView from "./views/signup/SignupView.js";
+import ProfileView from "./views/profile/ProfileView.js";
+import CreatePostView from "./views/posts/CreatePostView.js";
+import { fetchUserInfo, manageNavbar } from "./utils/base.js";
+
+const pathToRegex = (path) =>
+  new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+
+const getParams = (match) => {
+  const values = match.result.slice(1);
+  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
+    (result) => result[1],
+  );
+
+  // console.log(Array.from(match.route.path.matchAll(/:(\w+)/g)))
+  // console.log(keys)
+  return Object.fromEntries(
+    keys.map((key, i) => {
+      return [key, [values[i]]];
+    }),
+  );
+};
+
+const navigateTo = (url) => {
+  history.pushState(null, null, url);
+  router();
+};
+
+const router = async () => {
+  const routes = [
+    { path: "/", view: HomeView },
+    { path: "/guidelines", view: GuidelinesView },
+    { path: "/terms-conditions", view: TermconditionView },
+    { path: "/privacy-policy", view: PrivacypolicyView },
+    { path: "/more/about", view: AboutView },
+    { path: "/auth/login", view: LoginView },
+    { path: "/auth/signup", view: SignupView },
+    { path: "/user/:userName", view: ProfileView },
+    { path: "/post/create", view: CreatePostView },
+  ];
+
+  // Test each route for potential match
+  const potentialMatches = routes.map((route) => {
+    return {
+      route: route,
+      result: location.pathname.match(pathToRegex(route.path)),
+    };
+  });
+
+  let match = potentialMatches.find(
+    (potentialMatch) => potentialMatch.result !== null,
+  );
+
+  if (!match) {
+    match = {
+      route: routes[0],
+      result: [location.pathname],
+    };
+  }
+  const view = new match.route.view(getParams(match));
+
+  document.querySelector("#app").replaceChildren(await view.getHtml());
+};
+
+window.addEventListener("popstate", router);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.addEventListener("click", (e) => {
+    if (e.target.matches("[data-link]")) {
+      e.preventDefault();
+      navigateTo(e.target.href);
+    }
+  });
+  router();
+});
+
+fetchUserInfo();
+manageNavbar();

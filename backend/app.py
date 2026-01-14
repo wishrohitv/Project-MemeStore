@@ -1,0 +1,64 @@
+from backend.database import initializeDb
+from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask
+from backend.repository.getReadyRole import getReadyRole
+
+
+def runApp():
+    # Initialize database
+    initializeDb()
+
+    app = Flask(__name__)
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=["http://127.0.0.1:8000"],
+    )
+
+    app.config["path"] = ".backend/public"
+    app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
+
+    # Blueprint for auth
+    from backend.controllers.v1.auth import authBlueprint
+
+    # Blueprint for post collection of posts
+    from backend.controllers.v1.collections import (
+        collectionBlueprint,
+    )
+
+    # Blueprint for posts
+    from backend.controllers.v1.comments import commentsBlueprint
+
+    # Register Bluprint for homeFeed endpoint
+    from backend.controllers.v1.feed import feedBlueprint
+
+    # Blueprint for posts
+    from backend.controllers.v1.posts import postsBlueprint
+
+    # Blueprint for posts media content of user
+    from backend.controllers.v1.returnPostMedia import getPostMediaRouteBlueprint
+
+    # Blueprint for profile image fetch of user
+    from backend.controllers.v1.returnProfileImage import (
+        getProfileImageRouteBlueprint,
+    )
+
+    # Blueprint for user profile data
+    from backend.controllers.v1.users import usersBlueprint
+
+    app.register_blueprint(authBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(getProfileImageRouteBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(getPostMediaRouteBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(postsBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(commentsBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(usersBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(feedBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(collectionBlueprint, url_prefix="/api/v1")
+
+    # getReadyRole
+    getReadyRole()
+
+    app.run(debug=True, host=HOST, port=PORT)
+
+
+if __name__ == "__main__":
+    runApp()
