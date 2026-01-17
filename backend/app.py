@@ -57,8 +57,9 @@ def runApp():
     # getReadyRole
     getReadyRole()
 
-    app.run(debug=True, host=HOST, port=PORT)
+    return app
 
 
 if __name__ == "__main__":
-    runApp()
+    app = runApp()
+    app.run(debug=True, host=HOST, port=PORT)
