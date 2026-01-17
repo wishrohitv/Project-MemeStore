@@ -1,15 +1,10 @@
-import os
-from backend.modules import create_engine
 from dotenv import load_dotenv
+
+from backend.modules import create_engine, os
 
 load_dotenv()
 
-DB_USER = os.environ.get("DB_USER")
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DB_NAME = os.environ.get("DB_NAME")
-
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}")
-# engine = create_engine(os.environ.get("DB_URL"))
+engine = create_engine(os.environ.get("DB_URL") or "")
 
 
 def initializeDb():
