@@ -60,7 +60,9 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             fileExtension = ALLOWED_POST_FILE_MIMETYPE.get(fileMimeType)
 
         else:
-            return make_response({"error": "unsupported file type"}, 401)
+            return make_response(
+                {"error": f"unsupported file type {fileMimeType}"}, 401
+            )
         pForm = request.form
         try:
             fileSize = file.stream.seek(0, os.SEEK_END)
@@ -103,7 +105,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
                 mediaPublicID=_mediaPublicID,
                 category=1,
                 # category=pForm.get("category"),
-                ageRating=pForm.get("ageRating").lower(),
+                ageRating=(pForm.get("ageRating") or "pg13").lower(),
             )
             return make_response({"message": "post uploaded successfully"}, 200)
         except Exception as e:

@@ -20,6 +20,7 @@ ALLOWED_POST_FILE_SIZE: dict[str, int] = {
     "image/png": ALLOWED_IMG_FILE_SIZE,
     "image/webp": ALLOWED_IMG_FILE_SIZE,
     "video/mp4": ALLOWED_VID_FILE_SIZE,
+    "image/gif": ALLOWED_IMG_FILE_SIZE,
 }
 
 ALLOWED_PROFILE_FILE_MIMETYPE: dict[str, str] = {
@@ -43,6 +44,7 @@ ALLOWED_POST_FILE_MIMETYPE: dict[str, str] = {
     "image/png": "png",
     "image/webp": "webp",
     "video/mp4": "mp4",
+    "image/gif": "gif",
 }
 PASS_HASH_KEY: bytes = b"hellofromjapan"
 
