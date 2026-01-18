@@ -77,6 +77,9 @@ export async function refreshToken() {
 
     if (response.ok) {
       await fetchUserInfo();
+    } else {
+      deleteUser();
+      manageNavbar();
     }
 
     const data = await response.json();
