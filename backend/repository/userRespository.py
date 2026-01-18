@@ -76,9 +76,11 @@ def _createUser(
         "role": newUser.role,
         "accountStatus": newUser.accountStatus.value,
     }
-    print(userObj)
+
     # TODO: Implement email verification
-    return jsonify(userObj)
+    return make_response(
+        {"message": "User created successfully", "payload": userObj}, 201
+    )
 
 
 def _authenticateUser(userName, email, password):
