@@ -12,6 +12,7 @@
                                 class="file-input"
                                 accept="video/*,image/*"
                                 id="currentSelectedFile"
+                                name="files"
                             />
                             <label class="fieldset-label">Max size 30MB</label>
 
@@ -43,6 +44,7 @@
                             placeholder="Type catchy text"
                             class="input"
                             id="postTitle"
+                            name="postTitle"
                         />
                     </fieldset>
                 </div>
@@ -53,6 +55,7 @@
                             class="textarea h-24"
                             placeholder="Tags"
                             id="postTags"
+                            name="postTags"
                         ></textarea>
                     </fieldset>
                 </div>
@@ -61,16 +64,18 @@
                     <div class="min-w-14"></div>
                     <input
                         type="radio"
-                        name="visibility"
+                        name="postVisibility"
                         checked="checked"
                         class="checkbox"
+                        value="true"
                         id="public"
                     />
                     <label for="public">Public</label>
                     <input
                         type="radio"
-                        name="visibility"
+                        name="postVisibility"
                         class="checkbox"
+                        value="false"
                         id="private"
                     />
                     <label for="private">Private</label>
@@ -92,7 +97,11 @@
                         </div>
                         <div class="flex flex-col">
                             <label for="category">Select Category</label>
-                            <select class="select select lg" id="category">
+                            <select
+                                class="select select lg"
+                                id="category"
+                                name="category"
+                            >
                                 <option disabled selected>Relatable</option>
                                 <option>Politics</option>
                                 <option>Casual</option>
@@ -103,15 +112,11 @@
                     </div>
                 </div>
             </div>
+            <div class="flex justify-center items-center m-4">
+                <button id="uploadBtn" class="btn bg-purple-700" type="submit">
+                    Post
+                </button>
+            </div>
         </form>
-        <div class="flex justify-center items-center m-4">
-            <button
-                class="btn btn-soft btn-accent"
-                type="submit"
-                onclick="uploadPostOnServer()"
-            >
-                Post
-            </button>
-        </div>
     </div>
 </div>

@@ -1,4 +1,5 @@
 import AbstractView from "../AbstractView.js";
+import { apiUploadPosts } from "../../utils/base.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -15,6 +16,8 @@ export default class extends AbstractView {
       this.page = document.createElement("div");
       this.page.innerHTML = page;
 
+      // Form
+      this.form = this.page.querySelector("form");
       // Preview box
       const previewBox = this.page.querySelector(".previewBox");
       this.previewBox = previewBox.children;
@@ -26,13 +29,17 @@ export default class extends AbstractView {
       this.postTitle = this.page.querySelector("#postTitle");
       // Post tags
       this.postTags = this.page.querySelector("#postTags");
-      // Post visibility
-      this.postVisibility = this.page.querySelector(".visibility");
       // Post age rating
       this.postAgeRating = this.page.querySelector("#ageRating");
       // Post visibility
       this.postCategory = this.page.querySelector("#category");
-      this.currentSelectedFile.addEventListener("change", this.loadFile);
+      this.currentSelectedFile.addEventListener(
+        "change",
+        this.loadFile.bind(this),
+      );
+      this.page
+        .querySelector("form")
+        .addEventListener("submit", this.uploadPostOnServer.bind(this));
     } catch (error) {
       console.error(error);
       this.page = document.createElement("div");
@@ -44,38 +51,46 @@ export default class extends AbstractView {
 
   loadFile(event) {
     var reader = new FileReader();
-    console.log(this.previewBox, "re");
-    console.log(this.page, "re");
+    const previewBox = this.previewBox;
+    const page = this.page;
     reader.onload = function () {
       let fileName = event.target.files[0].type;
-      if (fileName === "image/png") {
-        this.previewBox[0].classList.remove("hidden");
-        this.previewBox[1].classList.add("hidden");
+      if (
+        fileName === "image/png" ||
+        fileName === "image/gif" ||
+        fileName === "image/jpeg"
+      ) {
+        previewBox[0].classList.remove("hidden");
+        previewBox[1].classList.add("hidden");
       } else if (fileName === "video/mp4") {
-        this.previewBox[1].classList.remove("hidden");
-        this.previewBox[0].classList.add("hidden");
+        previewBox[1].classList.remove("hidden");
+        previewBox[0].classList.add("hidden");
       }
-      console.log(this.page, "test");
-      let imgPreview = this.page.querySelector("#imgPreview");
-      let vidPreview = this.page.querySelector("#vidPreview");
+      let imgPreview = page.querySelector("#imgPreview");
+      let vidPreview = page.querySelector("#vidPreview");
       imgPreview.src = reader.result;
       vidPreview.src = reader.result;
     };
     reader.readAsDataURL(event.target.files[0]);
   }
 
-  async uploadPostOnServer() {
-    let postForm = new FormData();
-    let reader = new FileReader();
-    console.log(reader.result);
-    for (const file of currentSelectedFIle.files) {
-      postForm.append("files", file, file.name);
-      postForm.append("postTitle", postTitle.value);
-      postForm.append("postTags", postTags.value);
-      postForm.append("postVisibility", postVisibility[0].checked); // Here we checking only public radio tag between public and private class
-      postForm.append("ageRating", postAgeRating.selectedOptions[0].innerText);
-      postForm.append("category", postCategory.selectedOptions[0].innerText);
-    }
+  async uploadPostOnServer(event) {
+    event.preventDefault();
+    let postForm = new FormData(this.form);
+    postForm.append(
+      "ageRating",
+      this.postAgeRating.selectedOptions[0].innerText,
+    );
+    postForm.append("category", this.postCategory.selectedOptions[0].innerText);
+    const data = Object.fromEntries(postForm.entries()); // Convert form to simple object
+    console.log(data);
+
+    // for (const file of this.currentSelectedFile.files) {
+    //   Can be used for multiple file upload
+    //   postForm.append("files", file, file.name);
+    //   postForm.append("postTitle", this.postTitle.value);
+    //   postForm.append("postTags", this.postTags.value);
+    // }
 
     try {
       let connection = await fetch(apiUploadPosts, {
