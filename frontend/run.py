@@ -1,5 +1,5 @@
+from frontend.app.app import createApp
 from frontend.constant import Constants
-from frontend.frontend.app import createApp
 
 # run App
 runApp = createApp()
