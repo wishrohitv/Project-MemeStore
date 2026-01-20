@@ -6,7 +6,7 @@ def formateToCamel(val: str) -> str:
         "helloWorldWhat"
     """
     listOf = val.lower().split("_")
-    print(listOf)
+
     if len(listOf) == 1:
         return listOf[0]
     else:
