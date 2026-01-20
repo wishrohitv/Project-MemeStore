@@ -139,7 +139,7 @@ def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
             fileType=file.mimetype.split("/")[0],
         )
     except Exception as e:
-        return make_response({"error": "Bad request", "message": f"{e}"})
+        return make_response({"error": f"{e}"}, 500)
 
 
 # /user/delete

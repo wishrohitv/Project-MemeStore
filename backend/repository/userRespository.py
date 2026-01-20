@@ -272,74 +272,75 @@ def getUserProfile(
              message
     """
 
-    # User's follower count
-    followerCount = aliased(Follower)
-    # User's following count
-    followingCount = aliased(Follower)
+    try:
+        # User's follower count
+        followerCount = aliased(Follower)
+        # User's following count
+        followingCount = aliased(Follower)
 
-    matchBy = {}
-    if _userID:
-        matchBy["id"] = _userID
-    elif _userName:
-        matchBy["userName"] = _userName
-    elif _email:
-        matchBy["email"] = _email
-    if len(matchBy) == 0:
-        raise ValueError("No match criteria provided")
-    # Query the user
-    stmt = (
-        select(
-            Users,
-            Profile.bio,
-            Profile.country,
-            Profile.mediaUrl,
-            Profile.mediaPublicID,
-            Profile.fileExtension,
-            func.count(followerCount.userID).label("followerCount"),
-            func.count(followingCount.followerID).label("followingCount"),
-            exists(select(Follower).where(Follower.followerID == sessionUserID)).label(
-                "isFollowing"  # Whether session user follows or not
-            ),
+        matchBy = {}
+        if _userID:
+            matchBy["id"] = _userID
+        elif _userName:
+            matchBy["userName"] = _userName
+        elif _email:
+            matchBy["email"] = _email
+        if len(matchBy) == 0:
+            raise ValueError("No match criteria provided")
+        # Query the user
+        stmt = (
+            select(
+                Users,
+                Profile.bio,
+                Profile.country,
+                Profile.mediaUrl,
+                Profile.mediaPublicID,
+                Profile.fileExtension,
+                func.count(followerCount.userID).label("followerCount"),
+                func.count(followingCount.followerID).label("followingCount"),
+                exists(
+                    select(Follower).where(Follower.followerID == sessionUserID)
+                ).label(
+                    "isFollowing"  # Whether session user follows or not
+                ),
+            )
+            .select_from(Users)
+            .filter_by(**matchBy)  # Apply matches to User only while in context
+            .outerjoin(followerCount, followerCount.userID == Users.id)
+            .outerjoin(followingCount, followingCount.followerID == Users.id)
+            .outerjoin(Profile, Profile.userID == Users.id)
+            .group_by(Users.id, Profile.id)
         )
-        .select_from(Users)
-        .filter_by(**matchBy)  # Apply matches to User only while in context
-        .outerjoin(followerCount, followerCount.userID == Users.id)
-        .outerjoin(followingCount, followingCount.followerID == Users.id)
-        .outerjoin(Profile, Profile.userID == Users.id)
-        .group_by(Users.id, Profile.id)
-    )
-    users = session.execute(stmt).all()
-    # Close the session
-    session.close()
-    if users:
-        usersDict = []
-        for user in users:
-            userObj = {
-                "id": user[0].id,
-                "name": user[0].name,
-                "userName": user[0].userName,
-                "email": user[0].email,
-                "joinDate": user[0].joinDate.strftime("%Y-%m-%d %H:%M:%S"),
-                "role": user[0].role,
-                "accountStatus": user[0].accountStatus.value,
-                "bio": user[1],
-                "country": user[2],
-                "profileImgUrl": user[3]
-                if USE_CLOUDINARY_STORAGE
-                else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{user[4]}.{user[5]}')}",
-                "followerCount": user[6],
-                "followingCount": user[7],
-                "isFollowing": user[8],
-            }
-            usersDict.append(userObj)
-            print(usersDict)
-        return make_response({"payload": usersDict[0]}, 200)
-    else:
-        return make_response({"message": "user does not exist"}, 404)
-
-
-def updateProfile(sessionUserID: int, bio: str, country: str):
-    stmt = Profile
+        users = session.execute(stmt).all()
+        # Close the session
+        session.close()
+        if users:
+            usersDict = []
+            for user in users:
+                userObj = {
+                    "id": user[0].id,
+                    "name": user[0].name,
+                    "userName": user[0].userName,
+                    "email": user[0].email,
+                    "joinDate": user[0].joinDate.strftime("%Y-%m-%d %H:%M:%S"),
+                    "role": user[0].role,
+                    "accountStatus": user[0].accountStatus.value,
+                    "bio": user[1],
+                    "country": user[2],
+                    "profileImgUrl": user[3]
+                    if USE_CLOUDINARY_STORAGE
+                    else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{user[4]}.{user[5]}')}",
+                    "followerCount": user[6],
+                    "followingCount": user[7],
+                    "isFollowing": user[8],
+                }
+                usersDict.append(userObj)
+            return make_response({"payload": usersDict[0]}, 200)
+        else:
+            return make_response({"error": "user does not exist"}, 404)
+    except Exception as e:
+        print(e)
+        return make_response({"error": f"{e}"}, 500)
 
 
 def updateProfileImg(
@@ -385,7 +386,7 @@ def updateProfileImg(
         return make_response({"message": "profile image updated successfully"}, 201)
     except Exception as e:
         print(f"Error updating profile image: {e}")
-        return make_response({"message": "failed to update profile image"}, 500)
+        return make_response({"error": f"{e}"}, 500)
 
 
 def updateUser(
