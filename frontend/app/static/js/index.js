@@ -4,8 +4,10 @@ import AboutView from "./views/about/AboutView.js";
 import TermconditionView from "./views/termConditions/TermconditionView.js";
 import PrivacypolicyView from "./views/privacyPolicy/PrivacypolicyView.js";
 import LoginView from "./views/login/LoginView.js";
+import LogoutView from "./views/logout/LogoutView.js";
 import SignupView from "./views/signup/SignupView.js";
 import ProfileView from "./views/profile/ProfileView.js";
+import EditProfileView from "./views/profile/EditProfileView.js";
 import CreatePostView from "./views/posts/CreatePostView.js";
 import { fetchUserInfo, manageNavbar } from "./utils/base.js";
 
@@ -18,8 +20,6 @@ const getParams = (match) => {
     (result) => result[1],
   );
 
-  // console.log(Array.from(match.route.path.matchAll(/:(\w+)/g)))
-  // console.log(keys)
   return Object.fromEntries(
     keys.map((key, i) => {
       return [key, [values[i]]];
@@ -40,7 +40,9 @@ const router = async () => {
     { path: "/privacy-policy", view: PrivacypolicyView },
     { path: "/more/about", view: AboutView },
     { path: "/auth/login", view: LoginView },
+    { path: "/auth/logout", view: LogoutView },
     { path: "/auth/signup", view: SignupView },
+    { path: "/edit/profile/:userName", view: EditProfileView },
     { path: "/user/:userName", view: ProfileView },
     { path: "/post/create", view: CreatePostView },
   ];
@@ -63,6 +65,7 @@ const router = async () => {
       result: [location.pathname],
     };
   }
+
   const view = new match.route.view(getParams(match));
 
   document.querySelector("#app").replaceChildren(await view.getHtml());

@@ -9,7 +9,6 @@ import {
 export default class extends AbstractView {
   constructor(params) {
     super(params);
-    console.log(params);
     this.userName = params.userName[0];
     this.setTitle("Profile");
   }
@@ -75,11 +74,12 @@ export default class extends AbstractView {
         this.profileImg.src = res.payload.profileImgUrl;
         // change to followerbtn value
         console.log(res);
-        if (Number(uid.value) === res.payload.id) {
+        if (getUser().id === res.payload.id) {
           console.log(typeof res.payload.id);
           console.log("profile id", uid.value, " session id: ", getUser()?.id);
           this.followerBtn.disabled = true;
-          this.goToEditBtn.href = `/user/${res.payload.userName}/edit`;
+          this.goToEditBtn.href = `/edit/profile/${res.payload.userName}`;
+          this.goToEditBtn.classList.remove("hidden");
         } else if (res.payload.isFollowing) {
           this.followerBtn.innerText = "Unfollow";
           this.followerBtn.classList.remove("bg-purple-500");
