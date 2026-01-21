@@ -2,7 +2,7 @@ from frontend.app.app import createApp
 from frontend.constant import Constants
 
 # run App
-runApp = createApp()
+app = createApp()
 
 if __name__ == "__main__":
-    runApp.run(debug=True, host=Constants.HOST, port=Constants.PORT)
+    app.run(debug=True, host=Constants.HOST, port=Constants.PORT)
