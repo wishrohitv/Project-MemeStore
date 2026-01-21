@@ -4,6 +4,8 @@ import {
   getUser,
   apiUserPostsFeed,
   initializeTemplate,
+  apiAddFollower,
+  apiRemoveFollower,
 } from "../../utils/base.js";
 
 export default class extends AbstractView {
@@ -37,9 +39,7 @@ export default class extends AbstractView {
       );
       // Container of post preview
       this.postContainer = this.page.querySelector("#userPostContainer");
-      this.followerBtn.addEventListener("click", async (event) => {
-        await addFollower();
-      });
+      this.followerBtn.addEventListener("click", this.addFollower.bind(this));
       this.fetchUserProfileData(this.userName);
     } catch (error) {
       console.error(error);
@@ -63,6 +63,7 @@ export default class extends AbstractView {
       });
       const res = await connection.json();
       if (connection.ok) {
+        this.user = res.payload; // Declare global user variable
         this.name_.appendChild(document.createTextNode(res.payload["name"]));
         this.userName_.appendChild(
           document.createTextNode(res.payload["userName"]),
@@ -84,7 +85,7 @@ export default class extends AbstractView {
           this.followerBtn.innerText = "Unfollow";
           this.followerBtn.classList.remove("bg-purple-500");
           this.followerBtn.classList.remove("hover:bg-purple-600");
-          this.followerBtn.classList.add("bg-red-300");
+          this.followerBtn.classList.add("bg-red-400");
           this.followerBtn.classList.add("hover:bg-red-500");
         } else {
         }
@@ -193,17 +194,42 @@ export default class extends AbstractView {
   }
 
   // Functon to addFollower
-  async addFollower() {
-    let connection = await fetch(apiAddFollower, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify({ userID: Number(uid.value) }),
-    });
-    let res = await connection.json();
-
-    console.log(res);
+  async addFollower(event) {
+    try {
+      let connection = await fetch(
+        this.user.isFollowing ? apiRemoveFollower : apiAddFollower,
+        {
+          method: this.user.isFollowing ? "DELETE" : "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+          },
+          body: JSON.stringify({ userID: this.user.id }),
+        },
+      );
+      let res = await connection.json();
+      if (connection.ok) {
+        if (res.isFollowing) {
+          this.followerCount.innerText = `${this.user["followerCount"] + 1} follower`;
+          this.followerBtn.innerText = "Unfollow";
+          this.user.isFollowing = true;
+          this.followerBtn.classList.remove("bg-purple-500");
+          this.followerBtn.classList.remove("hover:bg-purple-600");
+          this.followerBtn.classList.add("bg-red-400");
+          this.followerBtn.classList.add("hover:bg-red-500");
+        } else {
+          this.followerCount.innerText = `${this.user["followerCount"] - 1} follower`;
+          this.followerBtn.innerText = "Follow";
+          this.user.isFollowing = false;
+          this.followerBtn.classList.remove("bg-red-400");
+          this.followerBtn.classList.remove("hover:bg-red-500");
+          this.followerBtn.classList.add("bg-purple-500");
+          this.followerBtn.classList.add("hover:bg-purple-600");
+        }
+      }
+      console.log(res);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

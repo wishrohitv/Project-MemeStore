@@ -12,6 +12,7 @@ export const apiUserUpdateProfileImg = `${baseUrl}/api/v1/user/profileImg/update
 export const apiUserPostsFeed = `${baseUrl}/api/v1/posts`;
 export const apiHomeFeed = `${baseUrl}/api/v1/feed`;
 export const apiAddFollower = `${baseUrl}/api/v1/user/follow`;
+export const apiRemoveFollower = `${baseUrl}/api/v1/user/unfollow`;
 export const apiTogglePostLike = `${baseUrl}/api/v1/posts/like`;
 export const apiRefreshToken = `${baseUrl}/api/v1/auth/refresh`;
 
