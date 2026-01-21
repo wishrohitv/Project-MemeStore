@@ -14,7 +14,8 @@ from backend.modules import (
     uuid,
 )
 from backend.repository.userRespository import (
-    addFollower,
+    _addFollower,
+    _removeFollower,
     getUserProfile,
     updateProfileImg,
     updateUser,
@@ -154,8 +155,20 @@ def usersDelete():
     route.userRemoveFollower.routeName, methods=route.userRemoveFollower.methods
 )
 @verifyRequestMiddleware(route.userRemoveFollower.routeName)
-def toggleFollower():
-    raise NotImplementedError()
+def removeFollower(loggedUser: LoggedUser, *args, **kwargs):
+    sessionUserID = loggedUser.userID
+    body = request.get_json()
+    if isinstance(body, dict):
+        targetUserID = body.get("userID")
+        if not isinstance(targetUserID, int):
+            return make_response({"error": f"Invalid {targetUserID} datatype"})
+        if targetUserID == sessionUserID:
+            return make_response({"error": "user can't unfollow himself"}, 409)
+        else:
+            return _removeFollower(sessionUserID, targetUserID)
+
+    else:
+        return make_response({"error": "Expect json body"}, 401)
 
 
 # /user/follow
@@ -163,7 +176,7 @@ def toggleFollower():
     route.userAddFollower.routeName, methods=route.userAddFollower.methods
 )
 @verifyRequestMiddleware(route.userAddFollower.routeName)
-def addFollwer(loggedUser: LoggedUser, *agrs, **kwargs):
+def addFollower(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
     body = request.get_json()
     if isinstance(body, dict):
@@ -173,7 +186,7 @@ def addFollwer(loggedUser: LoggedUser, *agrs, **kwargs):
         if targetUserID == sessionUserID:
             return make_response({"error": "user can't follow himself"}, 409)
         else:
-            return addFollower(sessionUserID, targetUserID)
+            return _addFollower(sessionUserID, targetUserID)
 
     else:
         return make_response({"error": "Expect json body"}, 401)

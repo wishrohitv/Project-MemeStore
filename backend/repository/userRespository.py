@@ -1,5 +1,3 @@
-from turtle import up
-
 from backend.database import engine
 from backend.models import AccountStatus, Follower, Profile, Sessions, Users
 from backend.modules import (
@@ -221,7 +219,7 @@ def _logout(refreshToken: str, userID: int, allDevices=False):
         raise Exception(e)
 
 
-def addFollower(sessionUserID: int, userID: int):
+def _addFollower(sessionUserID: int, userID: int):
     try:
         checkIsAlreadyFollow = select(
             exists().where(
@@ -231,8 +229,6 @@ def addFollower(sessionUserID: int, userID: int):
         isAlreadyFollows = session.scalar(
             checkIsAlreadyFollow
         )  # Scalar select first row from table
-        # print(checkIsAlreadyFollow)
-        # print(isAlreadyFollows)
         session.close()
         # If isAlreadyFollows
         if not isAlreadyFollows:
@@ -240,12 +236,62 @@ def addFollower(sessionUserID: int, userID: int):
             session.add(newFollower)
             session.commit()
             session.close()
-            print(newFollower)
-            return make_response({"message": "follower added successfully"}, 201)
-        else:
             return make_response(
-                {"message": "user already follows requested user"}, 409
+                {"message": "follower added successfully", "isFollowing": True}, 201
             )
+        else:
+            return make_response({"error": "user already follows requested user"}, 409)
+    except Exception as e:
+        session.rollback()
+        print(e)
+        return make_response({"error": f"{e}"}, 500)
+
+
+def _removeFollower(
+    sessionUserID: int,
+    userID: int,
+    userRemoveFollower: bool = False,  # User wants to remove his follower itself
+):
+    """
+    Follower can unfollow user
+    User can remove another user from following list
+    """
+    try:
+        if userRemoveFollower:
+            checkIsAlreadyFollow = select(
+                exists().where(
+                    Follower.userID == sessionUserID, Follower.followerID == userID
+                )
+            )
+        else:
+            checkIsAlreadyFollow = select(
+                exists().where(
+                    Follower.userID == userID, Follower.followerID == sessionUserID
+                )
+            )
+
+        isAlreadyFollows = session.scalar(
+            checkIsAlreadyFollow
+        )  # Scalar select first row from table
+
+        session.close()
+        # If isAlreadyFollows
+        if not isAlreadyFollows:
+            return make_response({"error": "User is not following requested user"}, 409)
+
+        if userRemoveFollower:
+            stmt = delete(Follower).where(
+                Follower.userID == sessionUserID, Follower.followerID == userID
+            )
+        else:
+            stmt = delete(Follower).where(
+                Follower.userID == userID, Follower.followerID == sessionUserID
+            )
+        session.execute(stmt)
+        session.commit()
+        return make_response(
+            {"message": "user unfollows requested user", "isFollowing": False}, 200
+        )
     except Exception as e:
         print(e)
         return make_response({"error": f"{e}"}, 500)
