@@ -1,6 +1,6 @@
 from backend.config import API_ENDPOINTS, ROLE
 from backend.database import engine
-from backend.models import Accessibility, Endpoint, Role
+from backend.models import Accessibility, Category, Endpoint, Role
 from backend.modules import sessionmaker
 
 Session = sessionmaker(bind=engine)
@@ -11,7 +11,7 @@ session = Session()
 def getReadyRole():
     checkRole = session.query(Role).all()
 
-    # check role db have role if not then add role
+    # Check if db has role or not then add role
     if len(checkRole) == 0:
         roleObjList = []
         for role, roleId in ROLE().roles.items():
@@ -23,7 +23,7 @@ def getReadyRole():
 
     # _______________ Add initial endpoints
     checkEndpoint = session.query(Endpoint).all()
-    # check role db have role if not then add role
+    # Check if db has endpoints or not then add
     if len(checkEndpoint) == 0:
         endpointObjList = []
         for endpoint, routeAccess in API_ENDPOINTS().apiEndpoints.items():
@@ -39,7 +39,7 @@ def getReadyRole():
     # Add accessibility in database
     checkAccessibility = session.query(Accessibility).all()
 
-    # check role db have role if not then add role
+    # check if db has accessibility or not then add
     if len(checkAccessibility) == 0:
         accessObjList = []
         for role_id, routeAccess in enumerate(API_ENDPOINTS().apiEndpoints.values()):
@@ -52,5 +52,28 @@ def getReadyRole():
             )
 
         session.add_all(accessObjList)
+        session.commit()
+        session.close()
+
+    # _______________
+    checkCategory = session.query(Category).all()
+
+    # Check if db has categories or not then add
+    if len(checkCategory) == 0:
+        catObjList = []
+        for category in [
+            "Politcs",
+            "Reletable",
+            "Troll",
+            "Coding",
+            "Programming",
+            "Movies",
+            "Sad",
+            "Casual",
+            "Trending",
+        ]:
+            catObjList.append(Category(category=category))
+
+        session.add_all(catObjList)
         session.commit()
         session.close()
