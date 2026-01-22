@@ -81,6 +81,7 @@ def _postToggleLike(sessionUserID: int, postID: int):
                 {"isLiked": False, "message": "Post like removed successfully"}, 201
             )
     except Exception as e:
+        session.rollback()
         raise Exception(str(e))
 
 
