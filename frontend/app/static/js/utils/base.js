@@ -14,6 +14,7 @@ export const apiHomeFeed = `${baseUrl}/api/v1/feed`;
 export const apiAddFollower = `${baseUrl}/api/v1/user/follow`;
 export const apiRemoveFollower = `${baseUrl}/api/v1/user/unfollow`;
 export const apiTogglePostLike = `${baseUrl}/api/v1/posts/like`;
+export const apiTogglePostBookmark = `${baseUrl}/api/v1/posts/bookmark`;
 export const apiRefreshToken = `${baseUrl}/api/v1/auth/refresh`;
 
 // Global user object

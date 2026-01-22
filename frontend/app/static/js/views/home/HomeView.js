@@ -3,8 +3,8 @@ import {
   initializeTemplate,
   apiHomeFeed,
   apiTogglePostLike,
+  apiTogglePostBookmark,
 } from "../../utils/base.js";
-import { togglePostLike } from "../../repository/global.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -149,8 +149,41 @@ export default class extends AbstractView {
           }
           bookmarkBtn
             .querySelector(".svgs")
-            .addEventListener("click", (event) => {
-              togglePostLike(post.postID, event);
+            .addEventListener("click", async (event) => {
+              try {
+                let conn = await fetch(
+                  `${apiTogglePostBookmark}/${post.postID}`,
+                  {
+                    method: "PUT",
+                    credentials: "include",
+                  },
+                );
+                let res = await conn.json();
+                if (conn.ok) {
+                  if (res.isBookmarked) {
+                    event.target.parentNode.parentNode.children[1].classList.remove(
+                      "hidden",
+                    );
+                    event.target.parentNode.parentNode.children[0].classList.add(
+                      "hidden",
+                    );
+                    bookmarkBtn.querySelector(".count").innerText =
+                      post.bookmarkCount + 1;
+                  } else {
+                    event.target.parentNode.parentNode.children[1].classList.add(
+                      "hidden",
+                    );
+                    event.target.parentNode.parentNode.children[0].classList.remove(
+                      "hidden",
+                    );
+                    bookmarkBtn.querySelector(".count").innerText =
+                      post.bookmarkCount - 1;
+                  }
+                }
+                console.log(res);
+              } catch (e) {
+                console.error(e);
+              }
             });
           // Link of creator's profile
           clone.querySelector(".postUserPic").src = post.profileImgUrl;
