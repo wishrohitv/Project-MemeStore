@@ -122,20 +122,13 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
 @verifyRequestMiddleware(route.postLike.routeName)
 def toggleLike(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
-    # print(request.path)
-    # print(request.full_path)
-    # print(request.remote_addr)
-    # print(request.user_agent_class.browser)
-    # print(request.user_agent_class.platform)
-    # print(request.user_agent_class.language)
-    # print(request.user_agent_class.version)
+
     postID = kwargs.get("postID")
     if postID is None and not isinstance(postID, int):
         return make_response({"error": "Invalid post ID"}, 400)
     try:
-        res = _postToggleLike(sessionUserID=sessionUserID, postID=postID)
+        return _postToggleLike(sessionUserID=sessionUserID, postID=postID)
 
-        return make_response(res, 201)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
