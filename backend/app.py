@@ -1,6 +1,12 @@
+import json
+
+from dotenv import load_dotenv
+
 from backend.database import initializeDb
-from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask
+from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask, os
 from backend.repository.getReadyRole import getReadyRole
+
+load_dotenv()
 
 
 def runApp():
@@ -8,11 +14,7 @@ def runApp():
     initializeDb()
 
     app = Flask(__name__)
-    CORS(
-        app,
-        supports_credentials=True,
-        origins=["http://127.0.0.1:8000"],
-    )
+    CORS(app, supports_credentials=True, origins=[os.environ.get("ORIGINS") or ""])
 
     app.config["path"] = ".backend/public"
     app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
