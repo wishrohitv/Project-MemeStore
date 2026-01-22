@@ -210,7 +210,7 @@ export default class extends AbstractView {
       let res = await connection.json();
       if (connection.ok) {
         if (res.isFollowing) {
-          this.followerCount.innerText = `${this.user["followerCount"] + 1} follower`;
+          this.followerCount.innerText = `${this.user.followerCount + 1} follower`;
           this.followerBtn.innerText = "Unfollow";
           this.user.isFollowing = true;
           this.followerBtn.classList.remove("bg-purple-500");
@@ -218,7 +218,7 @@ export default class extends AbstractView {
           this.followerBtn.classList.add("bg-red-400");
           this.followerBtn.classList.add("hover:bg-red-500");
         } else {
-          this.followerCount.innerText = `${this.user["followerCount"] - 1} follower`;
+          this.followerCount.innerText = `${this.user.followerCount - 1} follower`;
           this.followerBtn.innerText = "Follow";
           this.user.isFollowing = false;
           this.followerBtn.classList.remove("bg-red-400");
