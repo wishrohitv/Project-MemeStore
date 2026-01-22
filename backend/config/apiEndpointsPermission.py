@@ -125,6 +125,11 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["PUT"],
     )
+    postBookmark = RouteAccess(
+        routeName="/posts/bookmark",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["PUT"],
+    )
     deletePost = RouteAccess(
         routeName="/posts/delete",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],

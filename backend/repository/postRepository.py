@@ -1,5 +1,5 @@
 from backend.database import engine
-from backend.models import AgeRating, Likes, Posts, Users
+from backend.models import AgeRating, Bookmark, Likes, Posts, Users
 from backend.modules import (
     API_ROOT_URL,
     PUBLIC_DIRECTORY_POSTS,
@@ -81,6 +81,41 @@ def _postToggleLike(sessionUserID: int, postID: int):
                 {"isLiked": False, "message": "Post like removed successfully"}, 201
             )
     except Exception as e:
+        raise Exception(str(e))
+
+
+def _postToggleBookmark(sessionUserID: int, postID: int):
+    try:
+        isAlreadyBookmarked = (
+            session.query(Bookmark)
+            .filter(Bookmark.userID == sessionUserID, Bookmark.postID == postID)
+            .first()
+        )
+        if not isAlreadyBookmarked:
+            # Add bookmark to user
+            bookmarkPost = Bookmark(postID=postID, userID=sessionUserID)
+            session.add(bookmarkPost)
+            session.commit()
+            session.close()
+            return make_response(
+                {"isBookmarked": True, "message": "Post bookmark successfully"}, 201
+            )
+        else:
+            # Remove row from Bookmark
+            deLike = delete(Bookmark).filter(
+                Bookmark.userID == sessionUserID, Bookmark.postID == postID
+            )
+            session.execute(deLike)
+            session.commit()
+            return make_response(
+                {
+                    "isBookmarked": False,
+                    "message": "Post bookmark removed successfully",
+                },
+                201,
+            )
+    except Exception as e:
+        session.rollback()
         raise Exception(str(e))
 
 

@@ -16,6 +16,7 @@ from backend.repository.postRepository import (
     _createPost,
     _deletePost,
     _posts,
+    _postToggleBookmark,
     _postToggleLike,
     _updatePost,
 )
@@ -128,6 +129,24 @@ def toggleLike(loggedUser: LoggedUser, *agrs, **kwargs):
         return make_response({"error": "Invalid post ID"}, 400)
     try:
         return _postToggleLike(sessionUserID=sessionUserID, postID=postID)
+
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+# /posts/bookmark
+@postsBlueprint.route(
+    f"{route.postBookmark.routeName}/<int:postID>", methods=route.postBookmark.methods
+)
+@verifyRequestMiddleware(route.postBookmark.routeName)
+def toggleBookmark(loggedUser: LoggedUser, *agrs, **kwargs):
+    sessionUserID = loggedUser.userID
+
+    postID = kwargs.get("postID")
+    if postID is None and not isinstance(postID, int):
+        return make_response({"error": "Invalid post ID"}, 400)
+    try:
+        return _postToggleBookmark(sessionUserID=sessionUserID, postID=postID)
 
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
