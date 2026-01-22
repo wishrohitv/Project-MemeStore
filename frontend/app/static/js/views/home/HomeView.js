@@ -1,5 +1,10 @@
 import AbstractView from "../AbstractView.js";
-import { initializeTemplate, apiHomeFeed } from "../../utils/base.js";
+import {
+  initializeTemplate,
+  apiHomeFeed,
+  apiTogglePostLike,
+} from "../../utils/base.js";
+import { togglePostLike } from "../../repository/global.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -34,6 +39,7 @@ export default class extends AbstractView {
   async fetchHomeFeed() {
     let connection = await fetch(apiHomeFeed, {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
@@ -93,9 +99,39 @@ export default class extends AbstractView {
           }
           likeBtn
             .querySelector(".svgs")
-            .addEventListener("click", (event) =>
-              togglePostLike(post.postID, event),
-            );
+            .addEventListener("click", async (event) => {
+              try {
+                let conn = await fetch(`${apiTogglePostLike}/${post.postID}`, {
+                  method: "PUT",
+                  credentials: "include",
+                });
+                let res = await conn.json();
+                if (conn.ok) {
+                  if (res.isLiked) {
+                    event.target.parentNode.parentNode.children[1].classList.remove(
+                      "hidden",
+                    );
+                    event.target.parentNode.parentNode.children[0].classList.add(
+                      "hidden",
+                    );
+                    likeBtn.querySelector(".count").innerText =
+                      post.likeCount + 1;
+                  } else {
+                    event.target.parentNode.parentNode.children[1].classList.add(
+                      "hidden",
+                    );
+                    event.target.parentNode.parentNode.children[0].classList.remove(
+                      "hidden",
+                    );
+                    likeBtn.querySelector(".count").innerText =
+                      post.likeCount - 1;
+                  }
+                }
+                console.log(res);
+              } catch (e) {
+                console.error(e);
+              }
+            });
           // Post Bookmark
           console.log(post);
           const bookmarkBtn = clone.querySelector(".bookmarkBtn");
@@ -113,9 +149,9 @@ export default class extends AbstractView {
           }
           bookmarkBtn
             .querySelector(".svgs")
-            .addEventListener("click", (event) =>
-              togglePostLike(post.postID, event),
-            );
+            .addEventListener("click", (event) => {
+              togglePostLike(post.postID, event);
+            });
           // Link of creator's profile
           clone.querySelector(".postUserPic").src = post.profileImgUrl;
           clone.querySelector(".postUserName").href = `/user/${post.userName}`;
