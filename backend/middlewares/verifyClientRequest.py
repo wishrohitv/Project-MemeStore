@@ -46,6 +46,7 @@ def verifyRequestMiddleware(endpoint: str):
                                 **kwargs,
                             )
                         else:
+                            # Either user role or endpoint not found
                             return make_response({"message": "Invalid user role"}, 401)
 
                     else:
