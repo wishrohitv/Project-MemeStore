@@ -35,10 +35,14 @@ import bcrypt
 # Jwt module
 import jwt
 
+# Import requests
+import requests
+
 # Import flask modules
 from flask import (
     Blueprint,
     Flask,
+    Response,
     jsonify,
     make_response,
     request,
