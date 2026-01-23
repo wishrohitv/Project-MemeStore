@@ -4,6 +4,7 @@ import {
   apiHomeFeed,
   apiTogglePostLike,
   apiTogglePostBookmark,
+  apiGetPostMedia,
 } from "../../utils/base.js";
 
 export default class extends AbstractView {
@@ -185,6 +186,16 @@ export default class extends AbstractView {
                 console.error(e);
               }
             });
+          // Download Button
+          const downloadBtn = clone.querySelector(".downloadBtn");
+          downloadBtn.addEventListener("click", (e) => {
+            window.location.href = `${apiGetPostMedia}/${post.postID}`;
+            // Good for showing ads
+            // window.open(
+            //   `${apiGetPostMedia}/${post.postID}`,
+            //   "_blank",
+            // );
+          });
           // Link of creator's profile
           clone.querySelector(".postUserPic").src = post.profileImgUrl;
           clone.querySelector(".postUserName").href = `/user/${post.userName}`;

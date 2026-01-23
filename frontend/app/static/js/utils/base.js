@@ -16,6 +16,7 @@ export const apiRemoveFollower = `${baseUrl}/api/v1/user/unfollow`;
 export const apiTogglePostLike = `${baseUrl}/api/v1/posts/like`;
 export const apiTogglePostBookmark = `${baseUrl}/api/v1/posts/bookmark`;
 export const apiRefreshToken = `${baseUrl}/api/v1/auth/refresh`;
+export const apiGetPostMedia = `${baseUrl}/api/v1/getPostMedia`;
 
 // Global user object
 export function setUser(sessionUser) {
