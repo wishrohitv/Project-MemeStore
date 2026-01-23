@@ -239,3 +239,23 @@ def _posts(
             return make_response({"payload": []}, 200)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+def _getPostMedia(postID: int) -> tuple[str, str, str, str] | None:
+    try:
+        post = (
+            session.query(
+                Posts.title,
+                Posts.mediaUrl,
+                Posts.mediaPublicID,
+                Posts.fileExtension,
+            )
+            .filter(Posts.id == postID)
+            .first()
+        )
+        if not post:
+            return None
+        return tuple(post)
+    except Exception as e:
+        print(f"Error fetching post media: {e}")
+        return None
