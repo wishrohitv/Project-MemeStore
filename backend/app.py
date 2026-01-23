@@ -16,7 +16,7 @@ def runApp():
     app = Flask(__name__)
     CORS(app, supports_credentials=True, origins=[os.environ.get("ORIGINS") or ""])
 
-    app.config["path"] = ".backend/public"
+    app.config["path"] = "backend/public"
     app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
 
     # Blueprint for auth
