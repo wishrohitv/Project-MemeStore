@@ -187,7 +187,9 @@ def _posts(
 
     if sessionUserID:
         user = session.query(Users).filter_by(id=sessionUserID).first()
-        if user.userName == userName:
+        if not user:
+            filterObj["visibility"] = False
+        elif user.userName == userName:
             # filterObj["visibility"] = True
             pass
         else:
