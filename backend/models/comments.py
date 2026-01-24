@@ -18,9 +18,9 @@ class Comments(Base):
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
     content: Mapped[int] = mapped_column(String(1000), nullable=False)
     parentCommentID: Mapped[int] = mapped_column(INTEGER, nullable=True)
-    createdAt: Mapped[str] = mapped_column(
+    createdAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False), default=datetime.now()
     )
-    updatedAt: Mapped[str] = mapped_column(
+    updatedAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False), onupdate=datetime.now(), default=datetime.now()
     )
