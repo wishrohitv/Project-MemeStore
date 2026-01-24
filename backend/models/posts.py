@@ -1,3 +1,5 @@
+from sqlalchemy.sql.expression import nullsfirst
+
 from backend.modules import (
     TIMESTAMP,
     Enum,
@@ -6,6 +8,7 @@ from backend.modules import (
     Mapped,
     Optional,
     String,
+    datetime,
     mapped_column,
     relationship,
 )
@@ -18,12 +21,12 @@ class Posts(Base):
     __tablename__ = "posts"
     id: Mapped[int] = mapped_column(primary_key=True)
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
     tags: Mapped[str] = mapped_column(String(100), nullable=True)
     mediaUrl: Mapped[str] = mapped_column(nullable=True)
     mediaPublicID: Mapped[str] = mapped_column(String(55), nullable=True)
-    fileType: Mapped[str] = mapped_column(String(8), nullable=False)
-    fileExtension: Mapped[str] = mapped_column(String(5))
+    fileType: Mapped[str] = mapped_column(String(8), nullable=True)
+    fileExtension: Mapped[str] = mapped_column(String(5), nullable=True)
     visibility: Mapped[bool] = mapped_column(default=True)
     ageRating: Mapped[AgeRating] = mapped_column(
         "ageRating",
@@ -31,7 +34,16 @@ class Posts(Base):
         default=AgeRating.pg13,  # 'pg13' age ratings on posts by default
         quote=True,
     )
-    category: Mapped[int] = mapped_column(ForeignKey("category.id"))
+    category: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=True)
+    createdAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        default=datetime.now(),
+    )
+    updatedAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        onupdate=datetime.now(),
+        default=datetime.now(),
+    )
 
     def __repr__(self) -> str:
         return f"""Posts(
@@ -46,4 +58,6 @@ class Posts(Base):
                     'visibility': {self.visibility!r},
                     'ageRating': {self.ageRating!r},
                     'category': {self.category!r},
+                    'createdAt': {self.createdAt!r},
+                    'updatedAt': {self.updatedAt!r},
                 )"""
