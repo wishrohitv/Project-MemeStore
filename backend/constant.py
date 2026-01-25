@@ -65,6 +65,6 @@ ACCESS_TOKEN_EXPIRY_MINUTES: int = 30  # Minute
 
 REFRESH_TOKEN_EXPIRY_MINUTES: int = 60 * 24 * 10  # 10 days
 
-SECURE_COOKIE: bool = False  # Set always true
+SECURE_COOKIE: bool = True  # Set always true
 
 HTTP_ONLY: bool = True  # Set always true

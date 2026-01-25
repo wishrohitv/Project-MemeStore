@@ -131,13 +131,33 @@ def _authenticateUser(userName, email, password):
         # Close the session
         session.close()
 
-        return (
-            {"id": users.id, "userName": users.userName},
-            accessToken,
-            refreshToken,
+        res = make_response(
+            {
+                "message": "Logged in successfully",
+                "payload": {"userID": users.id, "userName": users.userName},
+            },
+            200,
         )
+        res.set_cookie(
+            key="accessToken",
+            value=accessToken,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
+        )
+        res.set_cookie(
+            key="refreshToken",
+            value=refreshToken,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            samesite=None,
+            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
+        )
+        return res
+
     except Exception as e:
-        raise Exception(str(e))
+        print(e)
+        raise Exception(e)
 
 
 def _refreshTokens(refreshToken: str):

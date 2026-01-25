@@ -67,38 +67,22 @@ def signup():
 # "/auth/login"
 @authBlueprint.route(route.loginUser.routeName, methods=route.loginUser.methods)
 def login():
-    clientBody = request.get_json()
-    if isinstance(clientBody, dict):
-        userName = clientBody.get("userName")
-        email = clientBody.get("email")
-        password = clientBody.get("password")
-        if not (userName or email):
-            return make_response({"error": "Username or email is required"}, 400)
-        if not password:
-            return make_response({"error": "Password is required"}, 400)
+    try:
+        clientBody = request.get_json()
+        if isinstance(clientBody, dict):
+            userName = clientBody.get("userName")
+            email = clientBody.get("email")
+            password = clientBody.get("password")
+            if not (userName or email):
+                return make_response({"error": "Username or email is required"}, 400)
+            if not password:
+                return make_response({"error": "Password is required"}, 400)
 
-        result = _authenticateUser(userName=userName, email=email, password=password)
-        res = make_response(
-            {"message": "Logged in successfully", "payload": result[0]}, 200
-        )
-        res.set_cookie(
-            key="accessToken",
-            value=result[1],
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        res.set_cookie(
-            key="refreshToken",
-            value=result[2],
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            samesite="Lax",
-            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        return res
-    else:
-        return make_response({"error": "Expect json body"}, 401)
+            return _authenticateUser(userName=userName, email=email, password=password)
+        else:
+            return make_response({"error": "Expect json body"}, 401)
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)
 
 
 # "/auth/logout"
@@ -150,7 +134,7 @@ def refreshToken():
             value=newTokens[2],
             httponly=HTTP_ONLY,
             secure=SECURE_COOKIE,
-            samesite="Lax",
+            samesite=None,
             max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
         )
         return res
