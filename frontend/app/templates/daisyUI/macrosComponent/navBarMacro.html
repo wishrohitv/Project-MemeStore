@@ -61,7 +61,7 @@
     <div class="hidden sm:flex flex-row gap-2">
         <input
             type="text"
-            placeholder="Search People, Memes"
+            placeholder="Search People, Memes, Templates"
             class="input input-bordered sm:max-w-64 lg:w-64"
             name="searchBox"
         />
@@ -138,7 +138,9 @@
         <!--Sinnup and login container-->
         <div id="signupLoginContainer" class="flex flex-row gap-2">
             <!-- Signup button-->
-            <a class="btn" href="/auth/signup" data-link>Create Account</a>
+            <a class="btn sr-only sm:not-sr-only" href="/auth/signup" data-link
+                >Create Account</a
+            >
             <!-- Login button-->
             <a class="btn" href="/auth/login" data-link>Log in</a>
         </div>
