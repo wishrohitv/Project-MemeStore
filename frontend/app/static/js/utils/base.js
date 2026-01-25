@@ -81,6 +81,7 @@ export async function refreshToken() {
     if (response.ok) {
       await fetchUserInfo();
     } else {
+      flash("Session expired. Please log in again.", { messageType: "error" });
       deleteUser();
       manageNavbar();
     }
@@ -113,4 +114,33 @@ export async function loadSessionUser() {
   if (!getUser()) {
     await fetchUserInfo();
   }
+}
+
+export function flash(message, { duration = 3000, messageType = "success" }) {
+  let bgColor;
+  switch (messageType) {
+    case "success":
+      bgColor = "#4caf50";
+      break;
+    case "error":
+      bgColor = "#f44336";
+      break;
+    case "warning":
+      bgColor = "#ffc107";
+      break;
+    case "info":
+      bgColor = "#2196f3";
+      break;
+    default:
+      bgColor = "#212121";
+      break;
+  }
+
+  const toast = document.querySelector(".toast");
+  toast.textContent = message;
+  toast.style.backgroundColor = bgColor;
+  toast.classList.add("show");
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, duration);
 }
