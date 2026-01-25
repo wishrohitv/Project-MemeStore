@@ -32,24 +32,28 @@ export default class extends AbstractView {
   }
 
   async authUser() {
-    console.log(this.email.value);
-    console.log(this.password.value);
-    let auth = await fetch(apiLoginUser, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        email: email.value,
-        password: password.value,
-      }),
-    });
-    let res = await auth.json();
-    if (auth.ok) {
-      console.log("logged in");
-      // redirect user to home page
-      location.href = "/";
+    try {
+      let auth = await fetch(apiLoginUser, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value,
+        }),
+      });
+      let res = await auth.json();
+      if (auth.ok) {
+        console.log("logged in");
+        // redirect user to home page
+        location.href = "/";
+      } else {
+        console.error(res);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
