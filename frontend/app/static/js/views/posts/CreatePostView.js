@@ -1,5 +1,5 @@
 import AbstractView from "../AbstractView.js";
-import { apiUploadPosts } from "../../utils/base.js";
+import { apiUploadPosts, flash } from "../../utils/base.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -102,6 +102,7 @@ export default class extends AbstractView {
       if (connection.ok) {
         console.log("uploaded successfully");
       } else {
+        flash("Failed to upload post", { messageType: "error" });
         console.error("failed to upload", res);
       }
     } catch (e) {
