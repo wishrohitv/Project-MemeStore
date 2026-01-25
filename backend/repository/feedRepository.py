@@ -98,4 +98,4 @@ def getHomeFeed(
             return make_response({"payload": []}, 200)
 
     except Exception as e:
-        return make_response({"error": f"{e}"}, 401)
+        return make_response({"error": f"{e}"}, 500)
