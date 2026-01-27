@@ -18,6 +18,11 @@ export const apiTogglePostBookmark = `${baseUrl}/api/v1/posts/bookmark`;
 export const apiRefreshToken = `${baseUrl}/api/v1/auth/refresh`;
 export const apiGetPostMedia = `${baseUrl}/api/v1/getPostMedia`;
 
+export const apiComments = `${baseUrl}/api/v1/comments`;
+export const apiCreateComment = `${baseUrl}/api/v1/comments/create`;
+export const apiUpdateComments = `${baseUrl}/api/v1/comments/update`;
+export const apiDeleteComment = `${baseUrl}/api/v1/comments/delete`;
+
 // Global user object
 export function setUser(sessionUser) {
   localStorage.setItem("payload", JSON.stringify(sessionUser));
