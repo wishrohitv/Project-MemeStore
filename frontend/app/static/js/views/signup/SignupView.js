@@ -23,7 +23,6 @@ export default class extends AbstractView {
 
         const formData = new FormData(this.form);
         const data = Object.fromEntries(formData.entries()); // Convert form to simple object
-        console.log(data);
         await this.signup(data);
       });
     } catch (error) {
