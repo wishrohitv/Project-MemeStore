@@ -1,9 +1,74 @@
 from backend.database import engine
-from backend.models import Comments, Posts
-from backend.modules import datetime, delete, or_, sessionmaker, update
+from backend.models import Comments, Posts, Profile, Users
+from backend.modules import (
+    API_ROOT_URL,
+    USE_CLOUDINARY_STORAGE,
+    datetime,
+    delete,
+    or_,
+    select,
+    sessionmaker,
+    update,
+    url_for,
+)
 
 Session = sessionmaker(bind=engine)
 session = Session()
+
+
+def _getComments(
+    postID: int,
+    parentCommentID: int | None = None,  # Used to fetch related comment's replies
+    offset: int = 0,
+    limit: int = 10,
+):
+    try:
+        stmt = (
+            select(
+                Comments,
+                Users.userName,
+                Users.name,
+                Profile.mediaUrl,
+                Profile.mediaPublicID,
+                Profile.fileExtension,
+            )
+            .join(
+                Users,
+                Comments.userID == Users.id,
+            )
+            .join(
+                Profile,
+                Users.id == Profile.userID,
+            )
+            .where(
+                Comments.postID == postID,
+                Comments.parentCommentID == parentCommentID,
+            )
+            .offset(offset)
+            .limit(limit)
+        )
+        comments = session.execute(stmt).all()
+        session.close()
+        commentsData = [
+            {
+                "id": comment[0].id,
+                "userID": comment[0].userID,
+                "content": comment[0].content,
+                "parentCommentID": comment[0].parentCommentID,
+                "createdAt": comment[0].createdAt,
+                "updatedAt": comment[0].updatedAt,
+                "userName": comment[1],
+                "name": comment[2],
+                "profileImgUrl": comment[3]
+                if USE_CLOUDINARY_STORAGE
+                else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{comment[4]}.{comment[5]}')}",
+            }
+            for comment in comments
+        ]
+        return commentsData
+    except Exception as e:
+        print(e)
+        raise Exception(f"Error getting comments: {e}")
 
 
 def _createComment(

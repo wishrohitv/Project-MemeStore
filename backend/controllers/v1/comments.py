@@ -4,6 +4,7 @@ from backend.modules import Blueprint, make_response, request
 from backend.repository.commentRepository import (
     _createComment,
     _deleteComment,
+    _getComments,
     _updateComment,
 )
 from backend.utils.loggedUser import LoggedUser
@@ -11,6 +12,25 @@ from backend.utils.loggedUser import LoggedUser
 commentsBlueprint = Blueprint("comments", __name__)
 
 route = API_ENDPOINTS()
+
+
+# /comments
+@commentsBlueprint.route(
+    f"{route.comments.routeName}/<int:postID>", methods=route.comments.methods
+)
+# /comments/postID/parentCommentID to get replies
+@commentsBlueprint.route(
+    f"{route.comments.routeName}/<int:postID>/<int:parentCommentID>",
+    methods=route.comments.methods,
+)
+def comments(postID: int, parentCommentID: int | None = None):
+    offset = request.args.get("offset", default=0, type=int)
+    limit = request.args.get("limit", default=10, type=int)
+    try:
+        comments = _getComments(postID, parentCommentID, offset, limit)
+        return make_response({"payload": comments}, 200)
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)
 
 
 # /comments/create"
@@ -23,18 +43,21 @@ def createCommments(loggedUser: LoggedUser, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID
     data = request.get_json()
+    content = data.get("content")
     parentCommentID = (
         data.get("parentCommentID") or None
     )  # Used to create comment replies
     if not isinstance(postID, int):
-        return make_response({"error": f"Invalid postID {postID} datatype"})
+        return make_response({"error": f"Invalid postID {postID} datatype"}, 401)
+    if len(content) == 0 or len(content) > 1000:
+        return make_response({"error": "Content length exceeds maximum allowed"}, 401)
 
     if parentCommentID is not None and not isinstance(parentCommentID, int):
-        return make_response({"error": f"Invalid commnetID {postID} datatype"})
+        return make_response({"error": f"Invalid commnetID {postID} datatype"}, 401)
 
     try:
-        _createComment(postID, sessionUserID, data.get("content"), parentCommentID)
-        return make_response("Comment created successfully")
+        _createComment(postID, sessionUserID, content, parentCommentID)
+        return make_response("Comment created successfully", 201)
     except Exception as e:
         return make_response({"error": str(e)}, 500)
 
