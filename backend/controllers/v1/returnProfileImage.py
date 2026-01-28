@@ -17,7 +17,6 @@ getProfileImageRouteBlueprint = Blueprint("profileImage", __name__)
     "/getProfileImage/<string:userName>", methods=["GET"]
 )
 def getProfileImage(userName):
-    print(userName)
     return make_response(
         {
             "profileImg": url_for(
