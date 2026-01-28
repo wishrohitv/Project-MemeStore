@@ -15,6 +15,7 @@ from backend.modules import (
 from backend.repository.postRepository import (
     _createPost,
     _deletePost,
+    _getPostByID,
     _posts,
     _postToggleBookmark,
     _postToggleLike,
@@ -199,5 +200,20 @@ def updatePost(loggedUser: LoggedUser, *args, **kwargs):
         )
 
         return make_response({"message": "Post updated successfully"}, 201)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+# /posts
+@postsBlueprint.route(
+    f"{route.posts.routeName}/<int:postID>",
+    methods=route.posts.methods,
+)
+@verifyRequestMiddleware(route.posts.routeName)
+def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    userName = kwargs.get("userName")
+    try:
+        return _getPostByID(postID=postID)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
