@@ -1,6 +1,6 @@
 <template id="postCardMacro">
     <!-- Post-card preview -->
-    <div class="card bg-base-100 max-w-94 shadow-sm">
+    <div class="card bg-base-100 max-w-94 shadow-sm" data-post>
         <figure class="px-10 pt-10">
             <img
                 alt="Media"
@@ -15,9 +15,7 @@
             <p class="cardInfo text-purple-100">A card component</p>
             <div class="card-actions w-full grid grid-cols-4 gap-2 mb-2 px-4">
                 <!--  Like post -->
-                <div
-                    class="likeButton flex flex-col items-center justify-center"
-                >
+                <div class="likeBtn flex flex-col items-center justify-center">
                     <div class="svgs hover:cursor-pointer">
                         <!-- If not liked and defualt-->
                         <svg
@@ -159,7 +157,7 @@
                 </div>
             </div>
             <div
-                class="flex flex-row justify-between items-center px-4 gap-2 w-full px-2"
+                class="flex flex-row justify-between items-center gap-2 w-full px-2"
             >
                 <!-- User avatar and name-->
                 <div>
@@ -178,7 +176,7 @@
                     <!--Upload date/time-->
                     <div class="text-purple-400">2 hour ago</div>
                     <!-- More option button -->
-                    <div id="profileBtnContainer" class="dropdown dropdown-end">
+                    <div id="moreBtnContainer" class="dropdown dropdown-end">
                         <div tabindex="0" role="button" class="">
                             <svg
                                 class="hover:scale-120 hover:cursor-pointer"

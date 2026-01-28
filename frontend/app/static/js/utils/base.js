@@ -37,12 +37,28 @@ export function deleteUser() {
   localStorage.removeItem("payload");
 }
 
-export async function initializeTemplate() {
+// Store macro components in memory
+let postMacroTemplate = {};
+
+export async function initializeTemplate({ feedMacro = true }) {
+  let templateHtml;
+  const feedPostMacro =
+    "/static/daisyUI/macroComponent/feedPostLayoutMacro.html";
+  const userPostMacro =
+    "/static/daisyUI/macroComponent/userPostLayoutMacro.html";
   try {
-    const res = await fetch(
-      "/static/daisyUI/macroComponent/postLayoutMacro.html",
-    );
-    const templateHtml = await res.text();
+    if (postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro]) {
+      templateHtml =
+        postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro];
+    } else {
+      const res = await fetch(feedMacro ? feedPostMacro : userPostMacro);
+      templateHtml = await res.text();
+
+      // Add template to memory
+      postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro] =
+        templateHtml;
+    }
+
     const tempContainer = document.createElement("div");
     tempContainer.innerHTML = templateHtml;
 
