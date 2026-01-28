@@ -24,3 +24,16 @@ class Comments(Base):
     updatedAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False), onupdate=datetime.now(), default=datetime.now()
     )
+
+    def __repr__(self) -> str:
+        return f"""
+            Comments(
+                id={self.id},
+                postID={self.postID},
+                userID={self.userID},
+                content={self.content},
+                parentCommentID={self.parentCommentID},
+                createdAt={self.createdAt},
+                updatedAt={self.updatedAt}
+            )
+            """
