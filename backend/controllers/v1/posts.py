@@ -44,7 +44,7 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
 
-# /posts/uploadPosts
+# /posts/upload
 @postsBlueprint.route(route.uploadPosts.routeName, methods=route.uploadPosts.methods)
 @verifyRequestMiddleware(route.uploadPosts.routeName)
 def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
