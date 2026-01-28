@@ -13,7 +13,8 @@ export default class extends AbstractView {
     this.setTitle("MemeStore");
   }
 
-  async getHtml() {
+  async getHtml(navigator) {
+    this.navigator = navigator;
     try {
       const html = await fetch(
         "./static/js/views/home/templates/daisyUI/home.html",
@@ -60,7 +61,7 @@ export default class extends AbstractView {
 
   async loadHomeFeed() {
     this.spinner.classList.remove("hidden");
-    initializeTemplate().then(async (postTemplate) => {
+    initializeTemplate({}).then(async (postTemplate) => {
       /// Fetch home feed data
       const feedData = await this.fetchHomeFeed();
       // Check if feedData is not empty
@@ -69,6 +70,15 @@ export default class extends AbstractView {
         // Loop feedData list
         feedData.forEach((post) => {
           const clone = postTemplate.content.cloneNode(true);
+          clone.querySelector(".card").addEventListener("click", (e) => {
+            if (
+              e.target.closest(
+                "a, button, .likeBtn, .bookmarkBton, .shareBtn, .downloadBtn, #moreBtnContainer",
+              )
+            )
+              return;
+            this.navigator("/post/" + post.postID);
+          });
           clone.querySelector(".cardTitle").textContent = post.title;
           clone.querySelector(".cardInfo").textContent = post.tags;
           clone.querySelector(".postUserName").textContent = post.userName;
@@ -87,7 +97,7 @@ export default class extends AbstractView {
           }
           clone.querySelector(".postUserPic").src = post.postUserPicUrl;
           // Post like
-          const likeBtn = clone.querySelector(".likeButton");
+          const likeBtn = clone.querySelector(".likeBtn");
           if (post.likeCount !== 0) {
             likeBtn.querySelector(".count").innerText = post.likeCount;
           }

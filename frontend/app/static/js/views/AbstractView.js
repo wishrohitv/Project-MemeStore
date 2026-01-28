@@ -7,7 +7,7 @@ export default class {
     document.title = title;
   }
 
-  async getHtml() {
+  async getHtml(navigator) {
     return "";
   }
 }

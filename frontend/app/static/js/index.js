@@ -7,6 +7,7 @@ import LoginView from "./views/login/LoginView.js";
 import LogoutView from "./views/logout/LogoutView.js";
 import SignupView from "./views/signup/SignupView.js";
 import ProfileView from "./views/profile/ProfileView.js";
+import PostView from "./views/posts/PostView.js";
 import EditProfileView from "./views/profile/EditProfileView.js";
 import CreatePostView from "./views/posts/CreatePostView.js";
 import { fetchUserInfo, manageNavbar } from "./utils/base.js";
@@ -45,6 +46,7 @@ const router = async () => {
     { path: "/edit/profile/:userName", view: EditProfileView },
     { path: "/user/:userName", view: ProfileView },
     { path: "/post/create", view: CreatePostView },
+    { path: "/post/:postID", view: PostView },
   ];
 
   // Test each route for potential match
@@ -68,7 +70,11 @@ const router = async () => {
 
   const view = new match.route.view(getParams(match));
 
-  document.querySelector("#app").replaceChildren(await view.getHtml());
+  document.querySelector("#app").replaceChildren(
+    await view.getHtml((goTo) => {
+      navigateTo(goTo);
+    }),
+  );
 };
 
 window.addEventListener("popstate", router);
