@@ -28,7 +28,7 @@ class Posts(Base):
     __tablename__ = "posts"
     id: Mapped[int] = mapped_column(primary_key=True)
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    text: Mapped[str] = mapped_column(String(500), nullable=True)
     tags: Mapped[str] = mapped_column(String(100), nullable=True)
     mediaUrl: Mapped[str] = mapped_column(nullable=True)
     mediaPublicID: Mapped[str] = mapped_column(String(55), nullable=True)
