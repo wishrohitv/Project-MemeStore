@@ -75,7 +75,16 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         _fileType = None  # i.e "image/jpeg"
         _fileExtension = None
         _mediaUrl = None
+
         pForm = request.form
+        postVisibility = pForm.get("postVisibility")
+        postTitle = pForm.get("postTitle")
+        postTags = pForm.get("postTags")
+        postVisibility = (
+            True if not postVisibility else postVisibility.lower() == "true"
+        )
+        postAgeRating = (pForm.get("ageRating") or "pg13").lower()
+
         if file:
             print(file, "not found")
             fileMimeType = file.mimetype
@@ -116,19 +125,22 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
                 )
         else:
             _mediaPublicID = None
+
+        # Check if text and file both is not None
+        if not postTitle and not _mediaPublicID:
+            return make_response({"error": "Text or file is required"}, 400)
+
         _createPost(
             userID=sessionUserID,
-            title=pForm.get("postTitle"),
-            tags=pForm.get("postTags"),
-            visibility=None
-            if not pForm.get("postVisibility")
-            else pForm.get("postVisibility").lower() == "true",
+            text=postTitle,
+            tags=postTags,
+            visibility=postVisibility,
             fileType=_fileType,  # i.e "image/jpeg"
             fileExtension=_fileExtension,
             mediaUrl=_mediaUrl,
             mediaPublicID=_mediaPublicID,
             category=1,
-            ageRating=(pForm.get("ageRating") or "pg13").lower(),
+            ageRating=postAgeRating,
             isReposted=isReposted,
             parentPostID=parentPostID,
         )
