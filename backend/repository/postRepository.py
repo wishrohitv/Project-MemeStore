@@ -1,5 +1,3 @@
-from multiprocessing import Condition
-
 from backend.database import engine
 from backend.models import AgeRating, Bookmark, Likes, Posts, Profile, Users
 from backend.modules import (
@@ -269,11 +267,16 @@ def _getPostMedia(postID: int) -> tuple[str, str, str, str] | None:
         return None
 
 
-def _getPostByID(
+def _getPostByIDorReplies(
     postID: int,
     sessionUserID: int | None = None,
+    fetchReplies: bool = False,
 ):
-    conditions = [Posts.id == postID, Posts.visibility]
+    conditions = []
+    if fetchReplies:
+        conditions.append(Posts.parentPostID == postID)
+    else:
+        conditions.append(Posts.id == postID)
     if sessionUserID is not None:
         # Check owner of the post
         post = session.query(Posts).where(Posts.id == postID).first()
@@ -283,8 +286,9 @@ def _getPostByID(
         if post.userID == sessionUserID:
             # Give the access to the private post to owner
             # Note : implement superadmin and moderator can access private post for enquiry
-            conditions.pop(-1)
             conditions.append(not Posts.visibility)
+        else:
+            conditions.append(Posts.visibility)
     # Get feed data from database alog with userName of author of post
     likeCount = aliased(Likes)
     bookmarkCount = aliased(Bookmark)
