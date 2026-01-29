@@ -72,6 +72,9 @@ export async function initializeTemplate({ feedMacro = true }) {
 }
 
 export async function fetchUserInfo() {
+  if (!getUser()) {
+    return;
+  }
   try {
     const res = await fetch(apiUserInSession, {
       method: "GET",
