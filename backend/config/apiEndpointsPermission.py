@@ -1,5 +1,4 @@
 from backend.config.roles import ROLE
-from backend.utils.formateToCamel import formateToCamel
 from backend.utils.routeAccess import RouteAccess
 
 
@@ -140,28 +139,23 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["POST"],
     )
-
-    # Comments
-    comments = RouteAccess(
-        routeName="/comments",
+    # Replies
+    postReplies = RouteAccess(
+        routeName="/posts/replies",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
     )
-    createComments = RouteAccess(
-        routeName="/comments/create",
-        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
-        methods=["POST"],
-    )
-    deleteComment = RouteAccess(
-        routeName="/comments/delete",
-        rolePermission=[ROLE.USER, ROLE.MODERATOR, ROLE.SUPER_ADMIN],
-        methods=["DELETE"],
-    )
-    updateComment = RouteAccess(
-        routeName="/comments/update",
-        rolePermission=[ROLE.USER, ROLE.MODERATOR, ROLE.SUPER_ADMIN],
+    addTemplatePost = RouteAccess(
+        routeName="/posts/addTemplate",
+        rolePermission=[ROLE.USER],
         methods=["PUT"],
     )
+    removeTemplatePost = RouteAccess(
+        routeName="/posts/removeTemplate",
+        rolePermission=[ROLE.USER],
+        methods=["DELETE"],
+    )
+
     # Collection
     collection = RouteAccess(
         routeName="/collections", rolePermission=[ROLE.USER], methods=["GET"]
@@ -169,26 +163,17 @@ class API_ENDPOINTS:
     createCollection = RouteAccess(
         routeName="/collections/create", rolePermission=[ROLE.USER], methods=["POST"]
     )
+    deleteCollection = RouteAccess(
+        routeName="/collections/delete", rolePermission=[ROLE.USER], methods=["DELETE"]
+    )
+    updateCollection = RouteAccess(
+        routeName="/collections/update", rolePermission=[ROLE.USER], methods=["PUT"]
+    )
     addPostToCollection = RouteAccess(
         routeName="/collections/addPost", rolePermission=[ROLE.USER], methods=["POST"]
     )
     removePostFromCollection = RouteAccess(
         routeName="/collections/removePost",
-        rolePermission=[ROLE.USER],
-        methods=["DELETE"],
-    )
-    deleteCollection = RouteAccess(
-        routeName="/collections/deleteCollection",
-        rolePermission=[ROLE.USER],
-        methods=["DELETE"],
-    )
-    templatePost = RouteAccess(
-        routeName="/collections/templatePost",
-        rolePermission=[ROLE.USER],
-        methods=["POST"],
-    )
-    removeTemplatePost = RouteAccess(
-        routeName="/collections/removeTemplatePost",
         rolePermission=[ROLE.USER],
         methods=["DELETE"],
     )
