@@ -279,6 +279,10 @@ def _getPostByIDorReplies(
     conditions = []
     if fetchReplies:
         conditions.append(Posts.parentPostID == postID)
+
+        conditions.append(
+            Posts.isReposted == False
+        )  # `not Posts.isReposted` is not working as false
     else:
         conditions.append(Posts.id == postID)
     if sessionUserID is not None:
@@ -364,7 +368,7 @@ def _getPostByIDorReplies(
                     "isBookmarked": feed[8],
                 }
                 feedObj.append(data)
-            if fetchReplies:
+            if len(feedObj) == 0:
                 return make_response(
                     {
                         "payload": [],
