@@ -18,10 +18,7 @@ export const apiTogglePostBookmark = `${baseUrl}/api/v1/posts/bookmark`;
 export const apiRefreshToken = `${baseUrl}/api/v1/auth/refresh`;
 export const apiGetPostMedia = `${baseUrl}/api/v1/getPostMedia`;
 
-export const apiComments = `${baseUrl}/api/v1/comments`;
-export const apiCreateComment = `${baseUrl}/api/v1/comments/create`;
-export const apiUpdateComments = `${baseUrl}/api/v1/comments/update`;
-export const apiDeleteComment = `${baseUrl}/api/v1/comments/delete`;
+export const apiPostsReplies = `${baseUrl}/api/v1/posts/replies`;
 
 // Global user object
 export function setUser(sessionUser) {
@@ -40,23 +37,41 @@ export function deleteUser() {
 // Store macro components in memory
 let postMacroTemplate = {};
 
-export async function initializeTemplate({ feedMacro = true }) {
+export async function initializeTemplate({ macro = "feed" }) {
   let templateHtml;
+
   const feedPostMacro =
     "/static/daisyUI/macroComponent/feedPostLayoutMacro.html";
   const userPostMacro =
     "/static/daisyUI/macroComponent/userPostLayoutMacro.html";
+  const userPostMacroParent =
+    "/static/daisyUI/macroComponent/feedPostLayoutParentMacro.html";
+
+  let loadMacro; // Default is feedPostMacro
+  switch (macro) {
+    case "feed":
+      loadMacro = feedPostMacro;
+      break;
+    case "user":
+      loadMacro = userPostMacro;
+      break;
+    case "parent":
+      loadMacro = userPostMacroParent;
+      break;
+    default:
+      loadMacro = feedPostMacro;
+      break;
+  }
+
   try {
-    if (postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro]) {
-      templateHtml =
-        postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro];
+    if (postMacroTemplate[loadMacro]) {
+      templateHtml = postMacroTemplate[loadMacro];
     } else {
-      const res = await fetch(feedMacro ? feedPostMacro : userPostMacro);
+      const res = await fetch(loadMacro);
       templateHtml = await res.text();
 
       // Add template to memory
-      postMacroTemplate[feedMacro ? feedPostMacro : userPostMacro] =
-        templateHtml;
+      postMacroTemplate[loadMacro] = templateHtml;
     }
 
     const tempContainer = document.createElement("div");
