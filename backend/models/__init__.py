@@ -4,7 +4,6 @@ from .bookmark import Bookmark
 from .category import Category
 from .collectionData import CollectionData
 from .collections import Collections
-from .comments import Comments
 from .endpoint import Endpoint
 from .enums import AccountStatus, AgeRating
 from .follower import Follower
@@ -29,10 +28,9 @@ __all__ = (
     "Likes",
     "Bookmark",
     "Templates",
-    "Comments",
     "AccountStatus",
     "AgeRating",
     "Collections",
-    "CollectioData",
+    "CollectionData",
     "Sessions",
 )
