@@ -1,7 +1,66 @@
 <template id="postCardMacro">
     <!-- Post-card preview -->
     <div class="card bg-base-100 max-w-94 shadow-sm" data-post>
-        <figure class="px-10 pt-10">
+        <!-- User avatar and name-->
+        <div
+            class="flex flex-row justify-between items-center gap-2 w-full px-2 mt-2"
+        >
+            <div>
+                <a
+                    class="userProfileLink flex flex-row items-center gap-2 text-bold hover:text-purple-700"
+                    data-link
+                >
+                    <img
+                        class="postUserPic h-[40px] w-[40px] hover:text-purple-300 hover:scale-110 rounded-full"
+                    />
+                    <h2 class="postUserName"></h2>
+                </a>
+            </div>
+
+            <div class="flex flex-row justify-center items-end gap-2">
+                <!--Upload date/time-->
+                <div class="text-purple-400">2 hour ago</div>
+                <!-- More option button -->
+                <div id="moreBtnContainer" class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="">
+                        <svg
+                            class="hover:scale-120 hover:cursor-pointer"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
+                        >
+                            <circle cx="12" cy="12" r="1" />
+                            <circle cx="12" cy="5" r="1" />
+                            <circle cx="12" cy="19" r="1" />
+                        </svg>
+                        More
+                    </div>
+                    <ul
+                        tabindex="0"
+                        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+                    >
+                        <li>
+                            <a data-link>
+                                Not interested
+                                <span class="badge">New</span>
+                            </a>
+                        </li>
+                        <li><a data-link>Report Post</a></li>
+                        <li><a data-link>Block User</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Text -->
+        <h2 class="cardTitle m-4">Card Title</h2>
+        <figure class="media px-10 pt-10 hidden">
             <img
                 alt="Media"
                 class="postContentImgPreview rounded-xl w-90 h-[160px]"
@@ -10,8 +69,13 @@
                 class="postContentVidPreview hidden rounded-xl w-90 h-[160px]"
             ></video>
         </figure>
+        <!-- Parent Post -->
+        <div class="parentPostContainer m-4 hidden">
+            <div class="spinner"></div>
+        </div>
+
+        <!--Button -->
         <div class="card-body w-full items-center text-center p-2">
-            <h2 class="cardTitle">Card Title</h2>
             <p class="cardInfo text-purple-100">A card component</p>
             <div class="card-actions w-full grid grid-cols-4 gap-2 mb-2 px-4">
                 <!--  Like post -->
@@ -154,63 +218,6 @@
                         </svg>
                     </div>
                     <div>Download</div>
-                </div>
-            </div>
-            <div
-                class="flex flex-row justify-between items-center gap-2 w-full px-2"
-            >
-                <!-- User avatar and name-->
-                <div>
-                    <a
-                        class="userProfileLink flex flex-row items-center gap-2 text-bold hover:text-purple-700"
-                        data-link
-                    >
-                        <img
-                            class="postUserPic h-[40px] w-[40px] hover:text-purple-300 hover:scale-110 rounded-full"
-                        />
-                        <h2 class="postUserName"></h2>
-                    </a>
-                </div>
-
-                <div class="flex flex-row justify-center items-end gap-2">
-                    <!--Upload date/time-->
-                    <div class="text-purple-400">2 hour ago</div>
-                    <!-- More option button -->
-                    <div id="moreBtnContainer" class="dropdown dropdown-end">
-                        <div tabindex="0" role="button" class="">
-                            <svg
-                                class="hover:scale-120 hover:cursor-pointer"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
-                            >
-                                <circle cx="12" cy="12" r="1" />
-                                <circle cx="12" cy="5" r="1" />
-                                <circle cx="12" cy="19" r="1" />
-                            </svg>
-                            More
-                        </div>
-                        <ul
-                            tabindex="0"
-                            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-                        >
-                            <li>
-                                <a data-link>
-                                    Not interested
-                                    <span class="badge">New</span>
-                                </a>
-                            </li>
-                            <li><a data-link>Report Post</a></li>
-                            <li><a data-link>Block User</a></li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
