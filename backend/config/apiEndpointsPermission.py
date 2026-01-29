@@ -144,6 +144,7 @@ class API_ENDPOINTS:
         routeName="/posts/replies",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
+        partialAccess=True,
     )
     addTemplatePost = RouteAccess(
         routeName="/posts/addTemplate",
