@@ -15,7 +15,7 @@ from backend.modules import (
 from backend.repository.postRepository import (
     _createPost,
     _deletePost,
-    _getPostByID,
+    _getPostByIDorReplies,
     _posts,
     _postToggleBookmark,
     _postToggleLike,
@@ -212,8 +212,21 @@ def updatePost(loggedUser: LoggedUser, *args, **kwargs):
 @verifyRequestMiddleware(route.posts.routeName)
 def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
     postID = kwargs.get("postID")
-    userName = kwargs.get("userName")
     try:
-        return _getPostByID(postID=postID)
+        return _getPostByIDorReplies(postID=postID)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+# /posts/replies
+@postsBlueprint.route(
+    f"{route.postReplies.routeName}/<int:postID>",
+    methods=route.postReplies.methods,
+)
+@verifyRequestMiddleware(route.postReplies.routeName)
+def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    try:
+        return _getPostByIDorReplies(postID=postID, fetchReplies=True)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
