@@ -363,6 +363,14 @@ def _getPostByIDorReplies(
                     "isBookmarked": feed[8],
                 }
                 feedObj.append(data)
+            if fetchReplies:
+                return make_response(
+                    {
+                        "payload": [],
+                        "message": "No replies found or post dosen't exists",
+                    },
+                    200,
+                )
             return make_response({"payload": feedObj}, 200)
         else:
             return make_response({"error": "Post not found"}, 404)
