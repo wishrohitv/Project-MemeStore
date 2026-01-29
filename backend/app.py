@@ -1,5 +1,3 @@
-import json
-
 from dotenv import load_dotenv
 
 from backend.database import initializeDb
@@ -27,9 +25,6 @@ def runApp():
         collectionBlueprint,
     )
 
-    # Blueprint for posts
-    from backend.controllers.v1.comments import commentsBlueprint
-
     # Register Bluprint for homeFeed endpoint
     from backend.controllers.v1.feed import feedBlueprint
 
@@ -51,7 +46,6 @@ def runApp():
     app.register_blueprint(getProfileImageRouteBlueprint, url_prefix="/api/v1")
     app.register_blueprint(getPostMediaRouteBlueprint, url_prefix="/api/v1")
     app.register_blueprint(postsBlueprint, url_prefix="/api/v1")
-    app.register_blueprint(commentsBlueprint, url_prefix="/api/v1")
     app.register_blueprint(usersBlueprint, url_prefix="/api/v1")
     app.register_blueprint(feedBlueprint, url_prefix="/api/v1")
     app.register_blueprint(collectionBlueprint, url_prefix="/api/v1")
