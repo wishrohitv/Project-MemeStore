@@ -50,23 +50,43 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
 @verifyRequestMiddleware(route.uploadPosts.routeName)
 def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
-    postMediaUid = str(uuid.uuid4())
-    if request.method == "POST":
-        # body = request.get_json(force=True)
-        # print(request.form.getlist)
-        print(request.files["files"])
-        print(request.form)
-        file = request.files["files"]
-        fileMimeType = file.mimetype
-        if fileMimeType in ALLOWED_POST_FILE_MIMETYPE:
-            fileExtension = ALLOWED_POST_FILE_MIMETYPE.get(fileMimeType)
 
-        else:
-            return make_response(
-                {"error": f"unsupported file type {fileMimeType}"}, 401
-            )
+    isReposted = (
+        str(request.args.get("isReposted", default="False", type=str)).lower() == "true"
+    )
+    parentPostID = request.args.get("parentPostID", default=None, type=int)
+
+    if isReposted and not parentPostID:
+        return make_response(
+            {
+                "error": "Parent post ID is required for reposts",
+                "message": "Bad request",
+            },
+            400,
+        )
+    try:
+        # Handle files
+        file = request.files.get(
+            "files"
+        )  # i.e. <FileStorage: 'mario-removebg-preview.png' ('image/png')>
+        _mediaPublicID = str(
+            uuid.uuid4()
+        )  # Initially any random id otherwise None if file not found
+        _fileType = None  # i.e "image/jpeg"
+        _fileExtension = None
+        _mediaUrl = None
         pForm = request.form
-        try:
+        if file:
+            print(file, "not found")
+            fileMimeType = file.mimetype
+            _fileType = fileMimeType.split("/")[0]
+            if fileMimeType in ALLOWED_POST_FILE_MIMETYPE:
+                _fileExtension = ALLOWED_POST_FILE_MIMETYPE.get(fileMimeType)
+
+            else:
+                return make_response(
+                    {"error": f"unsupported file type {fileMimeType}"}, 401
+                )
             fileSize = file.stream.seek(0, os.SEEK_END)
 
             allowedFileSize = ALLOWED_POST_FILE_SIZE.get(fileMimeType)
@@ -80,10 +100,9 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
                 )
             # Move pointer to Zero
             file.stream.seek(0)  # Moves the file pointer back to the beginning
-            _mediaUrl = None
-            _mediaPublicID = None
+
             if USE_CLOUDINARY_STORAGE:
-                cloudResponse = uploadMedia(file=file.stream, public_id=postMediaUid)
+                cloudResponse = uploadMedia(file=file.stream, public_id=_mediaPublicID)
                 if not (cloudResponse):
                     return make_response({"error": "Failed to upload media"}, 500)
                 _mediaUrl = cloudResponse.get("url")
@@ -92,29 +111,31 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
                 file.save(
                     os.path.join(
                         PUBLIC_DIRECTORY_POSTS,
-                        secure_filename(f"{postMediaUid}.{fileExtension}"),
+                        secure_filename(f"{_mediaPublicID}.{_fileExtension}"),
                     )
                 )
-                _mediaPublicID = postMediaUid
-            _createPost(
-                userID=sessionUserID,
-                title=pForm.get("postTitle"),
-                tags=pForm.get("postTags"),
-                visibility=pForm.get("postVisibility").lower() == "true",
-                fileType=fileMimeType.split("/")[0],  # i.e "image/jpeg"
-                fileExtension=fileExtension,
-                mediaUrl=_mediaUrl,
-                mediaPublicID=_mediaPublicID,
-                category=1,
-                # category=pForm.get("category"),
-                ageRating=(pForm.get("ageRating") or "pg13").lower(),
-            )
-            return make_response({"message": "post uploaded successfully"}, 200)
-        except Exception as e:
-            Log.error(f"Failed to upload post: {e}")
-            return make_response({"error": f"{e}"}, 401)
-    else:
-        return make_response({"error": "method upload post not allowed"}, 401)
+        else:
+            _mediaPublicID = None
+        _createPost(
+            userID=sessionUserID,
+            title=pForm.get("postTitle"),
+            tags=pForm.get("postTags"),
+            visibility=None
+            if not pForm.get("postVisibility")
+            else pForm.get("postVisibility").lower() == "true",
+            fileType=_fileType,  # i.e "image/jpeg"
+            fileExtension=_fileExtension,
+            mediaUrl=_mediaUrl,
+            mediaPublicID=_mediaPublicID,
+            category=1,
+            ageRating=(pForm.get("ageRating") or "pg13").lower(),
+            isReposted=isReposted,
+            parentPostID=parentPostID,
+        )
+        return make_response({"message": "post uploaded successfully"}, 201)
+    except Exception as e:
+        Log.error(f"Failed to upload post: {e}")
+        return make_response({"error": f"{e}"}, 500)
 
 
 # /posts/like

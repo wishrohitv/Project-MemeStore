@@ -23,21 +23,23 @@ session = Session()
 
 
 def _createPost(
-    userID,
-    title,
-    tags,
-    mediaUrl,
-    mediaPublicID,
-    fileType,
-    fileExtension,
-    visibility,
-    ageRating,
-    category,
+    userID: int,
+    title: str | None,
+    tags: str | None,
+    mediaUrl: str | None,
+    mediaPublicID: str | None,
+    fileType: str | None,
+    fileExtension: str | None,
+    ageRating: str,
+    category: int,
+    parentPostID: int | None = None,
+    isReposted: bool = False,
+    visibility: bool = True,
 ):
     try:
         newPost = Posts(
             userID=userID,
-            title=title,
+            text=title,
             tags=tags,
             mediaUrl=mediaUrl,
             mediaPublicID=mediaPublicID,
@@ -46,6 +48,8 @@ def _createPost(
             visibility=visibility,
             ageRating=ageRating,
             category=category,
+            isReposted=isReposted,
+            parentPostID=parentPostID,
         )
         session.add(newPost)
         session.commit()
