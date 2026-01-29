@@ -48,7 +48,7 @@ def getHomeFeed(
         )
         .join_from(Users, Posts)
         .join_from(Users, Profile)
-        .where(Posts.visibility)  # = True
+        .where(*[Posts.visibility, Posts.parentPostID.is_(None)])
         .outerjoin(likeCount, likeCount.postID == Posts.id)
         .outerjoin(bookmarkCount, bookmarkCount.postID == Posts.id)
         .group_by(
@@ -71,12 +71,13 @@ def getHomeFeed(
                     "userName": feed[0],
                     "postID": feed[1].id,
                     "userID": feed[1].userID,
-                    "title": feed[1].title,
+                    "title": feed[1].text,
                     "tags": feed[1].tags,
                     "mediaPulicID": feed[1].mediaPublicID,
                     "fileType": feed[1].fileType,
                     "fileExtension": feed[1].fileExtension,
                     "visibility": feed[1].visibility,
+                    "parentPostID": feed[1].parentPostID,
                     "ageRating": feed[
                         1
                     ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,

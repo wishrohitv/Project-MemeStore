@@ -24,7 +24,7 @@ session = Session()
 
 def _createPost(
     userID: int,
-    title: str | None,
+    text: str | None,
     tags: str | None,
     mediaUrl: str | None,
     mediaPublicID: str | None,
@@ -39,7 +39,7 @@ def _createPost(
     try:
         newPost = Posts(
             userID=userID,
-            text=title,
+            text=text,
             tags=tags,
             mediaUrl=mediaUrl,
             mediaPublicID=mediaPublicID,
@@ -341,12 +341,13 @@ def _getPostByIDorReplies(
                     "userName": feed[0],
                     "postID": feed[1].id,
                     "userID": feed[1].userID,
-                    "title": feed[1].title,
+                    "title": feed[1].text,
                     "tags": feed[1].tags,
                     "mediaPulicID": feed[1].mediaPublicID,
                     "fileType": feed[1].fileType,
                     "fileExtension": feed[1].fileExtension,
                     "visibility": feed[1].visibility,
+                    "parentPostID": feed[1].parentPostID,
                     "ageRating": feed[
                         1
                     ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
