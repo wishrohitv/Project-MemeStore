@@ -1,6 +1,6 @@
 <template id="postCardMacroParent">
     <!-- Post-card preview -->
-    <div class="card bg-base-100 max-w-94 shadow-sm" data-post>
+    <div class="card bg-base-100 max-w-94 border-1 border-purple-300" data-post>
         <!-- User avatar and name-->
         <div
             class="flex flex-row justify-between items-center gap-2 w-full px-2 mt-2"
@@ -16,6 +16,8 @@
                     <h2 class="postUserName"></h2>
                 </a>
             </div>
+            <!--Upload date/time-->
+            <div class="createdAt text-base-400">2 hour ago</div>
         </div>
         <!-- Text -->
         <h2 class="cardTitle m-4">Card Title</h2>
