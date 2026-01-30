@@ -5,7 +5,9 @@ import {
   apiTogglePostLike,
   apiTogglePostBookmark,
   apiGetPostMedia,
+  apiUserPostsFeed,
 } from "../../utils/base.js";
+import { formatDate } from "../../utils/datetime.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -55,7 +57,7 @@ export default class extends AbstractView {
       }
     } catch (error) {
       console.error(error);
-      return error;
+      throw new Error(error);
     }
   }
 
@@ -68,7 +70,7 @@ export default class extends AbstractView {
       if (feedData) {
         // postTemplate comming from base.js
         // Loop feedData list
-        feedData.forEach((post) => {
+        feedData.forEach(async (post) => {
           const clone = postTemplate.content.cloneNode(true);
           clone.querySelector(".card").addEventListener("click", (e) => {
             if (
@@ -82,20 +84,24 @@ export default class extends AbstractView {
           clone.querySelector(".cardTitle").textContent = post.title;
           clone.querySelector(".cardInfo").textContent = post.tags;
           clone.querySelector(".postUserName").textContent = post.userName;
-          if (post.fileType === "image") {
-            clone.querySelector(".postContentImgPreview").src =
-              post.postMediaUrl;
-          } else if (post.fileType === "video") {
-            clone
-              .querySelector(".postContentImgPreview")
-              .classList.add("hidden");
-            clone
-              .querySelector(".postContentVidPreview")
-              .classList.remove("hidden");
-            clone.querySelector(".postContentVidPreview").src =
-              post.postMediaUrl;
+
+          if (post.fileType) {
+            clone.querySelector(".media").classList.remove("hidden");
+            if (post.fileType === "image") {
+              clone.querySelector(".postContentImgPreview").src =
+                post.postMediaUrl;
+            } else if (post.fileType === "video") {
+              clone
+                .querySelector(".postContentImgPreview")
+                .classList.add("hidden");
+              clone
+                .querySelector(".postContentVidPreview")
+                .classList.remove("hidden");
+              clone.querySelector(".postContentVidPreview").src =
+                post.postMediaUrl;
+            }
+            clone.querySelector(".postUserPic").src = post.postUserPicUrl;
           }
-          clone.querySelector(".postUserPic").src = post.postUserPicUrl;
           // Post like
           const likeBtn = clone.querySelector(".likeBtn");
           if (post.likeCount !== 0) {
@@ -211,6 +217,53 @@ export default class extends AbstractView {
           clone.querySelector(".postUserName").href = `/user/${post.userName}`;
           clone.querySelector(".userProfileLink").href =
             `/user/${post.userName}`;
+          clone.querySelector(".createdAt").innerText = formatDate(
+            post.createdAt,
+          );
+
+          // Load parent post
+          if (post.parentPostID) {
+            const connection = await fetch(
+              `${apiUserPostsFeed}/${post.postID}`,
+              {
+                credentials: "include",
+              },
+            );
+            let parentPostObj = await connection.json();
+
+            if (connection.ok) {
+              const parentPost = parentPostObj.payload[0];
+              let parentPostContainer = clone.querySelector(
+                ".parentPostContainer",
+              );
+              if (parentPostContainer) {
+                parentPostContainer.classList.remove("hidden");
+                const parentMacro = await initializeTemplate({
+                  macro: "parent",
+                });
+                const cloneParentMacro = parentMacro.content.cloneNode(true);
+                cloneParentMacro
+                  .querySelector(".card")
+                  .addEventListener("click", (e) => {
+                    if (e.target.closest("a, button, #moreBtnContainer"))
+                      return;
+                    this.navigator("/post/" + parentPost.postID);
+                  });
+                cloneParentMacro.querySelector(".cardTitle").textContent =
+                  parentPost.title;
+                cloneParentMacro.querySelector(".postUserName").textContent =
+                  parentPost.userName;
+                cloneParentMacro.querySelector(".userProfileLink").href =
+                  `/user/${parentPost.userName}`;
+                cloneParentMacro.querySelector(".postUserPic").src =
+                  parentPost.profileImgUrl;
+                cloneParentMacro.querySelector(".createdAt").innerText =
+                  formatDate(parentPost.createdAt);
+
+                parentPostContainer.appendChild(cloneParentMacro);
+              }
+            }
+          }
 
           this.postContainer.appendChild(clone);
         });
