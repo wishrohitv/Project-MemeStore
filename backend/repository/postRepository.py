@@ -351,6 +351,7 @@ def _getPostByIDorReplies(
                     "fileExtension": feed[1].fileExtension,
                     "visibility": feed[1].visibility,
                     "parentPostID": feed[1].parentPostID,
+                    "createdAt": feed[1].createdAt,
                     "ageRating": feed[
                         1
                     ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
