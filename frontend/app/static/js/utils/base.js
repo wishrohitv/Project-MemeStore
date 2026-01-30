@@ -39,7 +39,7 @@ let postMacroTemplate = {};
 
 export async function initializeTemplate({ macro = "feed" }) {
   let templateHtml;
-
+  let templateID;
   const feedPostMacro =
     "/static/daisyUI/macroComponent/feedPostLayoutMacro.html";
   const userPostMacro =
@@ -51,18 +51,19 @@ export async function initializeTemplate({ macro = "feed" }) {
   switch (macro) {
     case "feed":
       loadMacro = feedPostMacro;
+      templateID = "feedPostCardMacro";
       break;
     case "user":
       loadMacro = userPostMacro;
+      templateID = "userPostCardMacro";
       break;
     case "parent":
       loadMacro = userPostMacroParent;
+      templateID = "postCardMacroParent";
       break;
     default:
       loadMacro = feedPostMacro;
-      break;
   }
-
   try {
     if (postMacroTemplate[loadMacro]) {
       templateHtml = postMacroTemplate[loadMacro];
@@ -79,7 +80,7 @@ export async function initializeTemplate({ macro = "feed" }) {
 
     document.body.appendChild(tempContainer);
 
-    const postTemplate = document.getElementById("postCardMacro");
+    const postTemplate = document.getElementById(templateID);
     return postTemplate; // resolve when fully loaded
   } catch (error) {
     console.error(error);
@@ -172,7 +173,6 @@ export function flash(message, { duration = 3000, messageType = "success" }) {
       break;
     default:
       bgColor = "#212121";
-      break;
   }
 
   const toast = document.querySelector(".toast");
