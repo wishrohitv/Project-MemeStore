@@ -3,7 +3,7 @@
     <div class="card bg-base-100 max-w-94 shadow-sm" data-post>
         <!-- User avatar and name-->
         <div
-            class="flex flex-row justify-between items-center gap-2 w-full px-2 mt-2"
+            class="flex flex-row justify-between items-center gap-2 w-full px-4 mt-2"
         >
             <div>
                 <a
@@ -19,7 +19,7 @@
 
             <div class="flex flex-row justify-center items-end gap-2">
                 <!--Upload date/time-->
-                <div class="text-purple-400">2 hour ago</div>
+                <div class="createdAt text-base-400">2 hour ago</div>
                 <!-- More option button -->
                 <div id="moreBtnContainer" class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="">
@@ -59,14 +59,14 @@
             </div>
         </div>
         <!-- Text -->
-        <h2 class="cardTitle m-4">Card Title</h2>
-        <figure class="media px-10 pt-10 hidden">
+        <h2 class="cardTitle m-4 px-8">Card Title</h2>
+        <figure class="media px-10 pt-4 hidden overflow-hidden relative">
             <img
                 alt="Media"
-                class="postContentImgPreview rounded-xl w-90 h-[160px]"
+                class="postContentImgPreview rounded-xl w-90 max-w-full max-h-full w-auto h-auto object-contain"
             />
             <video
-                class="postContentVidPreview hidden rounded-xl w-90 h-[160px]"
+                class="postContentVidPreview hidden rounded-xl w-90 max-w-full max-h-full w-auto h-auto object-contain"
             ></video>
         </figure>
         <!-- Parent Post -->
@@ -77,7 +77,7 @@
         <!--Button -->
         <div class="card-body w-full items-center text-center p-2">
             <p class="cardInfo text-purple-100">A card component</p>
-            <div class="card-actions w-full grid grid-cols-4 gap-2 mb-2 px-4">
+            <div class="card-actions w-full grid grid-cols-5 gap-2 mb-2 px-4">
                 <!--  Like post -->
                 <div class="likeBtn flex flex-col items-center justify-center">
                     <div class="svgs hover:cursor-pointer">
@@ -119,6 +119,51 @@
                     </div>
                     <!--Count-->
                     <div class="count">Like</div>
+                </div>
+
+                <!--Repost or requote-->
+                <div
+                    class="repostBtn flex flex-col items-center justify-center"
+                >
+                    <div class="svgs hover:cursor-pointer">
+                        <svg
+                            class="hover:scale-120 hidden"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="26"
+                            height="26"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-repeat2-icon lucide-repeat-2"
+                        >
+                            <path d="m2 9 3-3 3 3" />
+                            <path d="M13 18H7a2 2 0 0 1-2-2V6" />
+                            <path d="m22 15-3 3-3-3" />
+                            <path d="M11 6h6a2 2 0 0 1 2 2v10" />
+                        </svg>
+                        <svg
+                            class="hover:scale-120"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="26"
+                            height="26"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#9141ac"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-repeat2-icon lucide-repeat-2"
+                        >
+                            <path d="m2 9 3-3 3 3" />
+                            <path d="M13 18H7a2 2 0 0 1-2-2V6" />
+                            <path d="m22 15-3 3-3-3" />
+                            <path d="M11 6h6a2 2 0 0 1 2 2v10" />
+                        </svg>
+                    </div>
+                    Repost
                 </div>
 
                 <!--  Save post -->
