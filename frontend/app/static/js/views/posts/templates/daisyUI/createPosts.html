@@ -43,20 +43,20 @@
                     <div class="flex flex-col">
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Title</legend>
-                            <input
-                                type="text"
+                            <textarea
+                                class="textarea h-24"
                                 placeholder="Type catchy text"
                                 class="input"
                                 id="postTitle"
                                 name="postTitle"
-                            />
+                            ></textarea>
                         </fieldset>
                     </div>
                     <div class="flex flex-col">
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Tags</legend>
                             <textarea
-                                class="textarea h-24"
+                                class="textarea h-10"
                                 placeholder="Tags"
                                 id="postTags"
                                 name="postTags"
@@ -93,15 +93,15 @@
                         <div class="collapse-title font-semibold">
                             Click for more options
                         </div>
-                        <div class="collapse-content text-sm">
-                            <div class="flex flex-col">
+                        <div class="collapse-content text-sm gap-4">
+                            <div class="flex flex-col gap-2">
                                 <label for="ageRating">Age Rating</label>
                                 <select class="select select-lg" id="ageRating">
                                     <option selected>PG13</option>
                                     <option>NSFW</option>
                                 </select>
                             </div>
-                            <div class="flex flex-col">
+                            <div class="flex flex-col gap-2">
                                 <label for="category">Select Category</label>
                                 <select
                                     class="select select lg"
