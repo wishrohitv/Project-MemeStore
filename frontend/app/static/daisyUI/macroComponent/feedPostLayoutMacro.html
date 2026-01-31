@@ -22,7 +22,11 @@
                 <div class="createdAt text-base-400">2 hour ago</div>
                 <!-- More option button -->
                 <div id="moreBtnContainer" class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="">
+                    <div
+                        tabindex="0"
+                        role="button"
+                        class="flex flex-col items-center justify-center"
+                    >
                         <svg
                             class="hover:scale-120 hover:cursor-pointer"
                             xmlns="http://www.w3.org/2000/svg"
@@ -125,45 +129,62 @@
                 <div
                     class="repostBtn flex flex-col items-center justify-center"
                 >
-                    <div class="svgs hover:cursor-pointer">
-                        <svg
-                            class="hover:scale-120 hidden"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="26"
-                            height="26"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.75"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="lucide lucide-repeat2-icon lucide-repeat-2"
+                    <div id="moreBtnContainer" class="dropdown dropdown-end">
+                        <div
+                            tabindex="0"
+                            role="button"
+                            class="flex flex-col items-center justify-center"
                         >
-                            <path d="m2 9 3-3 3 3" />
-                            <path d="M13 18H7a2 2 0 0 1-2-2V6" />
-                            <path d="m22 15-3 3-3-3" />
-                            <path d="M11 6h6a2 2 0 0 1 2 2v10" />
-                        </svg>
-                        <svg
-                            class="hover:scale-120"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="26"
-                            height="26"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#9141ac"
-                            stroke-width="1.75"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="lucide lucide-repeat2-icon lucide-repeat-2"
+                            <div class="svgs hover:cursor-pointer">
+                                <svg
+                                    class="hover:scale-120"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="26"
+                                    height="26"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.75"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-repeat2-icon lucide-repeat-2"
+                                >
+                                    <path d="m2 9 3-3 3 3" />
+                                    <path d="M13 18H7a2 2 0 0 1-2-2V6" />
+                                    <path d="m22 15-3 3-3-3" />
+                                    <path d="M11 6h6a2 2 0 0 1 2 2v10" />
+                                </svg>
+                                <svg
+                                    class="hover:scale-120 hidden"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="26"
+                                    height="26"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#9141ac"
+                                    stroke-width="1.75"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-repeat2-icon lucide-repeat-2"
+                                >
+                                    <path d="m2 9 3-3 3 3" />
+                                    <path d="M13 18H7a2 2 0 0 1-2-2V6" />
+                                    <path d="m22 15-3 3-3-3" />
+                                    <path d="M11 6h6a2 2 0 0 1 2 2v10" />
+                                </svg>
+                            </div>
+                            Repost
+                        </div>
+                        <ul
+                            tabindex="0"
+                            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-24 p-2 shadow"
                         >
-                            <path d="m2 9 3-3 3 3" />
-                            <path d="M13 18H7a2 2 0 0 1-2-2V6" />
-                            <path d="m22 15-3 3-3-3" />
-                            <path d="M11 6h6a2 2 0 0 1 2 2v10" />
-                        </svg>
+                            <!--Repost is same as retweet-->
+                            <li><h>Repost</h></li>
+                            <!--Reqoute is same as reqoute-->
+                            <li><a class="reqoute" data-link>Reqoute</a></li>
+                        </ul>
                     </div>
-                    Repost
                 </div>
 
                 <!--  Save post -->
