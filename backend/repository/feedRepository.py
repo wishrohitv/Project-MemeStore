@@ -95,8 +95,10 @@ def getHomeFeed(
                     "isBookmarked": feed[8],
                 }
                 feedObj.append(data)
+            print(feedObj, "sdf")
             return make_response({"payload": feedObj}, 200)
         else:
+            print(getFeed, "sdf")
             return make_response({"payload": []}, 200)
 
     except Exception as e:

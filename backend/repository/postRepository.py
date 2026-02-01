@@ -280,7 +280,7 @@ def _getPostByIDorReplies(
     if fetchReplies:
         conditions.append(Posts.parentPostID == postID)
         conditions.append(
-            Posts.isReplie == False
+            Posts.isReplie
         )  # `not Posts.isReposted` is not working as false
     else:
         conditions.append(Posts.id == postID)
