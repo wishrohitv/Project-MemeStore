@@ -20,9 +20,9 @@ from .enums import AgeRating
 class Posts(Base):
     """
     This post table stores post and its replies and reposted posts
-    - when parentPostID is None(null) and isReposted will be always false (because its original post) then it will be considered original post
-    - if parentPostID is post id and isReposted is true then it will be considered reposted post
-    -  if parentPostID is post id and isReposted is false then is will be considered replies
+    - when parentPostID is None(null) and isReplie will be always false (because its original post) then it will be considered original post
+    - if parentPostID is post id and isReplie is false then it will be considered reposted/qouted post
+    -  if parentPostID is post id and isReplie is true then it will be considered replies
     """
 
     __tablename__ = "posts"
@@ -36,7 +36,7 @@ class Posts(Base):
     fileExtension: Mapped[str] = mapped_column(String(5), nullable=True)
     visibility: Mapped[bool] = mapped_column(default=True)
     parentPostID: Mapped[int] = mapped_column(default=None, nullable=True)
-    isReposted: Mapped[bool] = mapped_column(default=False, nullable=False)
+    isReplie: Mapped[bool] = mapped_column(default=False, nullable=False)
     ageRating: Mapped[AgeRating] = mapped_column(
         "ageRating",
         Enum(AgeRating),
@@ -58,7 +58,7 @@ class Posts(Base):
         return f"""Posts(
                     'id': {self.id!r},
                     'userID': {self.userID!r},
-                    'title': {self.title!r},
+                    'title': {self.text!r},
                     'tags': {self.tags!r},
                     'mediaUrl': {self.mediaUrl!r},
                     'mediaPublicID': {self.mediaPublicID!r},
