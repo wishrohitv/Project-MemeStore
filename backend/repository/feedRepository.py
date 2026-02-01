@@ -48,7 +48,7 @@ def getHomeFeed(
         )
         .join_from(Users, Posts)
         .join_from(Users, Profile)
-        .where(*[Posts.visibility, Posts.isReposted.is_(False)])
+        .where(*[Posts.visibility, Posts.isReplie.is_(False)])
         .outerjoin(likeCount, likeCount.postID == Posts.id)
         .outerjoin(bookmarkCount, bookmarkCount.postID == Posts.id)
         .group_by(

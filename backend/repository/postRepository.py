@@ -255,7 +255,7 @@ def _getPostMedia(postID: int) -> tuple[str, str, str, str] | None:
     try:
         post = (
             session.query(
-                Posts.title,
+                Posts.text,
                 Posts.mediaUrl,
                 Posts.mediaPublicID,
                 Posts.fileExtension,
@@ -280,7 +280,7 @@ def _getPostByIDorReplies(
     if fetchReplies:
         conditions.append(Posts.parentPostID == postID)
         conditions.append(
-            Posts.isReposted == False
+            Posts.isReplie == False
         )  # `not Posts.isReposted` is not working as false
     else:
         conditions.append(Posts.id == postID)
