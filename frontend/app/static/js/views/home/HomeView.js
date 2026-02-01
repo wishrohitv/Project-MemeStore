@@ -81,6 +81,9 @@ export default class extends AbstractView {
               return;
             this.navigator("/post/" + post.postID);
           });
+          clone.querySelector(".qoute").addEventListener("click", (e) => {
+            this.navigator("/post/create");
+          });
           clone.querySelector(".cardTitle").textContent = post.title;
           clone.querySelector(".cardInfo").textContent = post.tags;
           clone.querySelector(".postUserName").textContent = post.userName;
@@ -150,7 +153,6 @@ export default class extends AbstractView {
               }
             });
           // Post Bookmark
-          console.log(post);
           const bookmarkBtn = clone.querySelector(".bookmarkBtn");
           if (post.bookmarkCount !== 0) {
             bookmarkBtn.querySelector(".count").innerText = post.bookmarkCount;
@@ -224,7 +226,7 @@ export default class extends AbstractView {
           // Load parent post
           if (post.parentPostID) {
             const connection = await fetch(
-              `${apiUserPostsFeed}/${post.postID}`,
+              `${apiUserPostsFeed}/${post.parentPostID}`,
               {
                 credentials: "include",
               },
@@ -245,9 +247,9 @@ export default class extends AbstractView {
                 cloneParentMacro
                   .querySelector(".card")
                   .addEventListener("click", (e) => {
-                    if (e.target.closest("a, button, #moreBtnContainer"))
-                      return;
-                    this.navigator("/post/" + parentPost.postID);
+                    if (e.target.closest(".card")) {
+                      this.navigator("/post/" + parentPost.postID);
+                    }
                   });
                 cloneParentMacro.querySelector(".cardTitle").textContent =
                   parentPost.title;
@@ -273,11 +275,4 @@ export default class extends AbstractView {
       this.spinner.classList.add("hidden");
     });
   }
-
-  // // Fetch home feed on page load
-  // window.addEventListener("load", async (e) => {
-  //   spinner.classList.remove("hidden");
-  //   loadHomeFeed();
-  //   spinner.classList.add("hidden");
-  // });
 }
