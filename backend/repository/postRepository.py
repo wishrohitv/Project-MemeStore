@@ -297,8 +297,27 @@ def _getPostByIDorReplies(
         else:
             conditions.append(Posts.visibility)
     # Get feed data from database alog with userName of author of post
-    likeCount = aliased(Likes)
-    bookmarkCount = aliased(Bookmark)
+    like = aliased(Likes)
+    likeCount = (
+        select(func.count(like.userID))
+        .where(like.postID == Posts.id)
+        .correlate(Posts)
+        .scalar_subquery()
+    )
+    bookmark = aliased(Bookmark)
+    bookmarkCount = (
+        select(func.count(bookmark.userID))
+        .where(bookmark.postID == Posts.id)
+        .correlate(Posts)
+        .scalar_subquery()
+    )
+
+    reply = aliased(Posts)
+    repliesCount = (
+        select(func.count(reply.id))
+        .where(reply.parentPostID == Posts.id, reply.isReplie.is_(True))
+        .scalar_subquery()
+    )
     getFeedData = (
         select(
             Users.userName,
@@ -306,8 +325,9 @@ def _getPostByIDorReplies(
             Profile.mediaUrl,
             Profile.mediaPublicID,
             Profile.fileExtension,
-            func.count(likeCount.userID).label("likeCount"),
-            func.count(bookmarkCount.userID).label("bookmarkCount"),
+            likeCount.label("likeCount"),
+            bookmarkCount.label("bookmarkCount"),
+            repliesCount.label("replieCount"),
             exists(
                 select(Likes).where(
                     Likes.postID == Posts.id, Likes.userID == sessionUserID
@@ -321,16 +341,7 @@ def _getPostByIDorReplies(
         )
         .join_from(Users, Posts)
         .join_from(Users, Profile)
-        .where(*conditions)
-        .outerjoin(likeCount, likeCount.postID == Posts.id)
-        .outerjoin(bookmarkCount, bookmarkCount.postID == Posts.id)
-        .group_by(
-            Posts.id,
-            Users.userName,
-            Profile.mediaUrl,
-            Profile.mediaPublicID,
-            Profile.fileExtension,
-        )
+        .where(*[Posts.visibility, Posts.isReplie.is_(False)])
     )
     getFeed = session.execute(getFeedData).all()
 
@@ -364,8 +375,9 @@ def _getPostByIDorReplies(
                     else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{feed[3]}.{feed[4]}')}",
                     "likeCount": feed[5],
                     "bookmarkCount": feed[6],
-                    "isLiked": feed[7],
-                    "isBookmarked": feed[8],
+                    "replieCount": feed[7],
+                    "isLiked": feed[8],
+                    "isBookmarked": feed[9],
                 }
                 feedObj.append(data)
             if len(feedObj) == 0:
