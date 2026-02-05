@@ -82,11 +82,12 @@ export default class extends AbstractView {
             this.navigator("/post/" + post.postID);
           });
           clone.querySelector(".qoute").addEventListener("click", (e) => {
-            this.navigator("/post/create");
+            this.navigator("/post/create?reqouteTo=" + post.postID);
           });
           clone.querySelector(".cardTitle").textContent = post.title;
           clone.querySelector(".cardInfo").textContent = post.tags;
           clone.querySelector(".postUserName").textContent = post.userName;
+          clone.querySelector(".postUserPic").src = post.postUserPicUrl;
 
           if (post.fileType) {
             clone.querySelector(".media").classList.remove("hidden");
@@ -103,7 +104,6 @@ export default class extends AbstractView {
               clone.querySelector(".postContentVidPreview").src =
                 post.postMediaUrl;
             }
-            clone.querySelector(".postUserPic").src = post.postUserPicUrl;
           }
           // Post like
           const likeBtn = clone.querySelector(".likeBtn");
