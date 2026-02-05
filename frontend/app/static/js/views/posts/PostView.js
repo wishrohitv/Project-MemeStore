@@ -51,6 +51,7 @@ export default class extends AbstractView {
         clone.querySelector(".qoute").addEventListener("click", (e) => {
           this.navigator("/post/create");
         });
+        this.setTitle(post.title ?? post.userName);
         clone.querySelector(".cardTitle").textContent = post.title;
         clone.querySelector(".cardInfo").textContent = post.tags;
         clone.querySelector(".postUserName").textContent = post.userName;
