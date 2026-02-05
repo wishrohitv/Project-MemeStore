@@ -251,6 +251,26 @@ export default class extends AbstractView {
                       this.navigator("/post/" + parentPost.postID);
                     }
                   });
+                if (parentPost.fileType) {
+                  cloneParentMacro
+                    .querySelector(".media")
+                    .classList.remove("hidden");
+                  if (parentPost.fileType === "image") {
+                    cloneParentMacro.querySelector(
+                      ".postContentImgPreview",
+                    ).src = parentPost.postMediaUrl;
+                  } else if (parentPost.fileType === "video") {
+                    cloneParentMacro
+                      .querySelector(".postContentImgPreview")
+                      .classList.add("hidden");
+                    cloneParentMacro
+                      .querySelector(".postContentVidPreview")
+                      .classList.remove("hidden");
+                    cloneParentMacro.querySelector(
+                      ".postContentVidPreview",
+                    ).src = parentPost.postMediaUrl;
+                  }
+                }
                 cloneParentMacro.querySelector(".cardTitle").textContent =
                   parentPost.title;
                 cloneParentMacro.querySelector(".postUserName").textContent =
