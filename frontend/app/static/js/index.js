@@ -51,9 +51,11 @@ const router = async () => {
 
   // Test each route for potential match
   const potentialMatches = routes.map((route) => {
+    // Get pathname form URL parser and This way we can get params (hash) e.g. ?user=123
+    const pathname = new URL(location.href).pathname;
     return {
       route: route,
-      result: location.pathname.match(pathToRegex(route.path)),
+      result: pathname.match(pathToRegex(route.path)),
     };
   });
 
