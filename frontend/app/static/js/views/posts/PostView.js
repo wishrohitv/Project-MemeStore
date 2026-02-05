@@ -3,6 +3,8 @@ import {
   apiUserPostsFeed,
   apiPostsReplies,
   initializeTemplate,
+  apiTogglePostLike,
+  apiTogglePostBookmark,
 } from "../../utils/base.js";
 import { formatDate } from "../../utils/datetime.js";
 
@@ -233,7 +235,9 @@ export default class extends AbstractView {
         }
       }
       if (connection.status !== 404) {
-        this.fetchPostReplies();
+        if (post.replieCount !== 0) {
+          this.fetchPostReplies();
+        }
       }
     } catch (e) {
       console.error(e);
