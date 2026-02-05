@@ -341,7 +341,7 @@ def _getPostByIDorReplies(
         )
         .join_from(Users, Posts)
         .join_from(Users, Profile)
-        .where(*[Posts.visibility, Posts.isReplie.is_(False)])
+        .where(*conditions)
     )
     getFeed = session.execute(getFeedData).all()
 
