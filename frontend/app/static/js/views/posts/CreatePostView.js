@@ -1,10 +1,12 @@
 import AbstractView from "../AbstractView.js";
 import { apiUploadPosts, flash } from "../../utils/base.js";
+import { parseUrlParams } from "../../utils/parseUrlParams.js";
 
 export default class extends AbstractView {
   constructor(params) {
     super(params);
     this.setTitle("Create Post");
+    this.reqouteTo = parseUrlParams().reqouteTo;
   }
 
   async getHtml() {
@@ -83,7 +85,6 @@ export default class extends AbstractView {
     );
     postForm.append("category", this.postCategory.selectedOptions[0].innerText);
     const data = Object.fromEntries(postForm.entries()); // Convert form to simple object
-    console.log(data);
 
     // for (const file of this.currentSelectedFile.files) {
     //   Can be used for multiple file upload
@@ -93,7 +94,11 @@ export default class extends AbstractView {
     // }
 
     try {
-      let connection = await fetch(apiUploadPosts, {
+      let _apiUploadPosts = apiUploadPosts;
+      if (this.reqouteTo) {
+        _apiUploadPosts += `?parentPostID=${this.reqouteTo}`;
+      }
+      let connection = await fetch(_apiUploadPosts, {
         method: "POST",
         credentials: "include",
         body: postForm,
