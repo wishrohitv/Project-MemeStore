@@ -51,15 +51,15 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
 def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
 
-    isReposted = (
-        str(request.args.get("isReposted", default="False", type=str)).lower() == "true"
+    isReplie = (
+        str(request.args.get("isReplie", default="False", type=str)).lower() == "true"
     )
     parentPostID = request.args.get("parentPostID", default=None, type=int)
-
-    if isReposted and not parentPostID:
+    print(parentPostID)
+    if isReplie and not parentPostID:
         return make_response(
             {
-                "error": "Parent post ID is required for reposts",
+                "error": "Parent post ID is required for replie to a post",
                 "message": "Bad request",
             },
             400,
@@ -141,7 +141,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             mediaPublicID=_mediaPublicID,
             category=1,
             ageRating=postAgeRating,
-            isReposted=isReposted,
+            isReplie=isReplie,
             parentPostID=parentPostID,
         )
         return make_response({"message": "post uploaded successfully"}, 201)

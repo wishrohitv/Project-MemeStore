@@ -33,7 +33,7 @@ def _createPost(
     ageRating: str,
     category: int,
     parentPostID: int | None = None,
-    isReposted: bool = False,
+    isReplie: bool = False,
     visibility: bool = True,
 ):
     try:
@@ -48,7 +48,7 @@ def _createPost(
             visibility=visibility,
             ageRating=ageRating,
             category=category,
-            isReposted=isReposted,
+            isReplie=isReplie,
             parentPostID=parentPostID,
         )
         session.add(newPost)
@@ -281,7 +281,7 @@ def _getPostByIDorReplies(
         conditions.append(Posts.parentPostID == postID)
         conditions.append(
             Posts.isReplie
-        )  # `not Posts.isReposted` is not working as false
+        )  # `not Posts.isReplie` is not working as false
     else:
         conditions.append(Posts.id == postID)
     if sessionUserID is not None:
