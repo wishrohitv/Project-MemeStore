@@ -175,9 +175,19 @@ def _refreshTokens(refreshToken: str):
             .where(Sessions.refreshToken == refreshToken)
         )
         userResult = session.execute(stmt).first()
-        # user = session.scalar(stmt)
+        session.close()
         if not userResult or refreshToken != userResult[1]:
-            raise Exception("Invalid refresh token")
+            return make_response({"error": "Invalid refresh token"}, 401)
+        # Delete previous refresh token of user
+        stmt = (
+            update(Sessions)
+            .where(Sessions.refreshToken == refreshToken)
+            .values(refreshToken="")
+        )
+        session.execute(stmt)
+        session.commit()
+        session.close()
+
         user: Users = userResult[0]
 
         newAccessToken = generateJwtToken(
@@ -205,11 +215,30 @@ def _refreshTokens(refreshToken: str):
         session.add(stmt)
         session.commit()
         session.close()
-        return (
-            {"userID": user.id, "userName": user.userName},
-            newAccessToken,
-            newRefreshToken,
+
+        res = make_response(
+            {
+                "message": "Token refreshed successfully",
+                "payload": {"userID": user.id, "userName": user.userName},
+            },
+            200,
         )
+        res.set_cookie(
+            key="accessToken",
+            value=newAccessToken,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
+        )
+        res.set_cookie(
+            key="refreshToken",
+            value=newRefreshToken,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            samesite=None,
+            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
+        )
+        return res
     except Exception as e:
         print(e)
         raise Exception(e)

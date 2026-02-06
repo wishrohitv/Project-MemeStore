@@ -118,26 +118,7 @@ def refreshToken():
 
     # verify refresh token
     try:
-        newTokens = _refreshTokens(refreshToken)
-        res = make_response(
-            {"message": "Token refreshed successfully", "payload": newTokens[0]}, 200
-        )
-        res.set_cookie(
-            key="accessToken",
-            value=newTokens[1],
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        res.set_cookie(
-            key="refreshToken",
-            value=newTokens[2],
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            samesite=None,
-            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        return res
+        return _refreshTokens(refreshToken)
     except Exception as e:
         return make_response({"error": str(e)}, 401)
 
