@@ -87,6 +87,7 @@
                     <div class="svgs hover:cursor-pointer">
                         <!-- If not liked and defualt-->
                         <svg
+                            data-unliked
                             class="hover:fill-purple-500 hover:scale-120"
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
@@ -104,6 +105,7 @@
                             />
                         </svg>
                         <svg
+                            data-liked
                             class="fill-purple-500 hover:fill-white hidden hover:scale-120"
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
@@ -136,7 +138,9 @@
                             class="flex flex-col items-center justify-center"
                         >
                             <div class="svgs hover:cursor-pointer">
+                                <!--Defualt unreposted-->
                                 <svg
+                                    data-unreposted
                                     class="hover:scale-120"
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="26"
@@ -155,6 +159,7 @@
                                     <path d="M11 6h6a2 2 0 0 1 2 2v10" />
                                 </svg>
                                 <svg
+                                    data-reposted
                                     class="hover:scale-120 hidden"
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="26"
@@ -193,7 +198,9 @@
                 >
                     <!--  Bookmark -->
                     <div class="svgs hover:cursor-pointer">
+                        <!--Default is unbookmarked -->
                         <svg
+                            data-unbookmarked
                             class="hover:fill-purple-500 hover:scale-120"
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
@@ -212,6 +219,7 @@
                         </svg>
                         <!-- Bookmark checked -->
                         <svg
+                            data-bookmarked
                             class="fill-purple-500 hover:fill-white hidden hover:scale-120"
                             xmlns="http://www.w3.org/2000/svg"
                             width="28"
@@ -285,6 +293,14 @@
                     </div>
                     <div>Download</div>
                 </div>
+            </div>
+        </div>
+        <!--Replie and repost count -->
+        <div class="ml-10 flex flex-row">
+            <div
+                class="replieCount text-base-500 bg-base-300 rounted hover:bg-base-400 hover:cursor-pointer"
+            >
+                No replies yet
             </div>
         </div>
     </div>
