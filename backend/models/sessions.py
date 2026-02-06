@@ -14,7 +14,7 @@ class Sessions(Base):
     __tablename__ = "sessions"
     id: Mapped[int] = mapped_column(primary_key=True)
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    refreshToken: Mapped[str] = mapped_column(String(500))
+    refreshToken: Mapped[str] = mapped_column(String(500), nullable=True)
     createdAt: Mapped[str] = mapped_column(
         TIMESTAMP(timezone=False), default=datetime.now()
     )
