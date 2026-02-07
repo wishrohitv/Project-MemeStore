@@ -7,7 +7,11 @@ import {
 } from "./base.js";
 import { formatDate } from "./datetime.js";
 
-export async function postCard(clone, post, { type = "feed" }) {
+export async function postCard(
+  clone,
+  post,
+  { type = "feed", mainCardClbk, parentCardClbk },
+) {
   // If type = feed it means card is used for home feed and type = post so customize it for post screen
   if (!(type === "feed" || type === "post"))
     throw Error(`Invalid type used ${type}`);
@@ -19,11 +23,10 @@ export async function postCard(clone, post, { type = "feed" }) {
         )
       )
         return;
-      this.navigator("/post/" + post.postID);
+      mainCardClbk(post.postID);
     });
   } else {
     // Post page specific actions
-    // this.setTitle(post.title ?? post.userName);
   }
   clone.querySelector(".qoute").addEventListener("click", (e) => {
     this.navigator("/post/create?reqouteTo=" + post.postID);
@@ -165,7 +168,8 @@ export async function postCard(clone, post, { type = "feed" }) {
           .querySelector(".card")
           .addEventListener("click", (e) => {
             if (e.target.closest(".card")) {
-              this.navigator("/post/" + parentPost.postID);
+              // Send clbk
+              parentCardClbk(parentPost.postID);
             }
           });
         if (parentPost.fileType) {
