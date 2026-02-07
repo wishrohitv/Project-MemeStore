@@ -175,27 +175,25 @@ export default class extends AbstractView {
                 );
                 let res = await conn.json();
                 if (conn.ok) {
+                  const e = event.target.parentNode.parentNode;
+                  const bookmarked = e.querySelector("[data-bookmarked]");
+                  const unbookmarked = e.querySelector("[data-unbookmarked]");
                   if (res.isBookmarked) {
-                    event.target.parentNode.parentNode.children[1].classList.remove(
-                      "hidden",
-                    );
-                    event.target.parentNode.parentNode.children[0].classList.add(
-                      "hidden",
-                    );
+                    bookmarked.classList.remove("hidden");
+                    unbookmarked.classList.add("hidden");
                     bookmarkBtn.querySelector(".count").innerText =
-                      post.bookmarkCount + 1;
+                      post.isBookmarked
+                        ? post.bookmarkCount
+                        : post.bookmarkCount + 1;
                   } else {
-                    event.target.parentNode.parentNode.children[1].classList.add(
-                      "hidden",
-                    );
-                    event.target.parentNode.parentNode.children[0].classList.remove(
-                      "hidden",
-                    );
+                    bookmarked.classList.add("hidden");
+                    unbookmarked.classList.remove("hidden");
                     bookmarkBtn.querySelector(".count").innerText =
-                      post.bookmarkCount - 1;
+                      post.isBookmarked
+                        ? post.bookmarkCount - 1
+                        : post.bookmarkCount;
                   }
                 }
-                console.log(res);
               } catch (e) {
                 console.error(e);
               }
