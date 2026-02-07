@@ -65,7 +65,14 @@ export default class extends AbstractView {
         // Loop feedData list
         feedData.forEach(async (post) => {
           const clone = postTemplate.content.cloneNode(true);
-          let card = await postCard(clone, post, {});
+          let card = await postCard(clone, post, {
+            mainCardClbk: (postID) => {
+              this.navigator("/post/" + postID);
+            },
+            parentCardClbk: (parentPostID) => {
+              this.navigator("/post/" + parentPostID);
+            },
+          });
           this.postContainer.appendChild(card);
         });
       } else {

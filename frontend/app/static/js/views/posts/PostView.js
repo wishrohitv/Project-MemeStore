@@ -56,7 +56,13 @@ export default class extends AbstractView {
         const post = response.payload[0];
         if (connection.ok) {
           const clone = postTemplate.content.cloneNode(true);
-          const card = await postCard(clone, post, { type: "post" });
+          this.setTitle(post.title ?? post.userName);
+          const card = await postCard(clone, post, {
+            type: "post",
+            parentCardClbk: (parentPostID) => {
+              this.navigator("/post/" + parentPostID);
+            },
+          });
           this.postContainer.appendChild(card);
         }
         if (connection.status !== 404) {
@@ -83,7 +89,14 @@ export default class extends AbstractView {
         // Loop posts list
         posts.payload.forEach(async (post) => {
           const clone = postTemplate.content.cloneNode(true);
-          let card = await postCard(clone, post, {});
+          let card = await postCard(clone, post, {
+            mainCardClbk: (postID) => {
+              this.navigator("/post/" + postID);
+            },
+            parentCardClbk: (parentPostID) => {
+              this.navigator("/post/" + parentPostID);
+            },
+          });
 
           this.repliesContainer.appendChild(card);
         });
