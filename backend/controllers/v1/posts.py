@@ -245,8 +245,11 @@ def updatePost(loggedUser: LoggedUser, *args, **kwargs):
 @verifyRequestMiddleware(route.posts.routeName)
 def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
     postID = kwargs.get("postID")
+    sessionUserID: int | None = loggedUser.userID if loggedUser else None
+    if not postID or not isinstance(postID, int):
+        return make_response({"error": "Missing postID"}, 400)
     try:
-        return _getPostByIDorReplies(postID=postID)
+        return _getPostByIDorReplies(postID=postID, sessionUserID=sessionUserID)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
