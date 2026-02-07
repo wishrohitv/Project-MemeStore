@@ -75,7 +75,7 @@ export default class extends AbstractView {
           clone.querySelector(".card").addEventListener("click", (e) => {
             if (
               e.target.closest(
-                "a, button, .likeBtn, .bookmarkBton, .shareBtn, .downloadBtn, #moreBtnContainer",
+                "a, button, .likeBtn, .bookmarkBtn, .shareBtn, .downloadBtn, #moreBtnContainer",
               )
             )
               return;
@@ -111,11 +111,14 @@ export default class extends AbstractView {
             likeBtn.querySelector(".count").innerText = post.likeCount;
           }
 
+          if (post.replieCount !== 0) {
+            clone.querySelector(".replieCount").innerText =
+              post.replieCount + " replies";
+          }
+
           if (post.isLiked) {
-            likeBtn.querySelector(".svgs").children[0].classList.add("hidden");
-            likeBtn
-              .querySelector(".svgs")
-              .children[1].classList.remove("hidden");
+            clone.querySelector("[data-unliked]").classList.add("hidden");
+            clone.querySelector("[data-liked]").classList.remove("hidden");
           }
           likeBtn
             .querySelector(".svgs")
@@ -127,24 +130,21 @@ export default class extends AbstractView {
                 });
                 let res = await conn.json();
                 if (conn.ok) {
+                  const e = event.target.parentNode.parentNode;
+                  const liked = e.querySelector("[data-liked]");
+                  const unliked = e.querySelector("[data-unliked]");
                   if (res.isLiked) {
-                    event.target.parentNode.parentNode.children[1].classList.remove(
-                      "hidden",
-                    );
-                    event.target.parentNode.parentNode.children[0].classList.add(
-                      "hidden",
-                    );
-                    likeBtn.querySelector(".count").innerText =
-                      post.likeCount + 1;
+                    liked.classList.remove("hidden");
+                    unliked.classList.add("hidden");
+                    likeBtn.querySelector(".count").innerText = post.likeCount
+                      ? post.likeCount
+                      : post.likeCount + 1;
                   } else {
-                    event.target.parentNode.parentNode.children[1].classList.add(
-                      "hidden",
-                    );
-                    event.target.parentNode.parentNode.children[0].classList.remove(
-                      "hidden",
-                    );
-                    likeBtn.querySelector(".count").innerText =
-                      post.likeCount - 1;
+                    liked.classList.add("hidden");
+                    unliked.classList.remove("hidden");
+                    likeBtn.querySelector(".count").innerText = post.isLiked
+                      ? post.likeCount - 1
+                      : post.likeCount;
                   }
                 }
                 console.log(res);
@@ -159,12 +159,8 @@ export default class extends AbstractView {
           }
 
           if (post.isBookmarked) {
-            bookmarkBtn
-              .querySelector(".svgs")
-              .children[0].classList.add("hidden");
-            bookmarkBtn
-              .querySelector(".svgs")
-              .children[1].classList.remove("hidden");
+            clone.querySelector("[data-unbookmarked]").classList.add("hidden");
+            clone.querySelector("[data-bookmarked]").classList.remove("hidden");
           }
           bookmarkBtn
             .querySelector(".svgs")
