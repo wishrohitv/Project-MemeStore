@@ -55,7 +55,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         str(request.args.get("isReplie", default="False", type=str)).lower() == "true"
     )
     parentPostID = request.args.get("parentPostID", default=None, type=int)
-    print(parentPostID)
+
     if isReplie and not parentPostID:
         return make_response(
             {
