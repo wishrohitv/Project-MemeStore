@@ -3,11 +3,10 @@ import {
   apiUserPostsFeed,
   apiPostsReplies,
   initializeTemplate,
-  apiTogglePostLike,
-  apiTogglePostBookmark,
 } from "../../utils/base.js";
-import { formatDate } from "../../utils/datetime.js";
+
 import { postCard } from "../../utils/postCard.js";
+import { replieCard } from "../../utils/replieCard.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -27,12 +26,10 @@ export default class extends AbstractView {
       this.page.innerHTML = page;
       this.postContainer = this.page.querySelector(".postCard");
       this.repliesContainer = this.page.querySelector("#repliesContainer");
+      this.replieInputContainer = this.page.querySelector(
+        "#replieInputContainer",
+      );
       this.spinner = this.page.querySelector("#spinner");
-      this.form = this.page.querySelector("#commentForm");
-      this.form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        this.createComment();
-      });
       this.fetchPost();
     } catch (error) {
       console.error(error);
@@ -53,8 +50,8 @@ export default class extends AbstractView {
         });
 
         const response = await connection.json();
-        const post = response.payload[0];
         if (connection.ok) {
+          const post = response.payload[0];
           const clone = postTemplate.content.cloneNode(true);
           this.setTitle(post.title ?? post.userName);
           const card = await postCard(clone, post, {
@@ -64,13 +61,18 @@ export default class extends AbstractView {
             },
           });
           this.postContainer.appendChild(card);
-        }
-        if (connection.status !== 404) {
-          if (post.replieCount !== 0) {
-            this.fetchPostReplies();
+          this.spinner.classList.add("hidden");
+          // Add replie imput card
+          this.replieInputContainer.appendChild(await replieCard(this.postID));
+          if (connection.status !== 404) {
+            if (post.replieCount !== 0) {
+              this.fetchPostReplies();
+            }
           }
+        } else {
+          console.error(response);
+          this.spinner.classList.add("hidden");
         }
-        this.spinner.classList.add("hidden");
       });
     } catch (e) {
       console.error(e);
