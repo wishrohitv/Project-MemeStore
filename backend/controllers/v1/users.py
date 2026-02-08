@@ -1,5 +1,4 @@
 from backend.config import API_ENDPOINTS
-from backend.constant import ALLOWED_POST_FILE_SIZE
 from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
 from backend.modules import (
     ALLOWED_PROFILE_FILE_MIMETYPE,
@@ -100,9 +99,7 @@ def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
     try:
         profileMediaUid = str(uuid.uuid4())
         sessionUserID = loggedUser.userID
-        # files = request.files.getlist("file")
-        # print(files)
-        # print(request.files)
+
         file = request.files["file"]
         file.seek(0, 2)  # move to end of file
         size = file.tell()  # get current position, which is file size in bytes
