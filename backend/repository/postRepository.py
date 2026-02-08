@@ -361,7 +361,9 @@ def _getPostByIDorReplies(
                     "fileType": feed[1].fileType,
                     "fileExtension": feed[1].fileExtension,
                     "visibility": feed[1].visibility,
-                    "parentPostID": feed[1].parentPostID,
+                    "parentPostID": feed[1].parentPostID
+                    if not feed[1].isReplie
+                    else None,  # Check if post's 'isReplie=True' send None because
                     "createdAt": feed[1].createdAt,
                     "ageRating": feed[
                         1
