@@ -1,12 +1,14 @@
 from backend.modules import (
+    TIMESTAMP,
+    ForeignKey,
+    List,
     Mapped,
-    mapped_column,
     Optional,
     String,
-    List,
-    TIMESTAMP,
+    datetime,
+    datetimeUTC,
+    mapped_column,
     relationship,
-    ForeignKey,
 )
 
 from .base import Base
@@ -17,6 +19,9 @@ class Likes(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     postID: Mapped[int] = mapped_column(ForeignKey("posts.id"))
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    createdAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetimeUTC()
+    )
 
     def __repr__(self) -> str:
-        return f"Follower(postsID={self.postID!r}, userID={self.userID!r})"
+        return f"Follower(postsID={self.postID!r}, userID={self.userID!r}), createdAt={self.createdAt!r}"

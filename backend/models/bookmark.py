@@ -1,14 +1,16 @@
 from backend.modules import (
+    TIMESTAMP,
+    ForeignKey,
+    List,
     Mapped,
-    mapped_column,
     Optional,
     String,
-    List,
-    TIMESTAMP,
-    relationship,
-    ForeignKey,
     datetime,
+    datetimeUTC,
+    mapped_column,
+    relationship,
 )
+
 from .base import Base
 
 
@@ -18,5 +20,5 @@ class Bookmark(Base):
     postID: Mapped[int] = mapped_column(ForeignKey("posts.id"))
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
     createAt: Mapped[str] = mapped_column(
-        "timestamp", TIMESTAMP(timezone=False), nullable=False, default=datetime.now()
+        "timestamp", TIMESTAMP(timezone=True), nullable=False, default=datetimeUTC()
     )

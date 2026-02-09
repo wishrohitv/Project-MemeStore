@@ -4,6 +4,7 @@ from backend.modules import (
     Mapped,
     String,
     datetime,
+    datetimeUTC,
     mapped_column,
 )
 
@@ -16,8 +17,8 @@ class Sessions(Base):
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
     refreshToken: Mapped[str] = mapped_column(String(500), nullable=True)
     createdAt: Mapped[str] = mapped_column(
-        TIMESTAMP(timezone=False), default=datetime.now()
+        TIMESTAMP(timezone=True), default=datetimeUTC()
     )
     updatedAt: Mapped[str] = mapped_column(
-        TIMESTAMP(timezone=False), onupdate=datetime.now(), default=datetime.now()
+        TIMESTAMP(timezone=True), onupdate=datetimeUTC(), default=datetimeUTC()
     )

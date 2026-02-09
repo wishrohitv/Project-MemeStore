@@ -1,5 +1,3 @@
-from sqlalchemy.sql.expression import nullsfirst
-
 from backend.modules import (
     TIMESTAMP,
     Enum,
@@ -9,6 +7,7 @@ from backend.modules import (
     Optional,
     String,
     datetime,
+    datetimeUTC,
     mapped_column,
     relationship,
 )
@@ -45,13 +44,13 @@ class Posts(Base):
     )
     category: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=False),
-        default=datetime.now(),
+        TIMESTAMP(timezone=True),
+        default=datetimeUTC(),
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=False),
-        onupdate=datetime.now(),
-        default=datetime.now(),
+        TIMESTAMP(timezone=True),
+        onupdate=datetimeUTC(),
+        default=datetimeUTC(),
     )
 
     def __repr__(self) -> str:

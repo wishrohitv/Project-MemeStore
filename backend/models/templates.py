@@ -1,14 +1,16 @@
 from backend.modules import (
+    TIMESTAMP,
+    ForeignKey,
+    List,
     Mapped,
-    mapped_column,
     Optional,
     String,
-    List,
-    TIMESTAMP,
-    relationship,
-    ForeignKey,
     datetime,
+    datetimeUTC,
+    mapped_column,
+    relationship,
 )
+
 from .base import Base
 
 
@@ -17,6 +19,6 @@ class Templates(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     postID: Mapped[int] = mapped_column(ForeignKey("posts.id"))
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    createAt: Mapped[str] = mapped_column(
-        "timestamp", TIMESTAMP(timezone=False), nullable=False, default=datetime.now()
+    createAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetimeUTC()
     )

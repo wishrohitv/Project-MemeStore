@@ -20,7 +20,7 @@ import re
 import uuid
 
 # Time modules
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # io
 from io import BytesIO, StringIO
@@ -86,3 +86,6 @@ from werkzeug.utils import secure_filename
 
 # Import all contents
 from backend.constant import *
+
+# Datetime utc
+from backend.utils.dateTime import datetimeUTC

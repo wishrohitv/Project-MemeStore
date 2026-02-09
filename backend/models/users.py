@@ -1,21 +1,20 @@
 from backend.modules import (
-    DeclarativeBase,
+    TIMESTAMP,
+    Enum,
+    ForeignKey,
+    List,
     Mapped,
-    mapped_column,
     Optional,
     String,
-    List,
-    TIMESTAMP,
-    relationship,
-    ForeignKey,
     datetime,
-    Enum,
+    datetimeUTC,
+    mapped_column,
+    relationship,
 )
 
-
 from .base import Base
-from .profile import Profile
 from .enums import AccountStatus
+from .profile import Profile
 
 
 class Users(Base):
@@ -25,8 +24,8 @@ class Users(Base):
     userName: Mapped[str] = mapped_column(String(40))
     email: Mapped[str] = mapped_column(String(40))
     password: Mapped[bytes]
-    joinDate: Mapped[str] = mapped_column(
-        "timestamp", TIMESTAMP(timezone=False), nullable=False, default=datetime.now()
+    createdAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetimeUTC()
     )
     role: Mapped[int] = mapped_column(ForeignKey("role.id"), default=3)
     accountStatus: Mapped[AccountStatus] = mapped_column(
@@ -39,7 +38,7 @@ class Users(Base):
                 name={self.name!r},
                 userName={self.userName!r}
                 email={self.email!r},
-                joinDate={self.joinDate!r},
+                createdAt={self.createdAt!r},
                 role={self.role!r},
                 password{self.password!r},
                 accountStatus={self.accountStatus!r},

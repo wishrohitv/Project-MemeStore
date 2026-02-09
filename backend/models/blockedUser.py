@@ -6,6 +6,7 @@ from backend.modules import (
     Optional,
     String,
     datetime,
+    datetimeUTC,
     mapped_column,
     relationship,
 )
@@ -19,7 +20,7 @@ class BlockedUser(Base):
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
     blockedBy: Mapped[int] = mapped_column(ForeignKey("users.id"))
     createdAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=False), default=datetime.now()
+        TIMESTAMP(timezone=True), default=datetimeUTC()
     )
 
     def __repr__(self) -> str:

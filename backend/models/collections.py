@@ -13,6 +13,7 @@ from backend.modules import (
     Optional,
     String,
     datetime,
+    datetimeUTC,
     mapped_column,
     relationship,
 )
@@ -26,9 +27,11 @@ class Collections(Base):
     collectionName: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     owner: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    createdAt: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now())
+    createdAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetimeUTC()
+    )
     updatedAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP, onupdate=datetime.now(), default=datetime.now()
+        TIMESTAMP(timezone=True), onupdate=datetimeUTC(), default=datetimeUTC()
     )
 
     def __repr__(self):

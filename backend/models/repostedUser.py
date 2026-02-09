@@ -6,6 +6,7 @@ from backend.modules import (
     Optional,
     String,
     datetime,
+    datetimeUTC,
     mapped_column,
     relationship,
 )
@@ -21,7 +22,10 @@ class ReportedUser(Base):
     isResolved: Mapped[bool] = mapped_column(default=False)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=False), default=datetime.now()
+        TIMESTAMP(timezone=True), default=datetimeUTC()
+    )
+    updatedAt: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetimeUTC(), onupdate=datetimeUTC()
     )
 
     def __repr__(self) -> str:
@@ -32,4 +36,5 @@ class ReportedUser(Base):
                         isResolved={self.isResolved!r},
                         description={self.isResolved!r},
                         createdAt={self.createdAt!r}
+                        updatedAt={self.updatedAt!r}
                     """
