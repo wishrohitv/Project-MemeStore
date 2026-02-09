@@ -1,4 +1,4 @@
-<form id="commentForm">
+<form id="replieForm">
     <label for="chat" class="sr-only">Your message</label>
     <div
         class="flex items-center px-3 py-2 rounded-base bg-neutral-secondary-soft"
@@ -29,6 +29,13 @@
                 <circle cx="9" cy="9" r="2" />
             </svg>
             <span class="sr-only">Upload image</span>
+            <input
+                type="file"
+                ,
+                id="selectedFile"
+                accept="video/*,image/*"
+                class="hidden"
+            />
         </button>
         <textarea
             id="postTitle"

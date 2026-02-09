@@ -6,11 +6,12 @@ import {
   apiUserPostsFeed,
 } from "./base.js";
 import { formatDate } from "./datetime.js";
+import { replieCard } from "./replieCard.js";
 
 export async function postCard(
   clone,
   post,
-  { type = "feed", mainCardClbk, parentCardClbk },
+  { type = "feed", mainCardClbk, parentCardClbk, addReplieClbk },
 ) {
   // If type = feed it means card is used for home feed and type = post so customize it for post screen
   if (!(type === "feed" || type === "post"))
@@ -19,11 +20,25 @@ export async function postCard(
     clone.querySelector(".card").addEventListener("click", (e) => {
       if (
         e.target.closest(
-          "a, button, .likeBtn, .bookmarkBtn, .shareBtn, .downloadBtn, #moreBtnContainer",
+          "a, button, .likeBtn, .bookmarkBtn, .shareBtn, .downloadBtn, .addReplie, #moreBtnContainer, #replieForm",
         )
       )
         return;
+
+      // Go to post page
       mainCardClbk(post.postID);
+    });
+    // Add replie box
+    const replieBtn = clone.querySelector(".addReplie");
+    replieBtn.classList.remove("hidden");
+    replieBtn.addEventListener("click", async (e) => {
+      const parentCard = e.target.parentNode.parentNode;
+      if (parentCard.querySelector("form")) {
+        // Remove repliebox if already exists
+        parentCard.querySelector("form").remove();
+      } else {
+        parentCard.appendChild(await replieCard(post.postID));
+      }
     });
   } else {
     // Post page specific actions
