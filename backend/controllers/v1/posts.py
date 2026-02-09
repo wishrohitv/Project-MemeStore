@@ -251,6 +251,7 @@ def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
     try:
         return _getPostByIDorReplies(postID=postID, sessionUserID=sessionUserID)
     except Exception as e:
+        print(e)
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
 
@@ -261,7 +262,9 @@ def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
 )
 @verifyRequestMiddleware(route.postReplies.routeName)
 def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
-    postID = kwargs.get("postID")
+    postID: int | None = kwargs.get("postID")
+    if not postID:
+        return make_response({"error": f"Invalid post id {postID}"}, 400)
     try:
         return _getPostByIDorReplies(postID=postID, fetchReplies=True)
     except Exception as e:
