@@ -90,7 +90,7 @@ export async function postCard(
         if (res.isLiked) {
           liked.classList.remove("hidden");
           unliked.classList.add("hidden");
-          likeBtn.querySelector(".count").innerText = post.likeCount
+          likeBtn.querySelector(".count").innerText = post.isLiked
             ? post.likeCount
             : post.likeCount + 1;
         } else {
