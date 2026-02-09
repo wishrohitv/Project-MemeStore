@@ -86,7 +86,6 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         postAgeRating = (pForm.get("ageRating") or "pg13").lower()
 
         if file:
-            print(file, "not found")
             fileMimeType = file.mimetype
             _fileType = fileMimeType.split("/")[0]
             if fileMimeType in ALLOWED_POST_FILE_MIMETYPE:
