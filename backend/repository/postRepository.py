@@ -282,20 +282,28 @@ def _getPostByIDorReplies(
         conditions.append(
             Posts.isReplie
         )  # `not Posts.isReplie` is not working as false
+        conditions.append(Posts.visibility)  # Fetch only public posts
     else:
+        #  Fetch post by ID
         conditions.append(Posts.id == postID)
-    if sessionUserID is not None:
-        # Check owner of the post
-        post = session.query(Posts).where(Posts.id == postID).first()
-        if not post:
-            return make_response({"error": "Post not found"}, 404)
 
-        if post.userID == sessionUserID:
-            # Give the access to the private post to owner
-            # Note : implement superadmin and moderator can access private post for enquiry
-            conditions.append(not Posts.visibility)
-        else:
-            conditions.append(Posts.visibility)
+        # Check post visibility
+        if sessionUserID:
+            # Check owner of the post
+            post = session.query(Posts).where(Posts.id == postID).first()
+            if not post:
+                return make_response({"error": "Post not found"}, 404)
+
+            # Check whether post's visibility is true or false
+            if not post.visibility:
+                return make_response({"error": "Post is private"}, 403)
+
+            if post.userID == sessionUserID:
+                # Give the access to the private post to owner
+                # Note : implement superadmin and moderator can access private post for enquiry
+                conditions.append(not Posts.visibility)
+            else:
+                conditions.append(Posts.visibility)
     # Get feed data from database alog with userName of author of post
     like = aliased(Likes)
     likeCount = (
