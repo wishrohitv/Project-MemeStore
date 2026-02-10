@@ -8,7 +8,7 @@ export async function replieCard(postID) {
     const replieMarco = document.createElement("div");
     replieMarco.innerHTML = replieHtml;
     const form = replieMarco.querySelector("form");
-    const imgPreview = replieMarco.querySelector("#imgPreview");
+    const previewContainer = replieMarco.querySelector("#previewContainer");
     const selectedFile = replieMarco.querySelector("#selectedFile");
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -40,11 +40,15 @@ export async function replieCard(postID) {
     selectedFile.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (file) {
-        imgPreview.classList.remove("hidden");
-        if (imgPreview.children.length > 0) {
-          imgPreview.removeChild(imgPreview.firstChild);
+        previewContainer.classList.remove("hidden");
+        if (previewContainer.children.length > 0) {
+          previewContainer.removeChild(previewContainer.firstChild);
         }
-        imgPreview.appendChild(await createMediaPreview(file));
+        previewContainer.appendChild(
+          await createMediaPreview(file, (onRemove) => {
+            selectedFile.value = ""; // This resets the selected file
+          }),
+        );
       }
     });
     return replieMarco;
