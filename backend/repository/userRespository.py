@@ -1,5 +1,12 @@
 from backend.database import engine
-from backend.models import AccountStatus, Follower, Profile, Sessions, Users
+from backend.models import (
+    AccountStatus,
+    BlockedUsers,
+    Follower,
+    Profile,
+    Sessions,
+    Users,
+)
 from backend.modules import (
     ACCESS_TOKEN_EXPIRY_MINUTES,
     API_ROOT_URL,
@@ -522,3 +529,64 @@ def updateUser(
     except Exception as e:
         print(f"Error updating user: {e}")
         return make_response({"message": "failed to update user"}, 500)
+
+
+def _blockUser(sessionUserID: int, userID: int):
+    try:
+        # Check has user already blocked or not
+        stmt = select(
+            exists().where(
+                BlockedUsers.blockedBy == sessionUserID, BlockedUsers.userID == userID
+            )
+        )
+        user = session.scalar(stmt)
+        session.close()
+        if not user:
+            blockedUser = BlockedUsers(userID=userID, blockedBy=sessionUserID)
+            session.add(blockedUser)
+            session.commit()
+            session.close()
+            return make_response(
+                {"message": "User blocked successfully", "isBlocked": True}, 201
+            )
+
+        return make_response(
+            {"error": "User is already blocked", "isBlocked": True}, 409
+        )
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(e)
+        return make_response({"error": f"{e}"}, 500)
+
+
+def _unblockUser(sessionUserID: int, userID: int):
+    try:
+        # Check has user already blocked or not
+        stmt = select(
+            exists().where(
+                BlockedUsers.blockedBy == sessionUserID, BlockedUsers.userID == userID
+            )
+        )
+        user = session.scalar(stmt)
+        session.close()
+        # Remove the user from the table
+        if user:
+            stmt = delete(BlockedUsers).where(
+                BlockedUsers.blockedBy == sessionUserID, BlockedUsers.userID == userID
+            )
+            session.execute(stmt)
+            session.commit()
+            session.close()
+            return make_response(
+                {"message": "User unblocked successfully", "isBlocked": False}, 201
+            )
+
+        return make_response(
+            {"error": "User has already unblocked the person", "isBlocked": False}, 409
+        )
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(e)
+        return make_response({"error": f"{e}"}, 500)
