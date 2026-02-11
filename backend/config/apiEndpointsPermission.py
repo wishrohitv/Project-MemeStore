@@ -159,6 +159,16 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["POST"],
     )
+    reportPost = RouteAccess(
+        routeName="/posts/report",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+    )
+    reportPostInspector = RouteAccess(
+        routeName="/posts/report-inspector",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["POST"],
+    )
     # Replies
     postReplies = RouteAccess(
         routeName="/posts/replies",

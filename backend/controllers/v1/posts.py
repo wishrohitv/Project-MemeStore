@@ -19,6 +19,7 @@ from backend.repository.postRepository import (
     _posts,
     _postToggleBookmark,
     _postToggleLike,
+    _reportPost,
     _updatePost,
 )
 from backend.utils import Log, LoggedUser, uploadMedia
@@ -266,5 +267,23 @@ def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
         return make_response({"error": f"Invalid post id {postID}"}, 400)
     try:
         return _getPostByIDorReplies(postID=postID, fetchReplies=True)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+# /posts/report
+@postsBlueprint.route(
+    f"{route.reportPost.routeName}/<int:postID>",
+    methods=route.reportPost.methods,
+)
+@verifyRequestMiddleware(route.reportPost.routeName)
+def reportPost(loggedUser: LoggedUser, *args, **kwargs):
+    sessionUserID = loggedUser.userID
+    postID: int | None = kwargs.get("postID")
+    if not postID:
+        return make_response({"error": f"Invalid post id {postID}"}, 400)
+    try:
+        reason = request.get_json().get("reason")
+        return _reportPost(sessionUserID=sessionUserID, postID=postID, reason=reason)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)

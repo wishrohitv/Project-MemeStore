@@ -1,5 +1,13 @@
 from backend.database import engine
-from backend.models import AgeRating, Bookmark, Likes, Posts, Profile, Users
+from backend.models import (
+    AgeRating,
+    Bookmark,
+    Likes,
+    Posts,
+    Profile,
+    ReportedPosts,
+    Users,
+)
 from backend.modules import (
     API_ROOT_URL,
     PUBLIC_DIRECTORY_POSTS,
@@ -404,3 +412,19 @@ def _getPostByIDorReplies(
 
     except Exception as e:
         return make_response({"error": f"{e}"}, 500)
+
+
+def _reportPost(sessionUserID: int, postID: int, reason: str):
+    try:
+        post = ReportedPosts(
+            reportedBy=sessionUserID, postID=postID, description=reason
+        )
+        session.add(post)
+        session.commit()
+        session.close()
+        return make_response({"message": "Post reported successfully"}, 201)
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(e)
+        return make_response({"errror": f"{e}"}, 500)
