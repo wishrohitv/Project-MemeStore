@@ -14,11 +14,11 @@ from backend.modules import (
 from .base import Base
 
 
-class ReportedPosts(Base):
-    __tablename__ = "reported_posts"
+class ReportedUsers(Base):
+    __tablename__ = "reported_users"
     id: Mapped[int] = mapped_column(primary_key=True)
     reportedBy: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    postID: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
     isResolved: Mapped[bool] = mapped_column(default=False)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
@@ -31,8 +31,8 @@ class ReportedPosts(Base):
     def __repr__(self) -> str:
         return f"""ReportedUser(
                         id={self.id}
+                        userID={self.userID!r},
                         reportedBy={self.reportedBy!r}),
-                        postID={self.postID!r},
                         isResolved={self.isResolved!r},
                         description={self.isResolved!r},
                         createdAt={self.createdAt!r}
