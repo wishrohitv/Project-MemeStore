@@ -424,7 +424,7 @@ def getUserProfile(
                     "id": user[0].id,
                     "name": user[0].name,
                     "userName": user[0].userName,
-                    "email": user[0].email if sessionUserID else "",
+                    "email": user[0].email if sessionUserID == user[0].id else "",
                     "joinDate": user[0].createdAt.strftime("%Y-%m-%d %H:%M:%S"),
                     "role": user[0].role,
                     "accountStatus": user[0].accountStatus.value,
