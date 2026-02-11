@@ -4,6 +4,7 @@ from backend.models import (
     BlockedUsers,
     Follower,
     Profile,
+    ReportedUsers,
     Sessions,
     Users,
 )
@@ -585,6 +586,22 @@ def _unblockUser(sessionUserID: int, userID: int):
         return make_response(
             {"error": "User has already unblocked the person", "isBlocked": False}, 409
         )
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(e)
+        return make_response({"error": f"{e}"}, 500)
+
+
+def _reportUser(sessionUserID: int, userID: int, reason: str):
+    try:
+        stmt = ReportedUsers(
+            reportedBy=sessionUserID, userID=userID, description=reason
+        )
+        session.add(stmt)
+        session.commit()
+        session.close()
+        return make_response({"message": "User reported successfully"}, 201)
     except Exception as e:
         session.rollback()
         session.close()

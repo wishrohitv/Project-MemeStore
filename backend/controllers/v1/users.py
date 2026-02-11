@@ -16,6 +16,7 @@ from backend.repository.userRespository import (
     _addFollower,
     _blockUser,
     _removeFollower,
+    _reportUser,
     _unblockUser,
     getUserProfile,
     updateProfileImg,
@@ -213,3 +214,16 @@ def unblockUser(loggedUser: LoggedUser, *args, **kwargs):
     if not userID or not isinstance(userID, int):
         return make_response({"error": f"Invalid userID {userID} dataype"}, 400)
     return _unblockUser(sessionUserID, userID)
+
+
+@usersBlueprint.route(
+    f"{route.userReport.routeName}/<int:userID>", methods=route.userReport.methods
+)
+@verifyRequestMiddleware(route.userReport.routeName)
+def reportUser(loggedUser: LoggedUser, *args, **kwargs):
+    sessionUserID = loggedUser.userID
+    userID = kwargs.get("userID")
+    if not userID or not isinstance(userID, int):
+        return make_response({"error": f"Invalid userID {userID} dataype"}, 400)
+    reason = request.get_json().get("reason")
+    return _reportUser(sessionUserID, userID, reason or "")

@@ -88,9 +88,14 @@ class API_ENDPOINTS:
         methods=["PUT"],
     )
     userReport = RouteAccess(
-        routeName="/user/repost",
+        routeName="/user/report",
         rolePermission=[ROLE.USER],
         methods=["POST"],
+    )
+    userReportInpector = RouteAccess(
+        routeName="/user/report-inspector",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["PUT"],
     )
 
     # Feed
