@@ -1,5 +1,6 @@
 from .accessibility import Accessibility
 from .base import Base
+from .blockedUser import BlockedUser
 from .bookmark import Bookmark
 from .category import Category
 from .collectionData import CollectionData
@@ -10,6 +11,8 @@ from .follower import Follower
 from .likes import Likes
 from .posts import Posts
 from .profile import Profile
+from .repostedPosts import ReportedPosts
+from .repostedUser import ReportedUser
 from .role import Role
 from .sessions import Sessions
 from .templates import Templates
@@ -33,4 +36,7 @@ __all__ = (
     "Collections",
     "CollectionData",
     "Sessions",
+    "BlockedUser",
+    "ReportedPosts",
+    "ReportedUser",
 )
