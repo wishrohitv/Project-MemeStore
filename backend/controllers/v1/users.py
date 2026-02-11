@@ -14,7 +14,9 @@ from backend.modules import (
 )
 from backend.repository.userRespository import (
     _addFollower,
+    _blockUser,
     _removeFollower,
+    _unblockUser,
     getUserProfile,
     updateProfileImg,
     updateUser,
@@ -187,3 +189,27 @@ def addFollower(loggedUser: LoggedUser, *agrs, **kwargs):
 
     else:
         return make_response({"error": "Expect json body"}, 401)
+
+
+@usersBlueprint.route(
+    f"{route.userBlock.routeName}/<int:userID>", methods=route.userBlock.methods
+)
+@verifyRequestMiddleware(route.userBlock.routeName)
+def blockUser(loggedUser: LoggedUser, *args, **kwargs):
+    sessionUserID = loggedUser.userID
+    userID = kwargs.get("userID")
+    if not userID or not isinstance(userID, int):
+        return make_response({"error": f"Invalid userID {userID} dataype"}, 400)
+    return _blockUser(sessionUserID, userID)
+
+
+@usersBlueprint.route(
+    f"{route.userUnblock.routeName}/<int:userID>", methods=route.userUnblock.methods
+)
+@verifyRequestMiddleware(route.userUnblock.routeName)
+def unblockUser(loggedUser: LoggedUser, *args, **kwargs):
+    sessionUserID = loggedUser.userID
+    userID = kwargs.get("userID")
+    if not userID or not isinstance(userID, int):
+        return make_response({"error": f"Invalid userID {userID} dataype"}, 400)
+    return _unblockUser(sessionUserID, userID)

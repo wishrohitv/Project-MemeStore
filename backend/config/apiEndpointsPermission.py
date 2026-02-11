@@ -77,6 +77,21 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.USER],
         methods=["DELETE"],
     )
+    userBlock = RouteAccess(
+        routeName="/user/block",
+        rolePermission=[ROLE.USER],
+        methods=["PUT"],
+    )
+    userUnblock = RouteAccess(
+        routeName="/user/unblock",
+        rolePermission=[ROLE.USER],
+        methods=["PUT"],
+    )
+    userReport = RouteAccess(
+        routeName="/user/repost",
+        rolePermission=[ROLE.USER],
+        methods=["POST"],
+    )
 
     # Feed
     feed = RouteAccess(
