@@ -47,7 +47,9 @@ def verifyRequestMiddleware(endpoint: str):
                             )
                         else:
                             # Either user role or endpoint not found
-                            return make_response({"message": "Invalid user role"}, 401)
+                            return make_response(
+                                {"message": "Invalid user role or route"}, 401
+                            )
 
                     else:
                         return make_response({"error": "Token expired"}, 401)
