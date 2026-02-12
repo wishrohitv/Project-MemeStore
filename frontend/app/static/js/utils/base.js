@@ -88,9 +88,8 @@ export async function initializeTemplate({ macro = "feed" }) {
 }
 
 export async function fetchUserInfo() {
-  if (!getUser()) {
-    return;
-  }
+  // Check if user is logged in
+  if (!getUser()) return;
   try {
     const res = await fetch(apiUserInSession, {
       method: "GET",
@@ -118,16 +117,18 @@ export async function refreshToken() {
       credentials: "include",
     });
 
+    const data = await response.json();
     if (response.ok) {
       await fetchUserInfo();
     } else {
       flash("Session expired. Please log in again.", { messageType: "error" });
+      // Clear user data
       deleteUser();
+      // Update navbar
       manageNavbar();
     }
 
-    const data = await response.json();
-    console.log(data);
+    console.error(data);
   } catch (error) {
     console.error(error);
   }
@@ -138,7 +139,6 @@ export function manageNavbar() {
   const profileBtnContainer = document.getElementById("profileBtnContainer");
   const signupLoginContainer = document.getElementById("signupLoginContainer");
   const user = getUser();
-  console.log(user);
   if (user) {
     profileBtnContainer.classList.remove("hidden");
     const ankerTag = profileBtnContainer.querySelector("#goToProfile");
@@ -147,12 +147,6 @@ export function manageNavbar() {
       profileBtnContainer.querySelector("#loggedProfileLogo");
     loggedProfileLogo.src = user.profileImgUrl;
     signupLoginContainer.classList.add("hidden");
-  }
-}
-
-export async function loadSessionUser() {
-  if (!getUser()) {
-    await fetchUserInfo();
   }
 }
 
