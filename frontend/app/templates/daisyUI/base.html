@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
     <head>
         <meta charset="UTF-8" />
-        <title>Meme Store</title>
+        <title>{{ constants.APP_NAME }}</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
@@ -39,8 +39,8 @@
     <body style="overflow-x: clip">
         <!-- Nav bar macro -->
         <div>
-            {% from 'macrosComponent/navBarMacro.html' import navBarMacro %} {{
-            navBarMacro() }}
+            {% from 'macrosComponent/navBarMacro.html' import navBarMacro with
+            context %} {{ navBarMacro() }}
         </div>
 
         <!--  Body block for content  -->
