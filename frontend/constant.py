@@ -3,7 +3,7 @@ class Constants:
     APP_NAME = "MemeStore"
 
     # App version
-    APP_VERSION = "1.0.0"
+    APP_VERSION = "1.0.0.beta"
 
     # Host
     HOST = "0.0.0.0"
