@@ -4,6 +4,7 @@ import {
   apiTogglePostBookmark,
   apiGetPostMedia,
   apiUserPostsFeed,
+  flash,
 } from "./base.js";
 import { formatDate } from "./datetime.js";
 import { replieCard } from "./replieCard.js";
@@ -147,6 +148,32 @@ export async function postCard(
         console.error(e);
       }
     });
+  // Share Button
+  const shareBtn = clone.querySelector(".shareBtn");
+  shareBtn.querySelector(".svgs").addEventListener("click", async (e) => {
+    const uncopied = shareBtn.querySelector("[data-uncopied]");
+    const copied = shareBtn.querySelector("[data-copied]");
+    const shareText = shareBtn.querySelector(".shareText");
+
+    try {
+      uncopied.classList.add("hidden");
+      copied.classList.remove("hidden");
+      shareText.innerText = "Copied!";
+      shareText.classList.add("text-purple-500");
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/post/${post.postID}`,
+      );
+      flash("Copied to clipboard!", "success");
+      setTimeout(() => {
+        uncopied.classList.remove("hidden");
+        copied.classList.add("hidden");
+        shareText.innerText = "Share";
+        shareText.classList.remove("text-purple-500");
+      }, 3000);
+    } catch (error) {
+      console.error(error.message);
+    }
+  });
   // Download Button
   const downloadBtn = clone.querySelector(".downloadBtn");
   downloadBtn.addEventListener("click", (e) => {
