@@ -1,5 +1,5 @@
 import { apiUploadPosts } from "./base.js";
-import { createMediaPreview } from "./replieMediaPreview.js";
+import { createMediaPreview } from "./replieMediaPreviewCard.js";
 
 export async function replieCard(postID) {
   try {
@@ -13,7 +13,6 @@ export async function replieCard(postID) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
-      console.log(formData);
       try {
         const connection = await fetch(
           apiUploadPosts + `?parentPostID=${postID}&isReplie=True`,
