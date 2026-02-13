@@ -31,6 +31,7 @@ class Users(Base):
     accountStatus: Mapped[AccountStatus] = mapped_column(
         Enum(AccountStatus), default=AccountStatus.active
     )
+    isVerified: Mapped[bool] = mapped_column(default=False)
     profile: Mapped["Profile"] = relationship(backref="profile", uselist=False)
 
     def __repr__(self) -> str:
@@ -42,4 +43,5 @@ class Users(Base):
                 role={self.role!r},
                 password{self.password!r},
                 accountStatus={self.accountStatus!r},
+                isVerified={self.isVerified!r}
             )"""
