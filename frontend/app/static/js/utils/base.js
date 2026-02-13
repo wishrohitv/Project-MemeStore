@@ -73,12 +73,13 @@ export async function initializeTemplate({ macro = "feed" }) {
 
       // Add template to memory
       postMacroTemplate[loadMacro] = templateHtml;
+
+      // Create a temporary container element
+      const tempContainer = document.createElement("div");
+      tempContainer.innerHTML = templateHtml;
+
+      document.body.appendChild(tempContainer);
     }
-
-    const tempContainer = document.createElement("div");
-    tempContainer.innerHTML = templateHtml;
-
-    document.body.appendChild(tempContainer);
 
     const postTemplate = document.getElementById(templateID);
     return postTemplate; // resolve when fully loaded
