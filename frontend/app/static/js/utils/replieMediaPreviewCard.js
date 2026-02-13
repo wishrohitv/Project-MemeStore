@@ -1,4 +1,4 @@
-export async function createMediaPreview(file) {
+export async function createMediaPreview(file, onRemoveClbk) {
   try {
     const html = await fetch(
       "/static/daisyUI/macroComponent/replieMediaPreviewMacro.html",
@@ -18,6 +18,12 @@ export async function createMediaPreview(file) {
       img.classList.add("hidden");
       video.src = URL.createObjectURL(file);
     }
+    const removeBtn = preview.querySelector("#removeBtn");
+    removeBtn.addEventListener("click", () => {
+      URL.revokeObjectURL(img.src || video.src); // Avoid memory leaks
+      onRemoveClbk();
+      preview.remove();
+    });
     return preview;
   } catch (e) {
     console.error(e);
