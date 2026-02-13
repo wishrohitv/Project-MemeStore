@@ -1,4 +1,5 @@
 from backend.modules import (
+    JSONB,
     TIMESTAMP,
     Enum,
     ForeignKey,
@@ -43,6 +44,9 @@ class Posts(Base):
         quote=True,
     )
     category: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=True)
+    replyingTo: Mapped[JSONB] = mapped_column(
+        default=None, nullable=True
+    )  # usernames of users who is being replied to this post i.e. ['user1', 'user2']
     createdAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=datetimeUTC(),
@@ -66,6 +70,7 @@ class Posts(Base):
                     'visibility': {self.visibility!r},
                     'ageRating': {self.ageRating!r},
                     'category': {self.category!r},
+                    'replyingTo': {self.replyingTo!r},
                     'createdAt': {self.createdAt!r},
                     'updatedAt': {self.updatedAt!r},
                 )"""
