@@ -4,9 +4,9 @@ from backend.modules import (
     Mapped,
     String,
     datetime,
-    datetimeUTC,
     mapped_column,
 )
+from backend.utils import datetimeUTC
 
 from .base import Base
 

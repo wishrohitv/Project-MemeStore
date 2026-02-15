@@ -8,10 +8,10 @@ from backend.modules import (
     Optional,
     String,
     datetime,
-    datetimeUTC,
     mapped_column,
     relationship,
 )
+from backend.utils import datetimeUTC
 
 from .base import Base
 from .enums import AgeRating
