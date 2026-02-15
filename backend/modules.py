@@ -16,6 +16,9 @@ import math
 # Import os
 import os
 
+# Import random module
+import random
+
 # Regex module
 import re
 
