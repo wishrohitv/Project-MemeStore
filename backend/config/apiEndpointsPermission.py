@@ -30,6 +30,19 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
     )
+    genrateOtp = RouteAccess(
+        routeName="/auth/generate-otp",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    verifyUser = RouteAccess(
+        routeName="/auth/verify",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["POST"],
+        partialAccess=True,
+    )
+
     # User route
     deleteUser = RouteAccess(
         routeName="/user/delete",
