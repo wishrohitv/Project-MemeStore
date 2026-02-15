@@ -17,6 +17,6 @@ contains frontend and backend
 - Post Likes
 - Reply/Comments System (Nested like Twitter)
 - Post abuse reporting
-- Collections (User can create, edit, and delete collections of memes)
+- Collections (User can create, edit, delete and share collections of memes like Youtube playlist)
 - Search Functionality
 - Notifications
