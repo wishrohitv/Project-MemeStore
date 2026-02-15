@@ -45,7 +45,7 @@ class Posts(Base):
     )
     category: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=True)
     replyingTo: Mapped[JSONB] = mapped_column(
-        default=None, nullable=True
+        JSONB, nullable=True
     )  # usernames of users who is being replied to this post i.e. ['user1', 'user2']
     createdAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
