@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const link = e.target.closest("[data-link]");
     if (link) {
       e.preventDefault();
+      if (window.scrollY > 0) {
+        window.scrollTo(0, 0);
+      }
       navigateTo(link.href);
     }
   });
