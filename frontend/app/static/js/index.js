@@ -87,7 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (link) {
       e.preventDefault();
       if (window.scrollY > 0) {
-        window.scrollTo(0, 0);
+        window.scrollTo({
+          top: 0,
+          behavior: "instant",
+        });
       }
       navigateTo(link.href);
     }
