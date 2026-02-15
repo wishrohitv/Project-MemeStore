@@ -7,6 +7,7 @@ APP_VERSION: str = "1.0.0"
 # Media storage
 USE_CLOUDINARY_STORAGE: bool = False  # If true then cloudinary service will be used for storing user uploaded media file, else local computer storage will be used to store media files
 
+USE_EMAIL_SERVICE: bool = False  # If true then email service will be used for sending OTP, else email service will be used to send OTP (RESEND_API_KEY)
 
 USER_ACCOUNT_STATUS: list[str] = ["active", "suspended", "banned", "deleted"]
 
