@@ -10,6 +10,9 @@ import json
 # Import logging
 import logging
 
+# Import math module
+import math
+
 # Import os
 import os
 
@@ -86,6 +89,3 @@ from werkzeug.utils import secure_filename
 
 # Import all contents
 from backend.constant import *
-
-# Datetime utc
-from backend.utils.dateTime import datetimeUTC
