@@ -14,8 +14,10 @@ from backend.modules import (
 from backend.repository.userRespository import (
     _authenticateUser,
     _createUser,
+    _generateOTPforUser,
     _logout,
     _refreshTokens,
+    _verifyUser,
 )
 from backend.utils import LoggedUser
 
@@ -123,6 +125,16 @@ def refreshToken():
         return make_response({"error": str(e)}, 401)
 
 
-@authBlueprint.route("/auth/verify", methods=["POST"])
-def verify():
-    raise NotImplementedError()
+@authBlueprint.route(
+    f"{route.genrateOtp.routeName}/<int:userID>", methods=route.genrateOtp.methods
+)
+def generateOTP(userID):
+    return _generateOTPforUser(userID)
+
+
+@authBlueprint.route(
+    f"{route.verifyUser.routeName}/<int:userID>/<string:otp>",
+    methods=route.verifyUser.methods,
+)
+def verify(userID, otp):
+    return _verifyUser(userID, otp)

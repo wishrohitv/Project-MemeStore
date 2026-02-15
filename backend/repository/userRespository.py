@@ -1,4 +1,4 @@
-from backend.database import engine
+from backend.database import engine, redisClient
 from backend.models import (
     AccountStatus,
     BlockedUsers,
@@ -16,6 +16,7 @@ from backend.modules import (
     REFRESH_TOKEN_EXPIRY_MINUTES,
     SECURE_COOKIE,
     USE_CLOUDINARY_STORAGE,
+    USE_EMAIL_SERVICE,
     aliased,
     delete,
     exists,
@@ -29,10 +30,13 @@ from backend.modules import (
     update,
     url_for,
 )
+from backend.services.mailService import sendOTP
 from backend.utils import (
+    LoggedUser,
     decodeJwtToken,
     deleteMedia,
     generateJwtToken,
+    getRandomOTP,
     matchPassword,
     returnHashedBytes,
 )
@@ -83,10 +87,53 @@ def _createUser(
         "accountStatus": newUser.accountStatus.value,
     }
 
-    # TODO: Implement email verification
     return make_response(
         {"message": "User created successfully", "payload": userObj}, 201
     )
+
+
+def _generateOTPforUser(userID: int):
+    # TODO: Implement rate limiting, and check email bounce
+    try:
+        user = session.query(Users).filter(Users.id == userID).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        if user.isVerified:
+            return make_response({"message": "User already verified"}, 400)
+        otp = getRandomOTP()
+        redisClient.set(f"otp:{userID}", otp, ex=600)
+        sendOTP(user.email, str(otp))
+        session.close()
+        return make_response({"message": "OTP generated successfully"}, 200)
+
+    except Exception as e:
+        print(e)
+        return make_response({"error": "Internal server error"}, 500)
+
+
+def _verifyUser(userID: int, enteredOTP: str):
+    # TODO: check user's verification state then allow for login
+    try:
+        user = session.query(Users).filter(Users.id == userID).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        if user.isVerified:
+            return make_response({"message": "User already verified"}, 400)
+
+        storedOTP = redisClient.get(f"otp:{userID}")
+        if not storedOTP:
+            return make_response({"error": "OTP expired"}, 400)
+        if storedOTP != enteredOTP:
+            return make_response({"error": "Invalid OTP"}, 400)
+
+        user.isVerified = True
+        session.commit()
+        session.refresh(user)
+        session.close()
+        return make_response({"message": "OTP verified successfully"}, 200)
+    except Exception as e:
+        print(e)
+        return make_response({"error": "Internal server error"}, 500)
 
 
 def _authenticateUser(userName, email, password):
