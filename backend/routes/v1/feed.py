@@ -19,9 +19,9 @@ def getFeed(loggedUser: LoggedUser | None = None, *args, **kwargs):
     offset = request.args.get("offset", type=int, default=0)
     limit = request.args.get("limit", type=int, default=10)
     categoryIDs = request.args.get("category", type=list, default=[1])
-    fetchTemplate = str(request.args.get("template", default="False")).lower() == "true"
+    template = str(request.args.get("template", default="False")).lower() == "true"
     sessionUserID: int | None = loggedUser.userID if loggedUser else None
-
+    print(request.args.get("template", default="False"))
     if limit == 0 or limit > 30:
         return make_response({"error": "Invalid limit"}, 400)
     try:
@@ -30,6 +30,7 @@ def getFeed(loggedUser: LoggedUser | None = None, *args, **kwargs):
             offset=offset,
             limit=limit,
             sessionUserID=sessionUserID,
+            fetchTemplate=template,
         )
     except Exception as e:
         return make_response({"error": str(e)}, 500)

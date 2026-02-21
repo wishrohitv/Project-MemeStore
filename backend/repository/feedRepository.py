@@ -27,6 +27,8 @@ def getHomeFeed(
 ):
     # Fetch only public posts and isReplie false
     conditions = [Posts.visibility, Posts.isReplie.is_(False)]
+    if fetchTemplate:
+        conditions.append(Posts.isTemplate.is_(True))
     feed = queryPosts(conditions, category, offset, limit, sessionUserID)
     if feed and len(feed) >= 0:
         return make_response({"payload": feed}, 200)
@@ -119,6 +121,7 @@ def queryPosts(
                         1
                     ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
                     "category": feed[1].category,
+                    "isTemplate": feed[1].isTemplate,
                     "postMediaUrl": feed[1].mediaUrl
                     if USE_CLOUDINARY_STORAGE
                     else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{feed[1].mediaPublicID}.{feed[1].fileExtension}')}",

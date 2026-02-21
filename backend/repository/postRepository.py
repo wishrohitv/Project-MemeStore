@@ -195,6 +195,7 @@ def _userPosts(
     sessionUserID: int | None = None,
     category: int | None = None,
     orderBy="recent",
+    fetchTemplate: bool = False,
     limit: int = 10,
     offset: int = 0,
 ):
@@ -205,7 +206,9 @@ def _userPosts(
     """
 
     conditions = []
-    print(userName)
+    if fetchTemplate:
+        conditions.append(Posts.isTemplate)
+
     if not sessionUserID:
         conditions.append(Posts.visibility)
 

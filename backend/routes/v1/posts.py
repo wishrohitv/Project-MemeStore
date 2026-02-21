@@ -41,12 +41,17 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
     category = request.args.get("category")
     limit = request.args.get("limit", type=int, default=10)
     offset = request.args.get("offset", type=int, default=0)
+    template = str(request.args.get("template", default="False")).lower() == "true"
     sessionUserID: int | None = None if loggedUser is None else loggedUser.userID
     if not userName:
         return make_response({"error": "Invalid username"}, 400)
     try:
         return _userPosts(
-            userName=userName, sessionUserID=sessionUserID, limit=limit, offset=offset
+            userName=userName,
+            sessionUserID=sessionUserID,
+            limit=limit,
+            offset=offset,
+            fetchTemplate=template,
         )
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
