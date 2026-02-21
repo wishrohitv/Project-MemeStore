@@ -1,0 +1,87 @@
+<div class="m-2 flex flex-col items-center justify-center">
+    <!-- Search box -->
+    <div
+        class="flex flex-row justify-center items-center mt-3 mb-4 sm:hidden gap-2"
+    >
+        <input
+            id="searchBox"
+            type="text"
+            placeholder="Search People, Memes, Templates"
+            class="input input-bordered w-auto"
+        />
+        <div class="btn">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-search-icon lucide-search"
+            >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <!-- name of each tab group should be unique -->
+    <div class="tabs tabs-box">
+        <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Template"
+        />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 1</div>-->
+        <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Casual"
+            checked="checked"
+        />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 1</div>-->
+
+        <input type="radio" name="my_tabs_6" class="tab" aria-label="Sad" />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>-->
+
+        <input type="radio" name="my_tabs_6" class="tab" aria-label="Troll" />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 3</div>-->
+
+        <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Politics"
+        />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 3</div>-->
+
+        <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Programming"
+        />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 3</div>-->
+
+        <input
+            type="radio"
+            name="my_tabs_6"
+            class="tab"
+            aria-label="Trending"
+        />
+        <!--      <div class="tab-content bg-base-100 border-base-300 p-6">Tab content 3</div>-->
+    </div>
+
+    <div
+        id="postContainer"
+        class="columns-1 gap-5 sm:columns-2 sm:gap-8 md:columns-3 [&>img:not(:first-child)]:mt-8 px-4"
+    ></div>
+
+    <span id="spinner" class="loading loading-spinner loading-xl"></span>
+</div>
