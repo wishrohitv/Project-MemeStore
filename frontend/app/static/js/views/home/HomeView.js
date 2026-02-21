@@ -13,6 +13,7 @@ export default class extends AbstractView {
     this.postObjLength = 0; // Initial length is 0 but after first fetch it will be updated
     this.offset = 0;
     this.limit = 10;
+    this.tabName = "all";
     // Network request status for debouncing
     this.isLoading = false;
 
@@ -33,6 +34,13 @@ export default class extends AbstractView {
       this.page.innerHTML = page;
       // Container of post preview
       this.postContainer = this.page.querySelector("#postContainer");
+      // Tab change listener
+      const homeTabs = this.page.querySelectorAll("[name='home_tab']");
+      homeTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          this.handleTabChange(tab);
+        });
+      });
       // Spinner
       this.spinner = this.page.querySelector("#spinner");
 
@@ -46,18 +54,16 @@ export default class extends AbstractView {
   }
 
   // Function to fetch home feed for user
-  async fetchHomeFeed() {
+  async fetcFeed(url) {
     this.isLoading = true;
-    let connection = await fetch(
-      `${apiHomeFeed}?limit=${this.limit}&offset=${this.offset}`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
+
+    let connection = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
       },
-    );
+    });
     let res = await connection.json();
     try {
       if (connection.ok) {
@@ -76,10 +82,18 @@ export default class extends AbstractView {
   }
 
   async loadHomeFeed() {
+    let url = `${apiHomeFeed}?limit=${this.limit}&offset=${this.offset}`;
+    if (this.tabName === "template") {
+      url = `${apiHomeFeed}?limit=${this.limit}&offset=${this.offset}&template=true`;
+    } else {
+      // TODO : implement all category feed
+      url = `${apiHomeFeed}?limit=${this.limit}&offset=${this.offset}`;
+    }
+
     this.spinner.classList.remove("hidden");
     initializeTemplate({}).then(async (postTemplate) => {
       /// Fetch home feed data
-      const feedData = await this.fetchHomeFeed();
+      const feedData = await this.fetcFeed(url);
       // Check if feedData is not empty
       if (feedData) {
         // postTemplate comming from base.js
@@ -103,7 +117,7 @@ export default class extends AbstractView {
     });
   }
 
-  handleScroll(event) {
+  async handleScroll(event) {
     if (
       window.scrollY + window.innerHeight >=
       document.documentElement.scrollHeight - 1
@@ -113,7 +127,17 @@ export default class extends AbstractView {
       if (this.postObjLength < this.limit) return;
       console.log("Debouncing...");
       this.offset += this.limit;
-      this.loadHomeFeed();
+      await this.loadHomeFeed();
+    }
+  }
+
+  async handleTabChange(tab) {
+    // Reset post container and offset if tab changes
+    if (tab.id !== this.tabName) {
+      this.tabName = tab.id;
+      this.postContainer.innerHTML = "";
+      this.offset = 0;
+      await this.loadHomeFeed();
     }
   }
 }
