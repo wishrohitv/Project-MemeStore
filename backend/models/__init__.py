@@ -15,7 +15,6 @@ from .repostedPosts import ReportedPosts
 from .repostedUsers import ReportedUsers
 from .role import Role
 from .sessions import Sessions
-from .templates import Templates
 from .users import Users
 
 __all__ = (
@@ -30,7 +29,6 @@ __all__ = (
     "Posts",
     "Likes",
     "Bookmark",
-    "Templates",
     "AccountStatus",
     "AgeRating",
     "Collections",

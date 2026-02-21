@@ -47,6 +47,8 @@ class Posts(Base):
     replyingTo: Mapped[JSONB] = mapped_column(
         JSONB, nullable=True
     )  # usernames of users who is being replied to this post i.e. ['user1', 'user2']
+
+    isTemplate: Mapped[bool] = mapped_column(default=False, nullable=False)
     createdAt: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=datetimeUTC(),
@@ -71,6 +73,7 @@ class Posts(Base):
                     'ageRating': {self.ageRating!r},
                     'category': {self.category!r},
                     'replyingTo': {self.replyingTo!r},
+                    'isTemplate': {self.isTemplate!r},
                     'createdAt': {self.createdAt!r},
                     'updatedAt': {self.updatedAt!r},
                 )"""
