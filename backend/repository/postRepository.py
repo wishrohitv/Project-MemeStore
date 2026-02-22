@@ -196,6 +196,7 @@ def _userPosts(
     category: int | None = None,
     orderBy="recent",
     fetchTemplate: bool = False,
+    fetchBookmarked: bool = False,
     limit: int = 10,
     offset: int = 0,
 ):
@@ -223,6 +224,10 @@ def _userPosts(
         return make_response({"error": "Account is deleted"}, 404)
     if user.accountStatus == "banned":
         return make_response({"error": "Account is banned"}, 404)
+
+    if fetchBookmarked:
+        conditions.append(Bookmark.userID == user.id)
+
     posts = queryPosts(
         conditions=conditions, offset=offset, limit=limit, sessionUserID=sessionUserID
     )

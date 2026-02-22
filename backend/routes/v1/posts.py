@@ -42,6 +42,7 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
     limit = request.args.get("limit", type=int, default=10)
     offset = request.args.get("offset", type=int, default=0)
     template = str(request.args.get("template", default="False")).lower() == "true"
+    bookmark = str(request.args.get("bookmark", default="False")).lower() == "true"
     sessionUserID: int | None = None if loggedUser is None else loggedUser.userID
     if not userName:
         return make_response({"error": "Invalid username"}, 400)
@@ -52,6 +53,7 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
             limit=limit,
             offset=offset,
             fetchTemplate=template,
+            fetchBookmarked=bookmark,
         )
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
