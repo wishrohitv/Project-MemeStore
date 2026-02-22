@@ -69,6 +69,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    and_,
     delete,
     exists,
     func,
