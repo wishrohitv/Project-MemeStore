@@ -6,6 +6,7 @@ from backend.models import (
     Posts,
     Profile,
     ReportedPosts,
+    Reposts,
     Users,
 )
 from backend.modules import (
@@ -155,6 +156,36 @@ def _deletePost(postID: int, sessionUserID: int):
                 os.remove(filepath)
         session.delete(result)
         session.commit()
+    except Exception as e:
+        session.rollback()
+        raise Exception(str(e))
+
+
+def _repostPost(postID: int, sessionUserID: int):
+    # Toggle repost
+    try:
+        isRepost = (
+            session.query(Reposts)
+            .filter_by(postID=postID, userID=sessionUserID)
+            .first()
+        )
+        if isRepost:
+            stmt = delete(Reposts).where(
+                Reposts.postID == postID, Reposts.userID == sessionUserID
+            )
+            session.execute(stmt)
+            session.commit()
+            return make_response(
+                {"message": "Post repost removed successfully", "isReposted": False},
+                201,
+            )
+        else:
+            repost = Reposts(postID=postID, userID=sessionUserID)
+            session.add(repost)
+            session.commit()
+            return make_response(
+                {"message": "Post reposted successfully", "isReposted": True}, 201
+            )
     except Exception as e:
         session.rollback()
         raise Exception(str(e))

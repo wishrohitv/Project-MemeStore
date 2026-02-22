@@ -19,6 +19,7 @@ from backend.repository.postRepository import (
     _postToggleBookmark,
     _postToggleLike,
     _reportPost,
+    _repostPost,
     _updatePost,
     _userPosts,
 )
@@ -161,6 +162,19 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
     except Exception as e:
         Log.error(f"Failed to upload post: {e}")
         return make_response({"error": f"{e}"}, 500)
+
+
+# /posts/reposts
+@postsBlueprint.route(
+    f"{route.repostPosts.routeName}/<int:postID>", methods=route.repostPosts.methods
+)
+@verifyRequestMiddleware(route.repostPosts.routeName)
+def repostPost(loggedUser: LoggedUser, *args, **kwargs):
+    postID = kwargs.get("postID")
+    sessionUserID = loggedUser.userID
+    if postID is None or not isinstance(postID, int):
+        return make_response({"error": f"Invalid post ID {postID} type"}, 400)
+    return _repostPost(sessionUserID=sessionUserID, postID=postID)
 
 
 # /posts/like
