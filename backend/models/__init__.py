@@ -13,6 +13,7 @@ from .posts import Posts
 from .profile import Profile
 from .repostedPosts import ReportedPosts
 from .repostedUsers import ReportedUsers
+from .reposts import Reposts
 from .role import Role
 from .sessions import Sessions
 from .users import Users
@@ -37,4 +38,5 @@ __all__ = (
     "BlockedUsers",
     "ReportedPosts",
     "ReportedUsers",
+    "Reposts",
 )
