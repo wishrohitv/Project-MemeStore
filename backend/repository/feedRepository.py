@@ -1,5 +1,5 @@
 from backend.database import engine
-from backend.models import Bookmark, Category, Likes, Posts, Profile, Users
+from backend.models import Bookmark, Category, Likes, Posts, Profile, Reposts, Users
 from backend.modules import (
     API_ROOT_URL,
     USE_CLOUDINARY_STORAGE,
@@ -54,6 +54,13 @@ def queryPosts(
         .correlate(Posts)
         .scalar_subquery()
     )
+    repost = aliased(Reposts)
+    repostCount = (
+        select(func.count(repost.userID))
+        .where(repost.postID == Posts.id)
+        .correlate(Posts)
+        .scalar_subquery()
+    )
     bookmark = aliased(Bookmark)
     bookmarkCount = (
         select(func.count(bookmark.userID))
@@ -76,6 +83,7 @@ def queryPosts(
             Profile.mediaPublicID,
             Profile.fileExtension,
             likeCount.label("likeCount"),
+            repostCount.label("repostCount"),
             bookmarkCount.label("bookmarkCount"),
             repliesCount.label("replieCount"),
             exists(
@@ -88,6 +96,11 @@ def queryPosts(
                     Bookmark.postID == Posts.id, Bookmark.userID == sessionUserID
                 )
             ).label("isBookmarked"),
+            exists(
+                select(Reposts).where(
+                    Reposts.postID == Posts.id, Reposts.userID == sessionUserID
+                )
+            ).label("isReposted"),
         )
         .join_from(Users, Posts)
         .join_from(Users, Profile)
@@ -129,10 +142,12 @@ def queryPosts(
                     if USE_CLOUDINARY_STORAGE
                     else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{feed[3]}.{feed[4]}')}",
                     "likeCount": feed[5],
-                    "bookmarkCount": feed[6],
-                    "replieCount": feed[7],
-                    "isLiked": feed[8],
-                    "isBookmarked": feed[9],
+                    "repostCount": feed[6],
+                    "bookmarkCount": feed[7],
+                    "replieCount": feed[8],
+                    "isLiked": feed[9],
+                    "isBookmarked": feed[10],
+                    "isReposted": feed[11],
                 }
                 feedObj.append(data)
 
