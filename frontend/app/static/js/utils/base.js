@@ -4,6 +4,7 @@ export const apiLoginUser = `${baseUrl}/api/v1/auth/login`;
 export const apiSignupUser = `${baseUrl}/api/v1/auth/signup`;
 export const apiLogoutUser = `${baseUrl}/api/v1/auth/logout`;
 export const apiUploadPosts = `${baseUrl}/api/v1/posts/upload`;
+export const apiToggleRepostPosts = `${baseUrl}/api/v1/posts/repost`;
 export const apiUserInSession = `${baseUrl}/api/v1/user/auth`;
 export const apiUser = `${baseUrl}/api/v1/user`;
 export const apiProfileImage = `${baseUrl}/api/v1/getProfileImage`;

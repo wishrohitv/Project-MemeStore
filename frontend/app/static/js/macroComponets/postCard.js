@@ -4,6 +4,7 @@ import {
   apiTogglePostBookmark,
   apiGetPostMedia,
   apiUserPostsFeed,
+  apiToggleRepostPosts,
   flash,
 } from "../utils/base.js";
 import { formatDate } from "../utils/datetime.js";
@@ -62,17 +63,17 @@ export async function postCard(
       clone.querySelector(".postContentVidPreview").src = post.postMediaUrl;
     }
   }
-  // Post like
-  const likeBtn = clone.querySelector(".likeBtn");
-  if (post.likeCount !== 0) {
-    likeBtn.querySelector(".count").innerText = post.likeCount;
-  }
-
+  // Post replies count
   if (post.replieCount !== 0) {
     clone.querySelector(".replieCount").innerText =
       post.replieCount + " replies";
   }
 
+  // Post like
+  const likeBtn = clone.querySelector(".likeBtn");
+  if (post.likeCount !== 0) {
+    likeBtn.querySelector(".count").innerText = post.likeCount;
+  }
   if (post.isLiked) {
     clone.querySelector("[data-unliked]").classList.add("hidden");
     clone.querySelector("[data-liked]").classList.remove("hidden");
@@ -100,6 +101,50 @@ export async function postCard(
           likeBtn.querySelector(".count").innerText = post.isLiked
             ? post.likeCount - 1
             : post.likeCount;
+        }
+      }
+      console.log(res);
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  // Post repost
+  const repostBtn = clone.querySelector(".repostBtn");
+  const repostRealBtn = clone.querySelector(".repost");
+
+  if (post.repostCount !== 0) {
+    repostBtn.querySelector(".count").innerText = post.repostCount;
+    repostRealBtn.innerText = "Remove repost";
+  }
+  if (post.isReposted) {
+    clone.querySelector("[data-unreposted]").classList.add("hidden");
+    clone.querySelector("[data-reposted]").classList.remove("hidden");
+  }
+  repostRealBtn.addEventListener("click", async (event) => {
+    try {
+      let conn = await fetch(`${apiToggleRepostPosts}/${post.postID}`, {
+        method: "PUT",
+        credentials: "include",
+      });
+      let res = await conn.json();
+      if (conn.ok) {
+        const reposted = repostBtn.querySelector("[data-reposted]");
+        const unreposted = repostBtn.querySelector("[data-unreposted]");
+        if (res.isReposted) {
+          reposted.classList.remove("hidden");
+          unreposted.classList.add("hidden");
+          repostBtn.querySelector(".count").innerText = post.isReposted
+            ? post.repostCount
+            : post.repostCount + 1;
+          repostRealBtn.innerText = "Remove repost";
+        } else {
+          reposted.classList.add("hidden");
+          unreposted.classList.remove("hidden");
+          repostBtn.querySelector(".count").innerText = post.isReposted
+            ? post.repostCount - 1
+            : post.repostCount;
+          repostRealBtn.innerText = "Repost";
         }
       }
       console.log(res);
