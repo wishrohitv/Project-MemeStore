@@ -317,15 +317,14 @@ def _getPostByIDorReplies(
             if not post:
                 return make_response({"error": "Post not found"}, 404)
 
-            # Check whether post's visibility is true or false
-            if not post.visibility:
-                return make_response({"error": "Post is private"}, 403)
-
             if post.userID == sessionUserID:
                 # Give the access to the private post to owner
                 # Note : implement superadmin and moderator can access private post for enquiry
                 conditions.append(not Posts.visibility)
             else:
+                # Check whether post's visibility is true or false
+                if not post.visibility:
+                    return make_response({"error": "Post is private"}, 403)
                 conditions.append(Posts.visibility)
     postsOrReplie = queryPosts(
         conditions=conditions, offset=offset, limit=limit, sessionUserID=sessionUserID
