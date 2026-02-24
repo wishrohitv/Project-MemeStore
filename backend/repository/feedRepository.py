@@ -75,7 +75,7 @@ def queryPosts(
         .where(reply.parentPostID == Posts.id, reply.isReplie.is_(True))
         .scalar_subquery()
     )
-    getFeedData = (
+    stmt = (
         select(
             Users.userName,
             Posts,
@@ -108,7 +108,7 @@ def queryPosts(
         .limit(limit)
         .offset(offset)
     )
-    getFeed = session.execute(getFeedData).all()
+    getFeed = session.execute(stmt).all()
 
     # Close the session
     session.close()
@@ -126,7 +126,7 @@ def queryPosts(
                     "fileType": feed[1].fileType,
                     "fileExtension": feed[1].fileExtension,
                     "visibility": feed[1].visibility,
-                    "parentPostID": feed[1].parentPostID
+                    "parentPostID": _getParentPost(feed[1].parentPostID, sessionUserID)
                     if not feed[1].isReplie
                     else None,  # Check if post's 'isReplie=True' send None because
                     "createdAt": feed[1].createdAt,
@@ -157,3 +157,65 @@ def queryPosts(
 
     except Exception as e:
         raise Exception(e)
+
+
+def _getParentPost(postID: int, sessionUserID: int | None = None):
+    try:
+        conditions = []
+        # Fetch post by ID
+        conditions.append(Posts.id == postID)
+
+        # Check post visibility
+        if sessionUserID:
+            # Check owner of the post
+            post = session.query(Posts).where(Posts.id == postID).first()
+            if not post:
+                return {"error": "Post not found"}
+
+            if not post.userID == sessionUserID:
+                # Check whether post's visibility is true or false
+                if not post.visibility:
+                    return {"error": "Post is private"}
+
+                # Fetch only public posts
+                conditions.append(Posts.visibility)
+
+        stmt = (
+            select(
+                Users.userName,
+                Posts,
+                Profile.mediaUrl,
+                Profile.mediaPublicID,
+                Profile.fileExtension,
+            )
+            .join_from(Users, Posts)
+            .join_from(Users, Profile)
+            .where(*conditions)
+        )
+
+        result = session.execute(stmt).fetchone()
+        if not result:
+            return {"error": "Post not found"}
+
+        post = {
+            "userName": result[0],
+            "postID": result[1].id,
+            "title": result[1].text,
+            "userID": result[1].userID,
+            "fileType": result[1].fileType,
+            "mediaPublicID": result[1].mediaPublicID,
+            "fileExtension": result[1].fileExtension,
+            "createdAt": result[1].createdAt,
+            "ageRating": result[
+                1
+            ].ageRating.value,  # Return Enum class from db and get its value from
+            "postMediaUrl": result[1].mediaUrl
+            if USE_CLOUDINARY_STORAGE
+            else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{result[1].mediaPublicID}.{result[1].fileExtension}')}",
+            "profileImgUrl": result[2]
+            if USE_CLOUDINARY_STORAGE
+            else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{result[3]}.{result[4]}')}",
+        }
+        return {"payload": post}
+    except Exception as e:
+        return {"error": "Internal Server Error"}
