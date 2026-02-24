@@ -236,59 +236,50 @@ export async function postCard(
   clone.querySelector(".createdAt").innerText = formatDate(post.createdAt);
 
   // Load parent post
-  if (post.parentPostID) {
-    const connection = await fetch(`${apiUserPostsFeed}/${post.parentPostID}`, {
-      credentials: "include",
-    });
-    let parentPostObj = await connection.json();
-
-    if (connection.ok) {
-      const parentPost = parentPostObj.payload[0];
-      let parentPostContainer = clone.querySelector(".parentPostContainer");
-      if (parentPostContainer) {
-        parentPostContainer.classList.remove("hidden");
-        const parentMacro = await initializeTemplate({
-          macro: "parent",
-        });
-        const cloneParentMacro = parentMacro.content.cloneNode(true);
-        cloneParentMacro
-          .querySelector(".card")
-          .addEventListener("click", (e) => {
-            if (e.target.closest(".card")) {
-              // Send clbk
-              parentCardClbk(parentPost.postID);
-            }
-          });
-        if (parentPost.fileType) {
-          cloneParentMacro.querySelector(".media").classList.remove("hidden");
-          if (parentPost.fileType === "image") {
-            cloneParentMacro.querySelector(".postContentImgPreview").src =
-              parentPost.postMediaUrl;
-          } else if (parentPost.fileType === "video") {
-            cloneParentMacro
-              .querySelector(".postContentImgPreview")
-              .classList.add("hidden");
-            cloneParentMacro
-              .querySelector(".postContentVidPreview")
-              .classList.remove("hidden");
-            cloneParentMacro.querySelector(".postContentVidPreview").src =
-              parentPost.postMediaUrl;
-          }
+  if (post.parentPostID?.payload) {
+    const parentPost = post.parentPostID.payload;
+    let parentPostContainer = clone.querySelector(".parentPostContainer");
+    if (parentPostContainer) {
+      parentPostContainer.classList.remove("hidden");
+      const parentMacro = await initializeTemplate({
+        macro: "parent",
+      });
+      const cloneParentMacro = parentMacro.content.cloneNode(true);
+      cloneParentMacro.querySelector(".card").addEventListener("click", (e) => {
+        if (e.target.closest(".card")) {
+          // Send clbk
+          parentCardClbk(parentPost.postID);
         }
-        cloneParentMacro.querySelector(".cardTitle").textContent =
-          parentPost.title;
-        cloneParentMacro.querySelector(".postUserName").textContent =
-          parentPost.userName;
-        cloneParentMacro.querySelector(".userProfileLink").href =
-          `/user/${parentPost.userName}`;
-        cloneParentMacro.querySelector(".postUserPic").src =
-          parentPost.profileImgUrl;
-        cloneParentMacro.querySelector(".createdAt").innerText = formatDate(
-          parentPost.createdAt,
-        );
-
-        parentPostContainer.appendChild(cloneParentMacro);
+      });
+      if (parentPost.fileType) {
+        cloneParentMacro.querySelector(".media").classList.remove("hidden");
+        if (parentPost.fileType === "image") {
+          cloneParentMacro.querySelector(".postContentImgPreview").src =
+            parentPost.postMediaUrl;
+        } else if (parentPost.fileType === "video") {
+          cloneParentMacro
+            .querySelector(".postContentImgPreview")
+            .classList.add("hidden");
+          cloneParentMacro
+            .querySelector(".postContentVidPreview")
+            .classList.remove("hidden");
+          cloneParentMacro.querySelector(".postContentVidPreview").src =
+            parentPost.postMediaUrl;
+        }
       }
+      cloneParentMacro.querySelector(".cardTitle").textContent =
+        parentPost.title;
+      cloneParentMacro.querySelector(".postUserName").textContent =
+        parentPost.userName;
+      cloneParentMacro.querySelector(".userProfileLink").href =
+        `/user/${parentPost.userName}`;
+      cloneParentMacro.querySelector(".postUserPic").src =
+        parentPost.profileImgUrl;
+      cloneParentMacro.querySelector(".createdAt").innerText = formatDate(
+        parentPost.createdAt,
+      );
+
+      parentPostContainer.appendChild(cloneParentMacro);
     }
   }
   return clone;
