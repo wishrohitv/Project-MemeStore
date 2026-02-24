@@ -131,7 +131,7 @@
                 <div
                     class="repostBtn flex flex-col items-center justify-center"
                 >
-                    <div id="moreBtnContainer" class="dropdown dropdown-end">
+                    <div id="repostMenuContainer" class="dropdown dropdown-end">
                         <div
                             tabindex="0"
                             role="button"
@@ -183,6 +183,7 @@
                         <ul
                             tabindex="0"
                             class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-24 p-2 shadow"
+                            onclick="document.activeElement.blur()"
                         >
                             <!--Repost is same as retweet-->
                             <li><h class="repost">Repost</h></li>

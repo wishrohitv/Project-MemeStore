@@ -22,7 +22,7 @@ export async function postCard(
     clone.querySelector(".card").addEventListener("click", (e) => {
       if (
         e.target.closest(
-          "a, button, .likeBtn, .bookmarkBtn, .shareBtn, .downloadBtn, .addReplie, #moreBtnContainer, #replieForm",
+          "a, button, .likeBtn, .bookmarkBtn, .shareBtn, .downloadBtn, .addReplie, #repostMenuContainer, #replieForm",
         )
       )
         return;
@@ -137,7 +137,7 @@ export async function postCard(
           repostBtn.querySelector(".count").innerText = post.isReposted
             ? post.repostCount
             : post.repostCount + 1;
-          repostRealBtn.innerText = "Remove repost";
+          repostRealBtn.innerText = "Undo repost";
         } else {
           reposted.classList.add("hidden");
           unreposted.classList.remove("hidden");
