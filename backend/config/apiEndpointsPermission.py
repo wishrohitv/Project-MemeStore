@@ -155,7 +155,7 @@ class API_ENDPOINTS:
     repostPosts = RouteAccess(
         routeName="/posts/repost",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
-        methods=["POST"],
+        methods=["PUT"],
     )
     postLike = RouteAccess(
         routeName="/posts/like",
