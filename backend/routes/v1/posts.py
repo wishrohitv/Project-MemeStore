@@ -80,10 +80,8 @@ def postLikedUser(loggedUser: LoggedUser | None, *args, **kwargs):
         return make_response({"error": "User not logged in"}, 401)
     if not isinstance(postID, int):
         return make_response({"error": "Invalid post ID"}, 400)
-    if limit > 20:
-        return make_response(
-            {"error": "Limit must be greater than or equal to 20"}, 400
-        )
+    if limit >= 20:
+        return make_response({"error": "Limit must be less than or equal to 20"}, 400)
     try:
         return _getPostLikedUsers(postID, sessionUserID, offset, limit)
     except Exception as e:
@@ -100,10 +98,8 @@ def postBookmarkedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     sessionUserID = loggedUser.userID if loggedUser else None
     offset = request.args.get("offset", type=int, default=0)
     limit = request.args.get("limit", type=int, default=10)
-    if limit > 20:
-        return make_response(
-            {"error": "Limit must be greater than or equal to 20"}, 400
-        )
+    if limit >= 20:
+        return make_response({"error": "Limit must be less than or equal to 20"}, 400)
     if sessionUserID is None:
         # Only logged in users can see who liked a post
         return make_response({"error": "User not logged in"}, 401)
@@ -125,10 +121,8 @@ def postRepostedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     sessionUserID = loggedUser.userID if loggedUser else None
     offset = request.args.get("offset", type=int, default=0)
     limit = request.args.get("limit", type=int, default=10)
-    if limit > 20:
-        return make_response(
-            {"error": "Limit must be greater than or equal to 20"}, 400
-        )
+    if limit >= 20:
+        return make_response({"error": "Limit must be less than or equal to 20"}, 400)
     if sessionUserID is None:
         # Only logged in users can see who liked a post
         return make_response({"error": "User not logged in"}, 401)
@@ -150,10 +144,8 @@ def postReqoutedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     sessionUserID = loggedUser.userID if loggedUser else None
     offset = request.args.get("offset", type=int, default=0)
     limit = request.args.get("limit", type=int, default=10)
-    if limit > 20:
-        return make_response(
-            {"error": "Limit must be greater than or equal to 20"}, 400
-        )
+    if limit >= 20:
+        return make_response({"error": "Limit must be less than or equal to 20"}, 400)
     if sessionUserID is None:
         # Only logged in users can see who liked a post
         return make_response({"error": "User not logged in"}, 401)
@@ -248,7 +240,8 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         # Check if text and file both is not None
         if not postTitle and not _mediaPublicID:
             return make_response({"error": "Text or file is required"}, 400)
-
+        if postTitle.strip() == "":
+            return make_response({"error": "Text is required"}, 400)
         _createPost(
             userID=sessionUserID,
             text=postTitle,
