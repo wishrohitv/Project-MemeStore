@@ -11,8 +11,8 @@ from .follower import Follower
 from .likes import Likes
 from .posts import Posts
 from .profile import Profile
-from .repostedPosts import ReportedPosts
-from .repostedUsers import ReportedUsers
+from .reportedPosts import ReportedPosts
+from .reportedUsers import ReportedUsers
 from .reposts import Reposts
 from .role import Role
 from .sessions import Sessions
