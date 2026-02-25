@@ -2,6 +2,7 @@ from backend.database import engine
 from backend.models import (
     AgeRating,
     Bookmark,
+    Follower,
     Likes,
     Posts,
     Profile,
@@ -356,4 +357,116 @@ def _reportPost(sessionUserID: int, postID: int, reason: str):
         session.rollback()
         session.close()
         print(e)
-        return make_response({"errror": f"{e}"}, 500)
+        return make_response({"error": f"{e}"}, 500)
+
+
+def _getPostLikedUsers(
+    postID: int,
+    sessionUserID: int | None = None,
+    limit: int = 10,
+    offset: int = 0,
+):
+    joinModel = Likes
+    joinConditon = Users.id == Likes.userID
+    whereConditon = [Likes.postID == postID]
+    return _fetchPostUsers(
+        joinModel, joinConditon, whereConditon, sessionUserID, limit, offset
+    )
+
+
+def _getPostRepostedUsers(
+    postID: int,
+    sessionUserID: int | None = None,
+    limit: int = 10,
+    offset: int = 0,
+):
+    joinModel = Reposts
+    joinConditon = Users.id == Reposts.userID
+    whereConditon = [Reposts.postID == postID]
+    return _fetchPostUsers(
+        joinModel, joinConditon, whereConditon, sessionUserID, limit, offset
+    )
+
+
+def _getPostReqoutedUsers(
+    postID: int,
+    sessionUserID: int | None = None,
+    limit: int = 10,
+    offset: int = 0,
+):
+    joinModel = Posts
+    joinConditon = Users.id == Posts.userID
+    whereConditon = [Posts.parentPostID == postID]
+    return _fetchPostUsers(
+        joinModel, joinConditon, whereConditon, sessionUserID, limit, offset
+    )
+
+
+def _getPostBookmarkedUsers(
+    postID: int,
+    sessionUserID: int | None = None,
+    limit: int = 10,
+    offset: int = 0,
+):
+    joinModel = Bookmark
+    joinConditon = Users.id == Bookmark.userID
+    whereConditon = [Bookmark.userID == postID]
+    return _fetchPostUsers(
+        joinModel, joinConditon, whereConditon, sessionUserID, limit, offset
+    )
+
+
+def _fetchPostUsers(
+    joinModel,
+    joinConditon,
+    whereConditon,
+    sessionUserID: int | None,
+    limit: int = 10,
+    offset: int = 0,
+):
+    # TODO: prevent access of data if post is unavailable
+    try:
+        stmt = (
+            (
+                select(
+                    Users.id,
+                    Users.userName,
+                    Users.name,
+                    Profile.mediaUrl,
+                    Profile.mediaPublicID,
+                    Profile.fileExtension,
+                    Profile.fileType,
+                    exists(
+                        select(Follower).where(
+                            Follower.userID == Users.id,
+                            Follower.followerID == sessionUserID,
+                        )
+                    ).label("isFollowing"),
+                )
+                .join_from(Users, Profile, Users.id == Profile.id)
+                .join_from(Users, joinModel, joinConditon)
+            )
+            .where(*whereConditon)
+            .limit(limit)
+            .offset(offset)
+        )
+        result = session.execute(stmt).all()
+        session.close()
+        reqoutedUser = [
+            {
+                "userID": user.id,
+                "userName": user.userName,
+                "name": user.name,
+                "profileImgUrl": user[3]
+                if USE_CLOUDINARY_STORAGE
+                else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{user[4]}.{user[5]}')}",
+                "mediaPublicID": user.mediaPublicID,
+                "fileExtension": user.fileExtension,
+                "fileType": user.fileType,
+                "isFollowing": user.isFollowing,
+            }
+            for user in result
+        ]
+        return make_response({"payload": reqoutedUser}, 200)
+    except Exception as e:
+        return Exception(str(e))

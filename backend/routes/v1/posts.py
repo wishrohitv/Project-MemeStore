@@ -15,7 +15,11 @@ from backend.modules import (
 from backend.repository.postRepository import (
     _createPost,
     _deletePost,
+    _getPostBookmarkedUsers,
     _getPostByIDorReplies,
+    _getPostLikedUsers,
+    _getPostRepostedUsers,
+    _getPostReqoutedUsers,
     _postToggleBookmark,
     _postToggleLike,
     _reportPost,
@@ -56,6 +60,107 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
             fetchTemplate=template,
             fetchBookmarked=bookmark,
         )
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+# /posts/liked-users
+@postsBlueprint.route(
+    f"{route.postsLikedUsers.routeName}/<int:postID>",
+    methods=route.postsLikedUsers.methods,
+)
+@verifyRequestMiddleware(route.postsLikedUsers.routeName)
+def postLikedUser(loggedUser: LoggedUser | None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    sessionUserID = loggedUser.userID if loggedUser else None
+    offset = request.args.get("offset", type=int, default=0)
+    limit = request.args.get("limit", type=int, default=10)
+    if sessionUserID is None:
+        # Only logged in users can see who liked a post
+        return make_response({"error": "User not logged in"}, 401)
+    if not isinstance(postID, int):
+        return make_response({"error": "Invalid post ID"}, 400)
+    if limit > 20:
+        return make_response(
+            {"error": "Limit must be greater than or equal to 20"}, 400
+        )
+    try:
+        return _getPostLikedUsers(postID, sessionUserID, offset, limit)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+@postsBlueprint.route(
+    f"{route.postBookmaredUsers.routeName}/<int:postID>",
+    methods=route.postBookmaredUsers.methods,
+)
+@verifyRequestMiddleware(route.postBookmaredUsers.routeName)
+def postBookmarkedUser(loggedUser: LoggedUser | None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    sessionUserID = loggedUser.userID if loggedUser else None
+    offset = request.args.get("offset", type=int, default=0)
+    limit = request.args.get("limit", type=int, default=10)
+    if limit > 20:
+        return make_response(
+            {"error": "Limit must be greater than or equal to 20"}, 400
+        )
+    if sessionUserID is None:
+        # Only logged in users can see who liked a post
+        return make_response({"error": "User not logged in"}, 401)
+    if not isinstance(postID, int):
+        return make_response({"error": "Invalid post ID"}, 400)
+    try:
+        return _getPos(_getPostBookmarkedUsers, sessionUserID, offset, limit)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+@postsBlueprint.route(
+    f"{route.postRepostedUsers.routeName}/<int:postID>",
+    methods=route.postRepostedUsers.methods,
+)
+@verifyRequestMiddleware(route.postRepostedUsers.routeName)
+def postRepostedUser(loggedUser: LoggedUser | None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    sessionUserID = loggedUser.userID if loggedUser else None
+    offset = request.args.get("offset", type=int, default=0)
+    limit = request.args.get("limit", type=int, default=10)
+    if limit > 20:
+        return make_response(
+            {"error": "Limit must be greater than or equal to 20"}, 400
+        )
+    if sessionUserID is None:
+        # Only logged in users can see who liked a post
+        return make_response({"error": "User not logged in"}, 401)
+    if not isinstance(postID, int):
+        return make_response({"error": "Invalid post ID"}, 400)
+    try:
+        return _getPostRepostedUsers(postID, sessionUserID, limit, offset)
+    except Exception as e:
+        return make_response({"error": str(e), "message": "Internal server error"}, 500)
+
+
+@postsBlueprint.route(
+    f"{route.postReqoutedUsers.routeName}/<int:postID>",
+    methods=route.postReqoutedUsers.methods,
+)
+@verifyRequestMiddleware(route.postReqoutedUsers.routeName)
+def postReqoutedUser(loggedUser: LoggedUser | None, *args, **kwargs):
+    postID = kwargs.get("postID")
+    sessionUserID = loggedUser.userID if loggedUser else None
+    offset = request.args.get("offset", type=int, default=0)
+    limit = request.args.get("limit", type=int, default=10)
+    if limit > 20:
+        return make_response(
+            {"error": "Limit must be greater than or equal to 20"}, 400
+        )
+    if sessionUserID is None:
+        # Only logged in users can see who liked a post
+        return make_response({"error": "User not logged in"}, 401)
+    if not isinstance(postID, int):
+        return make_response({"error": "Invalid post ID"}, 400)
+    try:
+        return _getPostReqoutedUsers(postID, sessionUserID, limit, offset)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 

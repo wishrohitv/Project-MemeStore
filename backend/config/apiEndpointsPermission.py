@@ -147,6 +147,30 @@ class API_ENDPOINTS:
         methods=["GET"],
         partialAccess=True,
     )
+    postsLikedUsers = RouteAccess(
+        routeName="/posts/liked-users",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    postBookmaredUsers = RouteAccess(
+        routeName="/posts/bookmarked-users",  # This could be privacy voilation of user who bookmarked the post
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    postRepostedUsers = RouteAccess(
+        routeName="/posts/reposted-users",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
+    postReqoutedUsers = RouteAccess(
+        routeName="/posts/reqouted-users",
+        rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
+        methods=["GET"],
+        partialAccess=True,
+    )
     uploadPosts = RouteAccess(
         routeName="/posts/upload",
         rolePermission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
