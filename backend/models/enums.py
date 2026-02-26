@@ -13,3 +13,13 @@ class AccountStatus(PyEnum.Enum):
     suspended = "suspended"
     banned = "banned"
     deleted = "deleted"
+
+
+# Notifications types
+class NotificationType(PyEnum.Enum):
+    mention = "mention"
+    suggestion = "suggestion"  # Recommendation of post
+    reply = "reply"
+    warning = "warning"
+    danger = "danger"
+    systemUpdate = "systemUpdate"

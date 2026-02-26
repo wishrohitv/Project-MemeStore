@@ -9,6 +9,7 @@ from .endpoint import Endpoint
 from .enums import AccountStatus, AgeRating
 from .follower import Follower
 from .likes import Likes
+from .notification import Notifications
 from .posts import Posts
 from .profile import Profile
 from .reportedPosts import ReportedPosts
@@ -39,4 +40,5 @@ __all__ = (
     "ReportedPosts",
     "ReportedUsers",
     "Reposts",
+    "Notifications",
 )
