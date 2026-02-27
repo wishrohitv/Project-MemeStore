@@ -49,8 +49,9 @@ def mention(
                     "mentionedBy": mentionedBy,
                     # Text of the notification, e.g., "Alice mentioned you in a post."
                     "alert": f"{mentionedBy} mentioned you in a post.",
-                    "text": text[150] if len(text) > 150 else text,  # Short preview of the text
-
+                    "text": text[150]
+                    if len(text) > 150
+                    else text,  # Short preview of the text
                 }
                 # Create the notification using the createNotification function
                 createNotification(

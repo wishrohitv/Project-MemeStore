@@ -32,4 +32,4 @@ if __name__ == "__main__":
     addTaskInQueue(lambda: print("Sending email to admin@example.com"))
     addTaskInQueue(lambda: print("Sending email to support@example.com"))
     # Wait for all queued emails (optional)
-    task_queue.join() # Note: This will block until all tasks have been processed
+    task_queue.join()  # Note: This will block until all tasks have been processed
