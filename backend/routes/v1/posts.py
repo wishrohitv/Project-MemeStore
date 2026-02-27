@@ -106,7 +106,7 @@ def postBookmarkedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     if not isinstance(postID, int):
         return make_response({"error": "Invalid post ID"}, 400)
     try:
-        return _getPos(_getPostBookmarkedUsers, sessionUserID, offset, limit)
+        return _getPostBookmarkedUsers(postID, sessionUserID, offset, limit)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
