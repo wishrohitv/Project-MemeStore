@@ -22,7 +22,10 @@ class Notifications(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     userID: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     type: Mapped[NotificationType] = mapped_column(
-        Enum(NotificationType), nullable=False
+        "type",
+        Enum(NotificationType),
+        nullable=False,
+        quote=True,
     )
     notice: Mapped[JSON] = mapped_column(JSON, nullable=False)
     createdAt: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetimeUTC)

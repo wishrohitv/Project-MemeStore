@@ -20,9 +20,9 @@ from .enums import AgeRating
 class Posts(Base):
     """
     This post table stores post and its replies and reposted posts
-    - when parentPostID is None(null) and isReplie will be always false (because its original post) then it will be considered original post
-    - if parentPostID is post id and isReplie is false then it will be considered reposted/qouted post
-    -  if parentPostID is post id and isReplie is true then it will be considered replies
+    - when parentPostID is None(null) and isReply will be always false (because its original post) then it will be considered original post
+    - if parentPostID is post id and isReply is false then it will be considered reposted/qouted post
+    -  if parentPostID is post id and isReply is true then it will be considered replies
     """
 
     __tablename__ = "posts"
@@ -36,7 +36,7 @@ class Posts(Base):
     fileExtension: Mapped[str] = mapped_column(String(5), nullable=True)
     visibility: Mapped[bool] = mapped_column(default=True)
     parentPostID: Mapped[int] = mapped_column(default=None, nullable=True)
-    isReplie: Mapped[bool] = mapped_column(default=False, nullable=False)
+    isReply: Mapped[bool] = mapped_column(default=False, nullable=False)
     ageRating: Mapped[AgeRating] = mapped_column(
         "ageRating",
         Enum(AgeRating),

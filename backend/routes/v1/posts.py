@@ -163,15 +163,15 @@ def postReqoutedUser(loggedUser: LoggedUser | None, *args, **kwargs):
 def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
 
-    isReplie = (
-        str(request.args.get("isReplie", default="False", type=str)).lower() == "true"
+    isReply = (
+        str(request.args.get("isReply", default="False", type=str)).lower() == "true"
     )
     parentPostID = request.args.get("parentPostID", default=None, type=int)
 
-    if isReplie and not parentPostID:
+    if isReply and not parentPostID:
         return make_response(
             {
-                "error": "Parent post ID is required for replie to a post",
+                "error": "Parent post ID is required for reply to a post",
                 "message": "Bad request",
             },
             400,
@@ -191,6 +191,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         pForm = request.form
         postVisibility = pForm.get("postVisibility")
         postTitle = pForm.get("postTitle")
+        postReplyingTo = pForm.get("postReplyingTo")
         postTags = pForm.get("postTags")
         postVisibility = (
             True if not postVisibility else postVisibility.lower() == "true"
@@ -253,7 +254,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             mediaPublicID=_mediaPublicID,
             category=1,
             ageRating=postAgeRating,
-            isReplie=isReplie,
+            isReply=isReply,
             parentPostID=parentPostID,
         )
         return make_response({"message": "post uploaded successfully"}, 201)

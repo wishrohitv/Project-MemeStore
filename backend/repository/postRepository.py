@@ -47,7 +47,7 @@ def _createPost(
     ageRating: str,
     category: int,
     parentPostID: int | None = None,
-    isReplie: bool = False,
+    isReply: bool = False,
     visibility: bool = True,
 ):
     try:
@@ -62,7 +62,7 @@ def _createPost(
             visibility=visibility,
             ageRating=ageRating,
             category=category,
-            isReplie=isReplie,
+            isReply=isReply,
             parentPostID=parentPostID,
         )
         session.add(newPost)
@@ -316,9 +316,7 @@ def _getPostByIDorReplies(
     conditions = []
     if fetchReplies:
         conditions.append(Posts.parentPostID == postID)
-        conditions.append(
-            Posts.isReplie
-        )  # `not Posts.isReplie` is not working as false
+        conditions.append(Posts.isReply)  # `not Posts.isReply` is not working as false
         conditions.append(Posts.visibility)  # Fetch only public posts
     else:
         #  Fetch post by ID
