@@ -19,8 +19,8 @@ from .enums import NotificationType
 
 class Notifications(Base):
     __tablename__ = "notifications"
-    id: Mapped[int] = mapped_column(TIMESTAMP, primary_key=True, default=datetimeUTC)
-    userId: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    userID: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     type: Mapped[NotificationType] = mapped_column(
         Enum(NotificationType), nullable=False
     )
