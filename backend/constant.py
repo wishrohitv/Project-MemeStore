@@ -9,6 +9,11 @@ USE_CLOUDINARY_STORAGE: bool = False  # If true then cloudinary service will be 
 
 USE_EMAIL_SERVICE: bool = False  # If true then email service will be used for sending OTP, else email service will be used to send OTP (RESEND_API_KEY)
 
+# Background task thread
+BACKGROUND_TASK_NUMBER_OF_THREADS: int = (
+    3  # Number of worker threads for background task processing
+)
+
 USER_ACCOUNT_STATUS: list[str] = ["active", "suspended", "banned", "deleted"]
 
 SEREVR_ALLOWED_UPLOAD_FILE_SIZE: int = 20 * 1024 * 1024  # 20 MB

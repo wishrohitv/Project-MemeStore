@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 from backend.database import initializeDb
+from backend.tasks import startWorker
 from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask, os
 from backend.repository.getReadyRole import getReadyRole
 
@@ -52,6 +53,8 @@ def runApp():
 
     # getReadyRole
     getReadyRole()
+    # Start background worker
+    startWorker()
 
     return app
 

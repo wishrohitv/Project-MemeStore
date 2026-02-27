@@ -25,10 +25,12 @@ from backend.modules import (
     sessionmaker,
     update,
     url_for,
+    functools,
 )
 from backend.utils import Log, deleteMedia
 
 from .feedRepository import queryPosts
+from backend.tasks import mention, addTaskInQueue
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -65,11 +67,22 @@ def _createPost(
         )
         session.add(newPost)
         session.commit()
+        session.refresh(newPost)
+
+        # Create mention notification
         session.close()
-        Log.info("post added to table successfully")
+
+        # Send notification to mentioned users in the post
+        if text:
+            addTaskInQueue(
+                functools.partial(
+                    mention, mentionedByUserID=userID, postID=newPost.id, text=text
+                )
+            )
         return make_response({"message": "post upload successfully"}, 200)
     except Exception as e:
         session.rollback()
+        session.close()
         Log.critical(str(e))
         raise Exception(str(e))
 
