@@ -243,6 +243,12 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             return make_response({"error": "Text or file is required"}, 400)
         if postTitle.strip() == "":
             return make_response({"error": "Text is required"}, 400)
+
+        if postReplyingTo and not isinstance(postReplyingTo, list):
+            return make_response(
+                {"error": "postReplyingTo must be a list of strings of usernames"}, 400
+            )
+
         _createPost(
             userID=sessionUserID,
             text=postTitle,
@@ -256,6 +262,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             ageRating=postAgeRating,
             isReply=isReply,
             parentPostID=parentPostID,
+            replyingTo=postReplyingTo,
         )
         return make_response({"message": "post uploaded successfully"}, 201)
     except Exception as e:

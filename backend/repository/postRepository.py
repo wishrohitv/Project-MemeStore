@@ -49,6 +49,7 @@ def _createPost(
     parentPostID: int | None = None,
     isReply: bool = False,
     visibility: bool = True,
+    replyingTo: list[str] | None = None,
 ):
     try:
         newPost = Posts(
@@ -64,6 +65,7 @@ def _createPost(
             category=category,
             isReply=isReply,
             parentPostID=parentPostID,
+            replyingTo=replyingTo,
         )
         session.add(newPost)
         session.commit()
