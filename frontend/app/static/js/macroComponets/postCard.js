@@ -8,7 +8,7 @@ import {
   flash,
 } from "../utils/base.js";
 import { formatDate } from "../utils/datetime.js";
-import { replieCard } from "./replieCard.js";
+import { replieCard } from "./replyCard.js";
 
 export async function postCard(
   clone,

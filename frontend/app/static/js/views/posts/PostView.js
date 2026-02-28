@@ -6,7 +6,7 @@ import {
 } from "../../utils/base.js";
 
 import { postCard } from "../../macroComponets/postCard.js";
-import { replieCard } from "../../macroComponets/replieCard.js";
+import { replieCard } from "../../macroComponets/replyCard.js";
 
 export default class extends AbstractView {
   constructor(params) {

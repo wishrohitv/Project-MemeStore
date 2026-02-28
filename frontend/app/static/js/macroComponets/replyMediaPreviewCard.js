@@ -1,7 +1,7 @@
 export async function createMediaPreview(file, onRemoveClbk) {
   try {
     const html = await fetch(
-      "/static/daisyUI/macroComponent/replieMediaPreviewMacro.html",
+      "/static/daisyUI/macroComponent/replyMediaPreviewMacro.html",
     );
     const previewMacro = await html.text();
 

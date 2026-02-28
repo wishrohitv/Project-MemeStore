@@ -1,9 +1,9 @@
 import { apiUploadPosts } from "../utils/base.js";
-import { createMediaPreview } from "./replieMediaPreviewCard.js";
+import { createMediaPreview } from "./replyMediaPreviewCard.js";
 
 export async function replieCard(postID) {
   try {
-    const html = await fetch("/static/daisyUI/macroComponent/replieMacro.html");
+    const html = await fetch("/static/daisyUI/macroComponent/replyMacro.html");
     const replieHtml = await html.text();
     const replieMarco = document.createElement("div");
     replieMarco.innerHTML = replieHtml;
