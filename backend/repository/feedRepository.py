@@ -25,8 +25,8 @@ def getHomeFeed(
     fetchTemplate: bool = False,
     sessionUserID: int | None = None,
 ):
-    # Fetch only public posts and isReplie false
-    conditions = [Posts.visibility, Posts.isReplie.is_(False)]
+    # Fetch only public posts and isReply false
+    conditions = [Posts.visibility, Posts.isReply.is_(False)]
     if fetchTemplate:
         conditions.append(Posts.isTemplate.is_(True))
     feed = queryPosts(conditions, category, offset, limit, sessionUserID)
@@ -72,7 +72,7 @@ def queryPosts(
     reply = aliased(Posts)
     repliesCount = (
         select(func.count(reply.id))
-        .where(reply.parentPostID == Posts.id, reply.isReplie.is_(True))
+        .where(reply.parentPostID == Posts.id, reply.isReply.is_(True))
         .scalar_subquery()
     )
     stmt = (
@@ -113,47 +113,44 @@ def queryPosts(
     # Close the session
     session.close()
     try:
-        if getFeed:
-            feedObj = []
-            for feed in getFeed:
-                data = {
-                    "userName": feed[0],
-                    "postID": feed[1].id,
-                    "userID": feed[1].userID,
-                    "title": feed[1].text,
-                    "tags": feed[1].tags,
-                    "mediaPulicID": feed[1].mediaPublicID,
-                    "fileType": feed[1].fileType,
-                    "fileExtension": feed[1].fileExtension,
-                    "visibility": feed[1].visibility,
-                    "parentPostID": _getParentPost(feed[1].parentPostID, sessionUserID)
-                    if not feed[1].isReplie
-                    else None,  # Check if post's 'isReplie=True' send None because
-                    "createdAt": feed[1].createdAt,
-                    "ageRating": feed[
-                        1
-                    ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
-                    "category": feed[1].category,
-                    "isTemplate": feed[1].isTemplate,
-                    "postMediaUrl": feed[1].mediaUrl
-                    if USE_CLOUDINARY_STORAGE
-                    else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{feed[1].mediaPublicID}.{feed[1].fileExtension}')}",
-                    "profileImgUrl": feed[2]
-                    if USE_CLOUDINARY_STORAGE
-                    else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{feed[3]}.{feed[4]}')}",
-                    "likeCount": feed[5],
-                    "repostCount": feed[6],
-                    "bookmarkCount": feed[7],
-                    "replieCount": feed[8],
-                    "isLiked": feed[9],
-                    "isBookmarked": feed[10],
-                    "isReposted": feed[11],
-                }
-                feedObj.append(data)
+        feedObj = [
+            {
+                "userName": feed[0],
+                "postID": feed[1].id,
+                "userID": feed[1].userID,
+                "title": feed[1].text,
+                "tags": feed[1].tags,
+                "mediaPulicID": feed[1].mediaPublicID,
+                "fileType": feed[1].fileType,
+                "fileExtension": feed[1].fileExtension,
+                "visibility": feed[1].visibility,
+                "parentPostID": _getParentPost(feed[1].parentPostID, sessionUserID)
+                if not feed[1].isReply
+                else None,  # Check if post's 'isReply=True' send None because
+                "createdAt": feed[1].createdAt,
+                "ageRating": feed[
+                    1
+                ].ageRating.value,  # Return Enum class from db and get its value from 'ageRating': <PostAgeRating.pg13: 'pg13'>,
+                "category": feed[1].category,
+                "isTemplate": feed[1].isTemplate,
+                "postMediaUrl": feed[1].mediaUrl
+                if USE_CLOUDINARY_STORAGE
+                else f"{API_ROOT_URL}{url_for('postMedia.servePostMedia', fileName=f'{feed[1].mediaPublicID}.{feed[1].fileExtension}')}",
+                "profileImgUrl": feed[2]
+                if USE_CLOUDINARY_STORAGE
+                else f"{API_ROOT_URL}{url_for('profileImage.serveImage', fileName=f'{feed[3]}.{feed[4]}')}",
+                "likeCount": feed[5],
+                "repostCount": feed[6],
+                "bookmarkCount": feed[7],
+                "replieCount": feed[8],
+                "isLiked": feed[9],
+                "isBookmarked": feed[10],
+                "isReposted": feed[11],
+            }
+            for feed in getFeed
+        ]
 
-            return feedObj
-        else:
-            return []
+        return feedObj
 
     except Exception as e:
         raise Exception(e)
