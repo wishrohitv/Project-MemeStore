@@ -13,7 +13,12 @@ def runApp():
     initializeDb()
 
     app = Flask(__name__)
-    CORS(app, supports_credentials=True, origins=[os.environ.get("ORIGINS") or ""])
+    app.secret_key = os.environ.get("APP_SECRET_KEY") or "default_secret_key"
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=os.environ.get("ORIGINS").split(",") or ["*"],
+    )
 
     app.config["path"] = "backend/public"
     app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
