@@ -120,7 +120,7 @@ def queryPosts(
                 "userID": feed[1].userID,
                 "title": feed[1].text,
                 "tags": feed[1].tags,
-                "mediaPulicID": feed[1].mediaPublicID,
+                "replyingTo": feed[1].replyingTo,
                 "fileType": feed[1].fileType,
                 "fileExtension": feed[1].fileExtension,
                 "visibility": feed[1].visibility,

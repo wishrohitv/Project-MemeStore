@@ -11,6 +11,7 @@ from backend.modules import (
     request,
     secure_filename,
     uuid,
+    json,
 )
 from backend.repository.postRepository import (
     _createPost,
@@ -191,7 +192,9 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         pForm = request.form
         postVisibility = pForm.get("postVisibility")
         postTitle = pForm.get("postTitle")
-        postReplyingTo = pForm.get("postReplyingTo")
+        postReplyingTo = pForm.get(
+            "postReplyingTo"
+        )  # List(string) of usernames and parse it in python list using json.loads
         postTags = pForm.get("postTags")
         postVisibility = (
             True if not postVisibility else postVisibility.lower() == "true"
@@ -244,11 +247,11 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         if postTitle.strip() == "":
             return make_response({"error": "Text is required"}, 400)
 
-        if postReplyingTo and not isinstance(postReplyingTo, list):
+
+        if postReplyingTo and not isinstance(json.loads(postReplyingTo), list):
             return make_response(
                 {"error": "postReplyingTo must be a list of strings of usernames"}, 400
             )
-
         _createPost(
             userID=sessionUserID,
             text=postTitle,
@@ -262,7 +265,7 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
             ageRating=postAgeRating,
             isReply=isReply,
             parentPostID=parentPostID,
-            replyingTo=postReplyingTo,
+            replyingTo=json.loads(postReplyingTo) if postReplyingTo else None,
         )
         return make_response({"message": "post uploaded successfully"}, 201)
     except Exception as e:
