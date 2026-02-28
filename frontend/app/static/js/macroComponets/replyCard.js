@@ -1,7 +1,7 @@
 import { apiUploadPosts } from "../utils/base.js";
 import { createMediaPreview } from "./replyMediaPreviewCard.js";
 
-export async function replieCard(postID) {
+export async function replyCard(postID, replyingToUsernameList, postUsername) {
   try {
     const html = await fetch("/static/daisyUI/macroComponent/replyMacro.html");
     const replieHtml = await html.text();
@@ -13,9 +13,14 @@ export async function replieCard(postID) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
+
+      formData.append(
+        "postReplyingTo",
+        JSON.stringify([...new Set([...replyingToUsernameList, postUsername])]),
+      );
       try {
         const connection = await fetch(
-          apiUploadPosts + `?parentPostID=${postID}&isReplie=True`,
+          apiUploadPosts + `?parentPostID=${postID}&isReply=True`,
           {
             method: "POST",
             credentials: "include",

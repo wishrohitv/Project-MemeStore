@@ -6,7 +6,7 @@ import {
 } from "../../utils/base.js";
 
 import { postCard } from "../../macroComponets/postCard.js";
-import { replieCard } from "../../macroComponets/replyCard.js";
+import { replyCard } from "../../macroComponets/replyCard.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -63,7 +63,9 @@ export default class extends AbstractView {
           this.postContainer.appendChild(card);
           this.spinner.classList.add("hidden");
           // Add replie imput card
-          this.replieInputContainer.appendChild(await replieCard(this.postID));
+          this.replieInputContainer.appendChild(
+            await replyCard(this.postID, post.replyingTo ?? [], post.userName),
+          );
           if (connection.status !== 404) {
             if (post.replieCount !== 0) {
               this.fetchPostReplies();

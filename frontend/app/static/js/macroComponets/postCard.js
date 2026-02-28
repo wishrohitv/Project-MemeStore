@@ -8,7 +8,7 @@ import {
   flash,
 } from "../utils/base.js";
 import { formatDate } from "../utils/datetime.js";
-import { replieCard } from "./replyCard.js";
+import { replyCard } from "./replyCard.js";
 
 export async function postCard(
   clone,
@@ -39,7 +39,9 @@ export async function postCard(
         // Remove repliebox if already exists
         parentCard.querySelector("form").remove();
       } else {
-        parentCard.appendChild(await replieCard(post.postID));
+        parentCard.appendChild(
+          await replyCard(post.postID, post.replyingTo ?? [], post.userName),
+        );
       }
     });
   } else {
