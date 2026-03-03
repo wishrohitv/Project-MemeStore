@@ -135,6 +135,9 @@ def reply(
 
         # Create notifications for each mentioned user by the system (e.g., if the system automatically mentions users in a thread)
         for mentionedUsername in mentionedUsernamesBySystem:
+            if mentionedBy == mentionedUsername:
+                continue  # Skip if the user mentioned themselves
+
             notice = {
                 # Post ID where the user was mentioned
                 "postID": postID,
@@ -154,6 +157,10 @@ def reply(
         for mentionedUsername in mentionedUsernames:
             if mentionedUsername in mentionedUsernamesBySystem:
                 continue  # Skip if the username is already mentioned by the system
+
+            if mentionedBy == mentionedUsername:
+                continue  # Skip if the user mentioned themselves
+
             notice = {
                 # Post ID where the user was mentioned
                 "postID": postID,
