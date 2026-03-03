@@ -30,7 +30,7 @@ from backend.modules import (
 from backend.utils import Log, deleteMedia
 
 from .feedRepository import queryPosts
-from backend.tasks import mention, addTaskInQueue
+from backend.tasks import mention, reply, addTaskInQueue
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -74,13 +74,27 @@ def _createPost(
         # Create mention notification
         session.close()
 
-        # Send notification to mentioned users in the post
-        if text:
+        # If the post is a reply, create reply notifications for the users being replied to
+        if isReply:
             addTaskInQueue(
                 functools.partial(
-                    mention, mentionedByUserID=userID, postID=newPost.id, text=text
+                    reply,
+                    parentPostID=parentPostID,
+                    postID=newPost.id,
+                    mentionedUsernamesBySystem=replyingTo,
+                    mentionedByUserID=userID,
+                    text=text
+                    or "",  # If text is None, pass an empty string to avoid issues in the mention function
                 )
             )
+        else:
+            # Send notification to mentioned users in the post
+            if text:
+                addTaskInQueue(
+                    functools.partial(
+                        mention, mentionedByUserID=userID, postID=newPost.id, text=text
+                    )
+                )
         return make_response({"message": "post upload successfully"}, 200)
     except Exception as e:
         session.rollback()
