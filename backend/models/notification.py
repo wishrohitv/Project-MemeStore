@@ -34,3 +34,17 @@ class Notifications(Base):
     )
     readAt: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True)
     deletedAt: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True)
+
+    def __repr__(self) -> str:
+        return f"""
+            Notifications(
+                id={self.id},
+                type={self.type},
+                notice={self.notice},
+                createdAt={self.createdAt},
+                updatedAt={self.updatedAt},
+                readAt={self.readAt},
+                deletedAt={self.deletedAt},
+            )
+
+        """

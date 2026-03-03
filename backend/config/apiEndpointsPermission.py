@@ -250,6 +250,16 @@ class API_ENDPOINTS:
         rolePermission=[ROLE.USER],
         methods=["DELETE"],
     )
+    getNotifications = RouteAccess(
+        routeName="/notifications",
+        rolePermission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+    trackNotifications = RouteAccess(
+        routeName="/notifications/clicked",
+        rolePermission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["PUT"],
+    )
 
     @property
     def apiEndpoints(self) -> dict[str, RouteAccess]:

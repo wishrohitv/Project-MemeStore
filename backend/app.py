@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
 
 from backend.database import initializeDb
-from backend.tasks import startWorker
 from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask, os
 from backend.repository.getReadyRole import getReadyRole
+from backend.tasks import startWorker
 
 load_dotenv()
 
@@ -34,6 +34,9 @@ def runApp():
     # Register Bluprint for homeFeed endpoint
     from backend.routes.v1.feed import feedBlueprint
 
+    # Blueprint for notifications
+    from backend.routes.v1.notifications import notificationBlueprint
+
     # Blueprint for posts
     from backend.routes.v1.posts import postsBlueprint
 
@@ -55,6 +58,7 @@ def runApp():
     app.register_blueprint(usersBlueprint, url_prefix="/api/v1")
     app.register_blueprint(feedBlueprint, url_prefix="/api/v1")
     app.register_blueprint(collectionBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(notificationBlueprint, url_prefix="/api/v1")
 
     # getReadyRole
     getReadyRole()
