@@ -7,6 +7,7 @@ class ROLE:
     MODERATOR = 2
     USER = 3
     GUEST = 4
+    BOT = 5
 
     @property
     def roles(self) -> dict[str, int]:
