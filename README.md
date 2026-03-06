@@ -32,6 +32,9 @@ contains frontend and backend
 - Collections (User can create, edit, delete and share collections of memes like Youtube playlist)
 - Search Functionality
 - Notifications
+- **NARA** (AI chat bot similar to Grok bot)
+- Analytics (Planned - not implemented yet)
+- Chat (Planned - not implemented yet)
 
 ## Tech Stack
 - Frontend: Html, Tailwind CSS, Vanilla JS
@@ -40,7 +43,17 @@ contains frontend and backend
 - Deployment: Vercel (Frontend, Backend)
 
 ## System Architecture
-The system architecture of MemeStore is designed to be scalable and efficient, utilizing a microservices approach. The frontend is built using HTML, Tailwind CSS, and Vanilla JS, which communicates with the backend API built with Python and Flask. The backend handles user authentication, meme template management, user profiles, and other core functionalities. PostgreSQL is used as the primary database for storing user data, meme templates, and other related information. Redis is used for caching and session management to improve performance. Third-party services like Resend and Cloudinary are integrated for email delivery and media management, respectively. The application is deployed on Vercel, which provides a seamless deployment experience for both the frontend and backend components.
+### Backend
+- Built with Python and Flask
+- Uses SQLAlchemy for database ORM
+- Utilizes Flask-CORS for cross-origin resource sharing
+- Redis for caching and session management
+- Resend for email delivery
+- Cloudinary for media management
+
+### Frontend
+- Built with HTML, Tailwind CSS, and Vanilla JS
+- SPA architecture 
 
 
 ## Third-Party Services
