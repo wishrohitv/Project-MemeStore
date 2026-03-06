@@ -71,3 +71,4 @@ def _getNotifications(sessionUserID: int, mention: bool = False, offset: int = 0
         return make_response(notifications, 200)
     except Exception as e:
         Log.error(e)
+        return make_response({"error": "Internal sever error"}, 500)
