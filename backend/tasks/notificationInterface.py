@@ -1,9 +1,9 @@
-from .notifications import createNotification
+from backend.database import engine
 from backend.models import Users
 from backend.models.enums import NotificationType
 from backend.modules import sessionmaker
-from backend.database import engine
-from backend.utils import getUsername, Log
+from backend.repository.notificationRepository import _createNotification
+from backend.utils import Log, getUsername
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -13,7 +13,7 @@ def mention(
     mentionedByUserID: int,
     postID: int,
     text: str,
-) -> None:
+) -> None | Exception:
     try:
         # Extract mentioned usernames from the text
         mentionedUsernames = getUsername(text)
@@ -54,7 +54,7 @@ def mention(
                     else text,  # Short preview of the text
                 }
                 # Create the notification using the createNotification function
-                createNotification(
+                _createNotification(
                     userID=userID,
                     notice=notice,
                     type=NotificationType.mention,
@@ -69,7 +69,7 @@ def suggestion(
     postID: int,
     userID: list[int],  # list of user IDs to whom the suggestion is made
     text: str,  # title of the post or ""
-) -> dict:
+) -> None | Exception:
     notice = {
         "postID": postID,
         "text": text[150] if len(text) > 150 else text,  # Short preview of the text,
@@ -77,7 +77,7 @@ def suggestion(
 
     for _userID in userID:
         # Create the notification using the createNotification function
-        createNotification(
+        _createNotification(
             userID=_userID,
             notice=notice,
             type=NotificationType.suggestion,
@@ -92,7 +92,7 @@ def reply(
     ],  # list of usernames mentioned by system in the reply in the thread
     mentionedByUserID: int,  # user ID of post/reply author who mentioned others in the thread
     text: str,  # title of the post or ""
-) -> dict:
+) -> None | Exception:
     try:
 
         def createMentionNotification(
@@ -113,7 +113,7 @@ def reply(
             # If the mentioned user is found, create a notification for them
             if userID:
                 # Create the notification using the createNotification function
-                createNotification(
+                _createNotification(
                     userID=_userID,
                     notice=_notice,
                     type=type,
@@ -185,21 +185,21 @@ def reply(
         raise Exception(str(e))
 
 
-def warning(text: str) -> dict:
+def warning(text: str) -> None:
     # TODO: Implement the warning notification logic
     notice = {
         "text": text,
     }
 
 
-def danger(text: str) -> dict:
+def danger(text: str) -> None:
     # TODO: Implement the danger notification logic
     notice = {
         "text": text,
     }
 
 
-def systemUpdate(text: str) -> dict:
+def systemUpdate(text: str) -> None:
     # TODO: Implement the system update notification logic
     notice = {
         "text": text,

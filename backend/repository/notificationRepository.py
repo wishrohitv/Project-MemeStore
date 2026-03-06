@@ -10,6 +10,27 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
+def _createNotification(
+    userID: int | None,
+    notice: dict,
+    type: NotificationType,
+):
+    try:
+        notification = Notifications(
+            userID=userID,
+            notice=notice,
+            type=type,
+        )
+        session.add(notification)
+        session.commit()
+        session.close()
+    except Exception as e:
+        session.rollback()
+        session.close()
+        Log.critical(f"Error creating notification: {str(e)}")
+        raise Exception(str(e))
+
+
 def _getNotifications(sessionUserID: int, mention: bool = False, offset: int = 0):
     condition = []
     if mention:
