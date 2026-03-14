@@ -1,9 +1,18 @@
 from dotenv import load_dotenv
 
 from backend.database import initializeDb
-from backend.modules import CORS, HOST, PORT, SEREVR_ALLOWED_UPLOAD_FILE_SIZE, Flask, os
+from backend.modules import (
+    CORS,
+    HOST,
+    PORT,
+    SEREVR_ALLOWED_UPLOAD_FILE_SIZE,
+    Flask,
+    jsonify,
+    os,
+)
 from backend.repository.getReadyRole import getReadyRole
 from backend.tasks import startWorker
+from backend.utils import AppError
 
 load_dotenv()
 
@@ -59,6 +68,21 @@ def runApp():
     app.register_blueprint(feedBlueprint, url_prefix="/api/v1")
     app.register_blueprint(collectionBlueprint, url_prefix="/api/v1")
     app.register_blueprint(notificationBlueprint, url_prefix="/api/v1")
+
+    # Register handler for the custom exception
+
+    @app.errorhandler(AppError)
+    def handle_custom_error(error: AppError):
+        # Log the error, return a custom JSON response or render a custom template
+        response = jsonify(
+            {
+                "code": error.code,
+                "error": error.error,
+                "description": error.description,
+            }
+        )
+        response.status_code = error.code
+        return response
 
     # getReadyRole
     getReadyRole()
