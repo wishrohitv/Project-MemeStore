@@ -23,10 +23,11 @@ def runApp():
 
     app = Flask(__name__)
     app.secret_key = os.environ.get("APP_SECRET_KEY") or "default_secret_key"
+    origins = os.environ.get("ORIGINS")
     CORS(
         app,
         supports_credentials=True,
-        origins=os.environ.get("ORIGINS").split(",") or ["*"],
+        origins=origins.split(",") if origins else ["*"],
     )
 
     app.config["path"] = "backend/public"
@@ -81,7 +82,7 @@ def runApp():
                 "description": error.description,
             }
         )
-        response.status_code = error.code
+        response.status_code = error.code or 500
         return response
 
     # getReadyRole
