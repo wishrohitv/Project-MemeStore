@@ -9,6 +9,16 @@ class AppError(HTTPException):
         self.description = description
 
 
+class IndternalServerError(AppError):
+    def __init__(
+        self,
+        code=500,
+        error="IndternalServerError",
+        description="Token has expired",
+    ):
+        super().__init__(code=code, error=error, description=description)
+
+
 class ResourceNotFoundError(AppError):
     def __init__(
         self, code=404, error="ResourceNotFoundError", description="Resource not found"
