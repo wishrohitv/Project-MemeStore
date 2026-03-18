@@ -1,31 +1,38 @@
-from logging import FileHandler
-from backend.modules import logging, LOGGING_PATH, os
+from backend.modules import LOGGING_PATH, logging, os
 
-__all__ = ["Log"]
+__all__ = ["Log", "Logging"]
 
 
 class Logging:
-    def __init__(self, filename="app.log", level=logging.INFO):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, name, filename="app.log", level=logging.INFO):
+
+        self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
-        if not self.logger.handlers:
-            logDir = LOGGING_PATH
-            logFileDir = os.path.join(logDir, filename)
-            os.makedirs(logDir, exist_ok=True)
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
-            fileHandler = logging.FileHandler(logFileDir)
-            fileHandler.setFormatter(formatter)
-            fileHandler.setLevel(level)
 
-            # Stream Handler (for console output)
-            streamHander = logging.StreamHandler()
-            streamHander.setFormatter(formatter)
-            streamHander.setLevel(level)
+        if self.logger.hasHandlers():
+            self.logger.handlers.clear()
 
-            self.logger.addHandler(fileHandler)
-            self.logger.addHandler(streamHander)
+        # self.logger.propagate = False
+
+        logDir = LOGGING_PATH
+        os.makedirs(logDir, exist_ok=True)
+
+        logFile = os.path.join(logDir, filename)
+
+        formatter = logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+        )
+
+        fileHandler = logging.FileHandler(logFile)
+        fileHandler.setLevel(level)
+        fileHandler.setFormatter(formatter)
+
+        streamHandler = logging.StreamHandler()
+        streamHandler.setLevel(level)
+        streamHandler.setFormatter(formatter)
+
+        self.logger.addHandler(fileHandler)
+        self.logger.addHandler(streamHandler)
 
     def info(self, message):
         self.logger.info(message)
@@ -43,4 +50,4 @@ class Logging:
         self.logger.warning(message)
 
 
-Log = Logging()
+Log = Logging(__name__)
