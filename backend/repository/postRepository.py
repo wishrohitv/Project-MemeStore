@@ -18,6 +18,7 @@ from backend.modules import (
     delete,
     exists,
     func,
+    functools,
     make_response,
     or_,
     os,
@@ -25,12 +26,11 @@ from backend.modules import (
     sessionmaker,
     update,
     url_for,
-    functools,
 )
+from backend.tasks import addTaskInQueue, mention, reply
 from backend.utils import Log, deleteMedia
 
 from .feedRepository import queryPosts
-from backend.tasks import mention, reply, addTaskInQueue
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -322,7 +322,7 @@ def _getPostMedia(
         return None
 
 
-def _getPostByIDorReplies(
+def _getPostByIDorPostRepliesByID(
     postID: int,
     sessionUserID: int | None = None,
     fetchReplies: bool = False,

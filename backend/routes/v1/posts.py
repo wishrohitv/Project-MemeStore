@@ -6,18 +6,18 @@ from backend.modules import (
     PUBLIC_DIRECTORY_POSTS,
     USE_CLOUDINARY_STORAGE,
     Blueprint,
+    json,
     make_response,
     os,
     request,
     secure_filename,
     uuid,
-    json,
 )
 from backend.repository.postRepository import (
     _createPost,
     _deletePost,
     _getPostBookmarkedUsers,
-    _getPostByIDorReplies,
+    _getPostByIDorPostRepliesByID,
     _getPostLikedUsers,
     _getPostRepostedUsers,
     _getPostReqoutedUsers,
@@ -247,7 +247,6 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
         if postTitle.strip() == "":
             return make_response({"error": "Text is required"}, 400)
 
-
         if postReplyingTo and not isinstance(json.loads(postReplyingTo), list):
             return make_response(
                 {"error": "postReplyingTo must be a list of strings of usernames"}, 400
@@ -385,7 +384,7 @@ def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
     if not postID or not isinstance(postID, int):
         return make_response({"error": "Missing postID"}, 400)
     try:
-        return _getPostByIDorReplies(postID=postID, sessionUserID=sessionUserID)
+        return _getPostByIDorPostRepliesByID(postID=postID, sessionUserID=sessionUserID)
     except Exception as e:
         print(e)
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
@@ -402,7 +401,7 @@ def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
     if not postID:
         return make_response({"error": f"Invalid post id {postID}"}, 400)
     try:
-        return _getPostByIDorReplies(postID=postID, fetchReplies=True)
+        return _getPostByIDorPostRepliesByID(postID=postID, fetchReplies=True)
     except Exception as e:
         return make_response({"error": str(e), "message": "Internal server error"}, 500)
 
