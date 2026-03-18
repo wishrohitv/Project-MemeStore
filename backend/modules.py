@@ -15,12 +15,16 @@ import math
 
 # Import os
 import os
+import queue
 
 # Import random module
 import random
 
 # Regex module
 import re
+
+# Import threding and queue for background tasks
+import threading
 
 # Import uuid
 import uuid
@@ -89,11 +93,8 @@ from sqlalchemy.orm import (
 )
 
 # Werkzeug
+from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
 
 # Import all contents
 from backend.constant import *
-
-# Import threding and queue for background tasks
-import threading
-import queue
