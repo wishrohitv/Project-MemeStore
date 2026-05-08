@@ -1,6 +1,20 @@
 from werkzeug.exceptions import HTTPException
 
 
+class RepoError(Exception):
+    """Custom error class for repository error"""
+
+    def __init__(
+        self, statusCode: int = 500, message: str = "Error while querying database"
+    ) -> None:
+        super().__init__()
+        self.statusCode = statusCode
+        self.message = message
+
+    def __str__(self) -> str:
+        return f"{self.statusCode} {self.message}"
+
+
 class AppError(HTTPException):
     def __init__(self, code=500, error="AppError", description="Something went wrong"):
         super().__init__(description=description)
