@@ -9,6 +9,8 @@ USE_CLOUDINARY_STORAGE: bool = False  # If true then cloudinary service will be 
 
 USE_EMAIL_SERVICE: bool = False  # If true then email service will be used for sending OTP, else email service will be used to send OTP (RESEND_API_KEY)
 
+USE_BOT_SERVICE: bool = True  # If true then bot service will be used for generating responses by [@botuser], else default behavior will be used
+
 # Background task thread
 BACKGROUND_TASK_NUMBER_OF_THREADS: int = (
     3  # Number of worker threads for background task processing

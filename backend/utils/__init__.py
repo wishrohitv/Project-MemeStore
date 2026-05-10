@@ -1,4 +1,4 @@
-from .appError import AppError
+from .appError import *
 from .cloudinaryService import deleteMedia, uploadMedia
 from .dateTime import datetimeUTC
 from .formateToCamel import formateToCamel

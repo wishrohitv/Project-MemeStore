@@ -1,8 +1,7 @@
-from typing_extensions import Collection
-
 from backend.database import engine
 from backend.models import CollectionData, Collections
 from backend.modules import datetime, delete, or_, sessionmaker, update
+from backend.utils import RepoError
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -26,7 +25,7 @@ def _createCollection(
         session.close()
     except Exception as e:
         session.rollback()
-        raise Exception(f"Error while creating collection :{e}")
+        raise RepoError(500, f"Error while creating collection :{e}")
 
 
 def _addPostToCollection(collectionID: int, sessionUserID: int, postID: int):
@@ -37,14 +36,14 @@ def _addPostToCollection(collectionID: int, sessionUserID: int, postID: int):
             .first()
         )
         if not collection:
-            raise Exception("Collection not found or unauthorized")
+            raise RepoError(404, "Collection not found or unauthorized")
         stmt = CollectionData(collectionId=collectionID, postID=postID)
         session.add(stmt)
         session.commit()
         session.close()
     except Exception as e:
         session.rollback()
-        raise Exception(f"Error while creating collection :{e}")
+        raise RepoError(500, f"Error while creating collection :{e}")
 
 
 def _removePostToCollection(collectionID: int, sessionUserID: int, postID: int):
@@ -55,7 +54,7 @@ def _removePostToCollection(collectionID: int, sessionUserID: int, postID: int):
             .first()
         )
         if not collection:
-            raise Exception("Collection not found or unauthorized")
+            raise RepoError(404, "Collection not found or unauthorized")
         stmt = delete(CollectionData).filter_by(
             collectionID=collectionID, postID=postID
         )
@@ -64,7 +63,7 @@ def _removePostToCollection(collectionID: int, sessionUserID: int, postID: int):
         session.close()
     except Exception as e:
         session.rollback()
-        raise Exception(f"Error while creating collection :{e}")
+        raise RepoError(500, f"Error while removing post from collection :{e}")
 
 
 def _deleteCollection(collectionID: int, sessionUserID: int):
@@ -75,7 +74,7 @@ def _deleteCollection(collectionID: int, sessionUserID: int):
             .first()
         )
         if not collection:
-            raise Exception("Collection not found or unauthorized")
+            raise RepoError(404, "Collection not found or unauthorized")
         stmt = delete(CollectionData).filter_by(collectionID=collectionID)
         stmt1 = delete(Collections).filter_by(id=collectionID)
         session.execute(stmt)
@@ -84,4 +83,4 @@ def _deleteCollection(collectionID: int, sessionUserID: int):
         session.close()
     except Exception as e:
         session.rollback()
-        raise Exception(f"Error while creating collection :{e}")
+        raise RepoError(500, f"Error while deleting collection :{e}")
