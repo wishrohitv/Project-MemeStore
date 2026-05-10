@@ -1,33 +1,33 @@
-from backend.config import API_ENDPOINTS, ROLE
-from backend.modules import functools, make_response, re, request
-from backend.repository.checkUserRole import getUserRole
-from backend.utils import LoggedUser, decodeJwtToken
+from config import API_ENDPOINTS, ROLE
+from modules import functools, make_response, re, request
+from repository.checkUserRole import getUserRole
+from utils import LoggedUser, decodeJwtToken
 
-apiEndpointsPartialAccess = API_ENDPOINTS().apiEndpointsPartialAccess
+apiEndpointsPartialAccess = API_ENDPOINTS().api_endpoints_partial_access
 
 
-def verifyRequestMiddleware(endpoint: str):
+def verify_request_middleware(endpoint: str):
     # below decorator
-    def verifyClientRequest(func):
+    def verify_client_request(func):
         @functools.wraps(func)
-        def checkClientRequest(*args, **kwargs):
+        def check_client_request(*args, **kwargs):
             # before main function runs
-            accessToken = None
+            access_token = None
             authorization = request.headers.get("authorization")
-            refreshToken = request.headers.get("refreshToken")
+            refresh_token = request.headers.get("refresh_token")
             # Check request medium if mobile
             if authorization is not None and re.match(
                 "^Bearer *([^ ]+)", authorization, flags=0
             ):
-                accessToken = authorization.split(" ")[1]
+                access_token = authorization.split(" ")[1]
             else:
                 # Check of web
-                accessToken = request.cookies.get("accessToken")
-                refreshToken = request.cookies.get("refreshToken")
+                access_token = request.cookies.get("access_token")
+                refresh_token = request.cookies.get("refresh_token")
 
-            if accessToken:
+            if access_token:
                 try:
-                    decodedToken = decodeJwtToken(accessToken)
+                    decodedToken = decodeJwtToken(access_token)
                     if decodedToken:
                         # Match the user id and role for this endpoint
                         result = getUserRole(endpoint, decodedToken["payload"]["role"])
@@ -39,8 +39,8 @@ def verifyRequestMiddleware(endpoint: str):
                                     roleName=ROLE().rolesIds[
                                         decodedToken["payload"]["role"]
                                     ],
-                                    accessToken=accessToken,
-                                    refreshToken=refreshToken,
+                                    access_token=access_token,
+                                    refresh_token=refresh_token,
                                 ),
                                 *args,
                                 **kwargs,
@@ -74,6 +74,6 @@ def verifyRequestMiddleware(endpoint: str):
 
         # Renaming the function name:
         # checkClientRequest.__name__ = func.__name__
-        return checkClientRequest
+        return check_client_request
 
-    return verifyClientRequest
+    return verify_client_request

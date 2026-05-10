@@ -1,4 +1,4 @@
-from backend.modules import (
+from modules import (
     TIMESTAMP,
     ForeignKey,
     List,
@@ -9,7 +9,7 @@ from backend.modules import (
     mapped_column,
     relationship,
 )
-from backend.utils import datetimeUTC
+from utils import datetime_utc
 
 from .base import Base
 
@@ -17,11 +17,11 @@ from .base import Base
 class BlockedUsers(Base):
     __tablename__ = "blocked_users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    userID: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    blockedBy: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    createdAt: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), default=datetimeUTC()
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    blocked_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetime_utc()
     )
 
     def __repr__(self) -> str:
-        return f"BlockedUser(postsID={self.userID!r}, blockedBy={self.blockedBy!r})"
+        return f"BlockedUser(user_id={self.user_id!r}, blocked_by={self.blocked_by!r})"

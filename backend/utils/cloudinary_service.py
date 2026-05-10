@@ -8,7 +8,7 @@ import cloudinary.uploader
 cloudinary.config(secure=True)
 
 
-def uploadMedia(file, public_id):
+def upload_media(file, public_id):
     try:
         res = cloudinary.uploader.upload(
             file=file,
@@ -22,7 +22,7 @@ def uploadMedia(file, public_id):
         raise Exception(e)
 
 
-def deleteMedia(public_id: list[str]):
+def delete_media(public_id: list[str]):
     try:
         res = cloudinary.api.delete_resources(public_ids=public_id)
         return res

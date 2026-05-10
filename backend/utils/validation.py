@@ -1,7 +1,7 @@
-from backend.modules import re
+from modules import re
 
 
-def getUsername(text: str) -> list:
+def get_user_names(text: str) -> list:
     """
     Extracts all mentioned usernames from the given text.
     Usernames are expected to be prefixed with '@' and
@@ -13,13 +13,13 @@ def getUsername(text: str) -> list:
     return matches
 
 
-def validateEmail(email: str) -> bool:
+def validate_email(email: str) -> bool:
     pass
 
 
-def validatePassword(password: str) -> bool:
+def validate_password(password: str) -> bool:
     pass
 
 
-def validateUsername(username: str) -> bool:
+def validate_username(username: str) -> bool:
     pass

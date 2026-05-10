@@ -1,5 +1,5 @@
 from backend.config import API_ENDPOINTS
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
+from backend.middlewares.verify_client_request import verifyRequestMiddleware
 from backend.modules import Blueprint, make_response, request
 from backend.repository.feedRepository import getHomeFeed
 from backend.utils import LoggedUser

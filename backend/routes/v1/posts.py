@@ -1,6 +1,6 @@
-from backend.config import API_ENDPOINTS
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
-from backend.modules import (
+from config import API_ENDPOINTS
+from middlewares.verify_client_request import verify_request_middleware
+from modules import (
     ALLOWED_POST_FILE_MIMETYPE,
     ALLOWED_POST_FILE_SIZE,
     PUBLIC_DIRECTORY_POSTS,
@@ -13,7 +13,7 @@ from backend.modules import (
     secure_filename,
     uuid,
 )
-from backend.repository.postRepository import (
+from repository.postRepository import (
     _createPost,
     _deletePost,
     _getPostBookmarkedUsers,
@@ -28,7 +28,7 @@ from backend.repository.postRepository import (
     _updatePost,
     _userPosts,
 )
-from backend.utils import Log, LoggedUser, uploadMedia
+from utils import Log, LoggedUser, uploadMedia
 
 postsBlueprint = Blueprint("posts", __name__)
 
@@ -38,9 +38,9 @@ route = API_ENDPOINTS()
 # /posts
 # Unlogged user can access public posts
 @postsBlueprint.route(
-    f"{route.posts.routeName}/<string:userName>", methods=route.posts.methods
+    f"{route.posts.route_name}/<string:userName>", methods=route.posts.methods
 )
-@verifyRequestMiddleware(route.posts.routeName)
+@verify_request_middleware(route.posts.route_name)
 def posts(loggedUser: LoggedUser | None, *args, **kwargs):
     userName = kwargs.get("userName")
     orderBy = request.args.get("orderBy")
@@ -67,10 +67,10 @@ def posts(loggedUser: LoggedUser | None, *args, **kwargs):
 
 # /posts/liked-users
 @postsBlueprint.route(
-    f"{route.postsLikedUsers.routeName}/<int:postID>",
+    f"{route.postsLikedUsers.route_name}/<int:postID>",
     methods=route.postsLikedUsers.methods,
 )
-@verifyRequestMiddleware(route.postsLikedUsers.routeName)
+@verify_request_middleware(route.postsLikedUsers.route_name)
 def postLikedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID if loggedUser else None
@@ -90,10 +90,10 @@ def postLikedUser(loggedUser: LoggedUser | None, *args, **kwargs):
 
 
 @postsBlueprint.route(
-    f"{route.postBookmaredUsers.routeName}/<int:postID>",
+    f"{route.postBookmaredUsers.route_name}/<int:postID>",
     methods=route.postBookmaredUsers.methods,
 )
-@verifyRequestMiddleware(route.postBookmaredUsers.routeName)
+@verify_request_middleware(route.postBookmaredUsers.route_name)
 def postBookmarkedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID if loggedUser else None
@@ -113,10 +113,10 @@ def postBookmarkedUser(loggedUser: LoggedUser | None, *args, **kwargs):
 
 
 @postsBlueprint.route(
-    f"{route.postRepostedUsers.routeName}/<int:postID>",
+    f"{route.postRepostedUsers.route_name}/<int:postID>",
     methods=route.postRepostedUsers.methods,
 )
-@verifyRequestMiddleware(route.postRepostedUsers.routeName)
+@verify_request_middleware(route.postRepostedUsers.route_name)
 def postRepostedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID if loggedUser else None
@@ -136,10 +136,10 @@ def postRepostedUser(loggedUser: LoggedUser | None, *args, **kwargs):
 
 
 @postsBlueprint.route(
-    f"{route.postReqoutedUsers.routeName}/<int:postID>",
+    f"{route.postReqoutedUsers.route_name}/<int:postID>",
     methods=route.postReqoutedUsers.methods,
 )
-@verifyRequestMiddleware(route.postReqoutedUsers.routeName)
+@verify_request_middleware(route.postReqoutedUsers.route_name)
 def postReqoutedUser(loggedUser: LoggedUser | None, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID if loggedUser else None
@@ -159,8 +159,8 @@ def postReqoutedUser(loggedUser: LoggedUser | None, *args, **kwargs):
 
 
 # /posts/upload
-@postsBlueprint.route(route.uploadPosts.routeName, methods=route.uploadPosts.methods)
-@verifyRequestMiddleware(route.uploadPosts.routeName)
+@postsBlueprint.route(route.uploadPosts.route_name, methods=route.uploadPosts.methods)
+@verify_request_middleware(route.uploadPosts.route_name)
 def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
 
@@ -274,9 +274,9 @@ def uploadPosts(loggedUser: LoggedUser, *args, **kwargs):
 
 # /posts/reposts
 @postsBlueprint.route(
-    f"{route.repostPosts.routeName}/<int:postID>", methods=route.repostPosts.methods
+    f"{route.repostPosts.route_name}/<int:postID>", methods=route.repostPosts.methods
 )
-@verifyRequestMiddleware(route.repostPosts.routeName)
+@verify_request_middleware(route.repostPosts.route_name)
 def repostPost(loggedUser: LoggedUser, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID = loggedUser.userID
@@ -287,9 +287,9 @@ def repostPost(loggedUser: LoggedUser, *args, **kwargs):
 
 # /posts/like
 @postsBlueprint.route(
-    f"{route.postLike.routeName}/<int:postID>", methods=route.postLike.methods
+    f"{route.postLike.route_name}/<int:postID>", methods=route.postLike.methods
 )
-@verifyRequestMiddleware(route.postLike.routeName)
+@verify_request_middleware(route.postLike.route_name)
 def toggleLike(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
 
@@ -305,9 +305,9 @@ def toggleLike(loggedUser: LoggedUser, *agrs, **kwargs):
 
 # /posts/bookmark
 @postsBlueprint.route(
-    f"{route.postBookmark.routeName}/<int:postID>", methods=route.postBookmark.methods
+    f"{route.postBookmark.route_name}/<int:postID>", methods=route.postBookmark.methods
 )
-@verifyRequestMiddleware(route.postBookmark.routeName)
+@verify_request_middleware(route.postBookmark.route_name)
 def toggleBookmark(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
 
@@ -323,9 +323,9 @@ def toggleBookmark(loggedUser: LoggedUser, *agrs, **kwargs):
 
 # /posts/delete
 @postsBlueprint.route(
-    f"{route.deletePost.routeName}/<int:postID>", methods=route.deletePost.methods
+    f"{route.deletePost.route_name}/<int:postID>", methods=route.deletePost.methods
 )
-@verifyRequestMiddleware(route.deletePost.routeName)
+@verify_request_middleware(route.deletePost.route_name)
 def deletePost(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     postID = kwargs.get("postID")
@@ -341,9 +341,9 @@ def deletePost(loggedUser: LoggedUser, *args, **kwargs):
 
 # /posts/update
 @postsBlueprint.route(
-    f"{route.updatePost.routeName}/<int:postID>", methods=route.updatePost.methods
+    f"{route.updatePost.route_name}/<int:postID>", methods=route.updatePost.methods
 )
-@verifyRequestMiddleware(route.updatePost.routeName)
+@verify_request_middleware(route.updatePost.route_name)
 def updatePost(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     postID = kwargs.get("postID")
@@ -374,10 +374,10 @@ def updatePost(loggedUser: LoggedUser, *args, **kwargs):
 
 # /posts
 @postsBlueprint.route(
-    f"{route.posts.routeName}/<int:postID>",
+    f"{route.posts.route_name}/<int:postID>",
     methods=route.posts.methods,
 )
-@verifyRequestMiddleware(route.posts.routeName)
+@verify_request_middleware(route.posts.route_name)
 def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
     postID = kwargs.get("postID")
     sessionUserID: int | None = loggedUser.userID if loggedUser else None
@@ -392,10 +392,10 @@ def postsByID(loggedUser: LoggedUser | None = None, *args, **kwargs):
 
 # /posts/replies
 @postsBlueprint.route(
-    f"{route.postReplies.routeName}/<int:postID>",
+    f"{route.postReplies.route_name}/<int:postID>",
     methods=route.postReplies.methods,
 )
-@verifyRequestMiddleware(route.postReplies.routeName)
+@verify_request_middleware(route.postReplies.route_name)
 def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
     postID: int | None = kwargs.get("postID")
     if not postID:
@@ -408,10 +408,10 @@ def postsReplies(loggedUser: LoggedUser | None = None, *args, **kwargs):
 
 # /posts/report
 @postsBlueprint.route(
-    f"{route.reportPost.routeName}/<int:postID>",
+    f"{route.reportPost.route_name}/<int:postID>",
     methods=route.reportPost.methods,
 )
-@verifyRequestMiddleware(route.reportPost.routeName)
+@verify_request_middleware(route.reportPost.route_name)
 def reportPost(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     postID: int | None = kwargs.get("postID")

@@ -1,6 +1,6 @@
-from backend.config import API_ENDPOINTS
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
-from backend.modules import (
+from config import API_ENDPOINTS
+from middlewares.verify_client_request import verify_request_middleware
+from modules import (
     ALLOWED_PROFILE_FILE_MIMETYPE,
     ALLOWED_PROFILE_FILE_SIZE,
     PUBLIC_DIRECTORY_PROFILES,
@@ -12,7 +12,7 @@ from backend.modules import (
     secure_filename,
     uuid,
 )
-from backend.repository.userRespository import (
+from repository.userRespository import (
     _addFollower,
     _blockUser,
     _removeFollower,
@@ -22,33 +22,16 @@ from backend.repository.userRespository import (
     updateProfileImg,
     updateUser,
 )
-from backend.utils import LoggedUser, uploadMedia
+from utils import LoggedUser, upload_media
 
 usersBlueprint = Blueprint("users", __name__)
 
 route = API_ENDPOINTS()
 
 
-# /user/auth sessionUser only
-@usersBlueprint.route(
-    f"{route.userInSession.routeName}", methods=route.userInSession.methods
-)
-@verifyRequestMiddleware(route.userInSession.routeName)
-def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
-    try:
-        userID = loggedUser.userID
-        return getUserProfile(
-            _userID=userID,
-        )
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
-
-
 # /user/<string:userName>
-@usersBlueprint.route(
-    f"{route.user.routeName}/<string:userName>", methods=route.user.methods
-)
-@verifyRequestMiddleware(route.user.routeName)
+@usersBlueprint.route(f"{route.user.route_name}", methods=route.user.methods)
+@verify_request_middleware(route.user.route_name)
 def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
     userName: str | None = kwargs.get("userName") or request.args.get("userName")
     userID = request.args.get("userID")
@@ -73,7 +56,7 @@ def usersGetInfo(loggedUser: LoggedUser | None = None, *args, **kwargs):
 
 # /user/update
 @usersBlueprint.route(route.userUpdate.routeName, methods=route.userUpdate.methods)
-@verifyRequestMiddleware(route.userUpdate.routeName)
+@verify_request_middleware(route.userUpdate.routeName)
 def usersUpdateInfo(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     try:
@@ -97,7 +80,7 @@ def usersUpdateInfo(loggedUser: LoggedUser, *args, **kwargs):
 @usersBlueprint.route(
     route.userChangeProfile.routeName, methods=route.userChangeProfile.methods
 )
-@verifyRequestMiddleware(route.userChangeProfile.routeName)
+@verify_request_middleware(route.userChangeProfile.routeName)
 def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
     try:
         profileMediaUid = str(uuid.uuid4())
@@ -122,7 +105,7 @@ def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
         _mediaUrl = None
         _mediaPublicID = None
         if USE_CLOUDINARY_STORAGE:
-            cloudResponse = uploadMedia(file=file.stream, public_id=profileMediaUid)
+            cloudResponse = upload_media(file=file.stream, public_id=profileMediaUid)
             _mediaUrl = cloudResponse.get("url")
             _mediaPublicID = cloudResponse.get("public_id")
         else:
@@ -145,7 +128,7 @@ def usersUpdateProfileImg(loggedUser: LoggedUser, *args, **kwargs):
 
 # /user/delete
 @usersBlueprint.route(route.deleteUser.routeName, methods=route.deleteUser.methods)
-@verifyRequestMiddleware(route.deleteUser.routeName)
+@verify_request_middleware(route.deleteUser.routeName)
 def usersDelete():
     raise NotImplementedError()
 
@@ -154,7 +137,7 @@ def usersDelete():
 @usersBlueprint.route(
     route.userRemoveFollower.routeName, methods=route.userRemoveFollower.methods
 )
-@verifyRequestMiddleware(route.userRemoveFollower.routeName)
+@verify_request_middleware(route.userRemoveFollower.routeName)
 def removeFollower(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     body = request.get_json()
@@ -175,7 +158,7 @@ def removeFollower(loggedUser: LoggedUser, *args, **kwargs):
 @usersBlueprint.route(
     route.userAddFollower.routeName, methods=route.userAddFollower.methods
 )
-@verifyRequestMiddleware(route.userAddFollower.routeName)
+@verify_request_middleware(route.userAddFollower.routeName)
 def addFollower(loggedUser: LoggedUser, *agrs, **kwargs):
     sessionUserID = loggedUser.userID
     body = request.get_json()
@@ -195,7 +178,7 @@ def addFollower(loggedUser: LoggedUser, *agrs, **kwargs):
 @usersBlueprint.route(
     f"{route.userBlock.routeName}/<int:userID>", methods=route.userBlock.methods
 )
-@verifyRequestMiddleware(route.userBlock.routeName)
+@verify_request_middleware(route.userBlock.routeName)
 def blockUser(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     userID = kwargs.get("userID")
@@ -207,7 +190,7 @@ def blockUser(loggedUser: LoggedUser, *args, **kwargs):
 @usersBlueprint.route(
     f"{route.userUnblock.routeName}/<int:userID>", methods=route.userUnblock.methods
 )
-@verifyRequestMiddleware(route.userUnblock.routeName)
+@verify_request_middleware(route.userUnblock.routeName)
 def unblockUser(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     userID = kwargs.get("userID")
@@ -219,7 +202,7 @@ def unblockUser(loggedUser: LoggedUser, *args, **kwargs):
 @usersBlueprint.route(
     f"{route.userReport.routeName}/<int:userID>", methods=route.userReport.methods
 )
-@verifyRequestMiddleware(route.userReport.routeName)
+@verify_request_middleware(route.userReport.routeName)
 def reportUser(loggedUser: LoggedUser, *args, **kwargs):
     sessionUserID = loggedUser.userID
     userID = kwargs.get("userID")

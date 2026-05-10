@@ -1,9 +1,9 @@
 from backend.config import API_ENDPOINTS
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
+from backend.middlewares.verify_client_request import verifyRequestMiddleware
 from backend.modules import Blueprint, make_response, request
 from backend.repository.notificationRepository import _getNotifications
 from backend.utils import Log, LoggedUser
-from backend.utils.appError import AppError, RateLimitExceededError
+from backend.utils.app_errors import AppError, RateLimitExceededError
 from backend.utils.logger import Logging
 
 notificationBlueprint = Blueprint("notifications", __name__)

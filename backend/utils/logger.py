@@ -1,4 +1,4 @@
-from backend.modules import LOGGING_PATH, logging, os
+from modules import LOGGING_PATH, logging, os
 
 __all__ = ["Log", "Logging"]
 

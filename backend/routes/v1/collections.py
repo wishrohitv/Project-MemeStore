@@ -1,7 +1,7 @@
 from flask.globals import request
 
 from backend.config import API_ENDPOINTS
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
+from backend.middlewares.verify_client_request import verifyRequestMiddleware
 from backend.modules import Blueprint, make_response
 from backend.repository.collectionRepository import (
     _addPostToCollection,

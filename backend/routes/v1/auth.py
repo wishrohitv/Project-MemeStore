@@ -1,5 +1,5 @@
 from backend.config import API_ENDPOINTS, ROLE
-from backend.middlewares.verifyClientRequest import verifyRequestMiddleware
+from backend.middlewares.verify_client_request import verifyRequestMiddleware
 from backend.models import AccountStatus
 from backend.modules import (
     ACCESS_TOKEN_EXPIRY_MINUTES,
@@ -66,7 +66,7 @@ def signup():
         return make_response({"error": "Expect json body"}, 401)
 
 
-# "/auth/login"
+# /auth/login
 @authBlueprint.route(route.loginUser.routeName, methods=route.loginUser.methods)
 def login():
     try:
@@ -138,3 +138,18 @@ def generateOTP(userID):
 )
 def verify(userID, otp):
     return _verifyUser(userID, otp)
+
+
+# /auth/c/user sessionUser only
+@usersBlueprint.route(
+    f"{route.auth_current_user.route_name}", methods=route.auth_current_user.methods
+)
+@verify_request_middleware(route.auth_current_user.route_name)
+def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
+    try:
+        userID = loggedUser.user_id
+        return getUserProfile(
+            _userID=userID,
+        )
+    except Exception as e:
+        return make_response({"error": str(e)}, 500)

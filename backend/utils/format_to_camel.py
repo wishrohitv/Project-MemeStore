@@ -1,4 +1,4 @@
-def formateToCamel(val: str) -> str:
+def format_to_camel(val: str) -> str:
     """
     Args:
         "HELLO_WORLD_what"

@@ -1,4 +1,4 @@
-from backend.utils.formateToCamel import formateToCamel
+from utils.format_to_camel import format_to_camel
 
 
 # Roles and with id in database
@@ -16,7 +16,7 @@ class ROLE:
         return {
             # Convert the role name to lowercase (e.g., 'SUPER_ADMIN' -> 'superAdmin')
             # You might need to adjust the key generation based on your desired output
-            formateToCamel(k): v
+            format_to_camel(k): v
             for k, v in self.__class__.__dict__.items()
             if isinstance(v, int) and k.isupper()
         }
@@ -26,7 +26,7 @@ class ROLE:
         return {
             # Convert the role name to lowercase (e.g., 'SUPER_ADMIN' -> 'superAdmin')
             # You might need to adjust the key generation based on your desired output
-            v: formateToCamel(k)
+            v: format_to_camel(k)
             for k, v in self.__class__.__dict__.items()
             if isinstance(v, int) and k.isupper()
         }
