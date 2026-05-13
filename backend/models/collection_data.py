@@ -21,20 +21,20 @@ from .base import Base
 class CollectionData(Base):
     __tablename__ = "collection_data"
     id: Mapped[int] = mapped_column(primary_key=True)
-    collectionID: Mapped[int] = mapped_column(ForeignKey("collections.id"))
-    postID: Mapped[int] = mapped_column(ForeignKey("posts.id"))
-    createdAt: Mapped[datetime] = mapped_column(
+    collection_id: Mapped[int] = mapped_column(ForeignKey("collections.id"))
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), default=datetime_utc()
     )
-    updatedAt: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), onupdate=datetime_utc(), default=datetime_utc()
     )
 
     def __repr__(self):
         return f"""CollectionData(
                 id={self.id!r},
-                collectionId={self.collectionID!r},
-                postId={self.postID!r},
-                createdAt={self.createdAt!r},
-                updatedAt={self.updatedAt!r}
+                collectionId={self.collection_id!r},
+                post_id={self.post_id!r},
+                created_at={self.created_at!r},
+                updated_at={self.updated_at!r}
             )"""

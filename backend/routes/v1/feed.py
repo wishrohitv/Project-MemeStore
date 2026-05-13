@@ -1,7 +1,7 @@
 from config import API_ENDPOINTS
 from middlewares.verify_client_request import verify_request_middleware
 from modules import Blueprint, make_response, request
-from repository.feed_repository import getHomeFeed
+from repository.feed_repository import _get_home_feed
 from utils import LoggedUser
 
 feed_blueprint = Blueprint("feed", __name__)
@@ -25,12 +25,12 @@ def getFeed(logged_user: LoggedUser | None = None, *args, **kwargs):
     if limit == 0 or limit > 30:
         return make_response({"error": "Invalid limit"}, 400)
     try:
-        return getHomeFeed(
+        return _get_home_feed(
             category=category_ids,
             offset=offset,
             limit=limit,
-            session_user_ids=session_user_ids,
-            fetchTemplate=template,
+            session_user_id=session_user_ids,
+            fetch_template=template,
         )
     except Exception as e:
         return make_response({"error": str(e)}, 500)

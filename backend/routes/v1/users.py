@@ -169,16 +169,12 @@ def add_follower(logged_user: LoggedUser, *agrs, **kwargs):
     session_user_id = logged_user.user_id
     target_user_id = kwargs.get("user_id")
 
-
     if not isinstance(target_user_id, int):
         return make_response({"error": f"Invalid {target_user_id} datatype"})
     if target_user_id == session_user_id:
         return make_response({"error": "user can't follow himself"}, 409)
     else:
         return _add_follower(session_user_id, target_user_id)
-
-    else:
-        return make_response({"error": "Expect json body"}, 401)
 
 
 @users_blueprint.route(route.user_block.route_name, methods=route.user_block.methods)

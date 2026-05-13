@@ -37,14 +37,14 @@ class API_ENDPOINTS:
     )
     auth_generate_otp = RouteAccess(
         # Generate otp for verification
-        route_name="/auth/otp/generate",
+        route_name="/auth/otp/generate/<int:user_id>",
         role_permission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["POST"],
         partial_access=True,
     )
     auth_verify = RouteAccess(
         # Verify otp
-        route_name="/auth/otp/verify",
+        route_name="/auth/otp/verify/<int:user_id>/<string:otp>",
         role_permission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["POST"],
         partial_access=True,
@@ -300,28 +300,28 @@ class API_ENDPOINTS:
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["GET"],
     )
-    create_collection = RouteAccess(
+    ollection_create = RouteAccess(
         # Create a new collection
         route_name="/collections",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["POST"],
     )
-    delete_collection = RouteAccess(
+    collection_delete = RouteAccess(
         route_name="/collections/<int:collection_id>",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["DELETE"],
     )
-    update_collection = RouteAccess(
+    collection_update = RouteAccess(
         route_name="/collections/<int:collection_id>",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["PATCH"],
     )
-    add_post_to_collection = RouteAccess(
+    collection_add_post = RouteAccess(
         route_name="/collections/<int:collection_id>/<int:post_id>",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["POST"],
     )
-    remove_post_from_collection = RouteAccess(
+    collection_remove_post = RouteAccess(
         route_name="/collections/<int:collection_id>/<int:post_id>",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["DELETE"],

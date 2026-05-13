@@ -30,7 +30,7 @@ from modules import (
 from tasks import add_task_in_queue, mention, reply
 from utils import Log, delete_media
 
-from .feed_repository import queryPosts
+from .feed_repository import _query_posts
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -262,7 +262,7 @@ def _update_post(
 
 
 def _user_posts(
-    user_name: str,
+    username: str,
     session_user_id: int | None = None,
     category: int | None = None,
     order_by="recent",
@@ -272,8 +272,8 @@ def _user_posts(
     offset: int = 0,
 ):
     """
-    Check if user is logged and session_user_id = user_name then fetch private posts too
-    if user is logged but session_user_id != user_name then fetch public posts only
+    Check if user is logged and session_user_id = username then fetch private posts too
+    if user is logged but session_user_id != username then fetch public posts only
     else fetch public posts only
     """
     try:
@@ -284,9 +284,9 @@ def _user_posts(
         if not session_user_id:
             conditions.append(Posts.visibility)
 
-        conditions.append(Users.username == user_name)
+        conditions.append(Users.username == username)
 
-        user = session.query(Users).where(Users.username == user_name).first()
+        user = session.query(Users).where(Users.username == username).first()
         if not user:
             return make_response({"error": "User not found"}, 404)
         if user.account_status == "suspended":
@@ -299,7 +299,7 @@ def _user_posts(
         if fetch_bookmarked:
             conditions.append(Bookmark.user_id == user.id)
 
-        posts = queryPosts(
+        posts = _query_posts(
             conditions=conditions,
             offset=offset,
             limit=limit,
@@ -372,7 +372,7 @@ def _get_post_by_id_or_post_replies_by_id(
                 if not post.visibility:
                     return make_response({"error": "Post is private"}, 403)
                 conditions.append(Posts.visibility)
-    posts_or_replies = queryPosts(
+    posts_or_replies = _query_posts(
         conditions=conditions,
         offset=offset,
         limit=limit,
@@ -450,17 +450,19 @@ def _get_post_reqouted_users(
     )
 
 
-def _getPostBookmarkedUsers(
-    postID: int,
-    sessionUserID: int | None = None,
+def _get_post_bookmarked_users(
+    post_id: int,
+    session_user_id: int | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
-    joinModel = Bookmark
-    joinConditon = Users.id == Bookmark.user_id
-    whereConditon = [Bookmark.user_id == postID]
+    join_model = Bookmark
+    join_condition = Users.id == Bookmark.user_id
+    where_condition = [
+        Bookmark.post_id == post_id
+    ]  # Changed Bookmark.user_id to Bookmark.post_id
     return _fetch_post_users(
-        joinModel, joinConditon, whereConditon, sessionUserID, limit, offset
+        join_model, join_condition, where_condition, session_user_id, limit, offset
     )
 
 
@@ -503,7 +505,7 @@ def _fetch_post_users(
         fetched_users = [
             {
                 "user_id": user.id,
-                "user_name": user.username,
+                "username": user.username,
                 "name": user.name,
                 "profile_img_url": user.media_url
                 if USE_CLOUDINARY_STORAGE

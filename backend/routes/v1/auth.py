@@ -12,12 +12,13 @@ from modules import (
     request,
 )
 from repository.user_respository import (
-    _authenticateUser,
-    _createUser,
-    _generateOTPforUser,
+    _generate_otp_for_user,
+    _get_user_profile,
+    _login_user,
     _logout,
-    _refreshTokens,
-    _verifyUser,
+    _refresh_tokens,
+    _signup_user,
+    _verify_user,
 )
 from utils import LoggedUser
 
@@ -35,31 +36,31 @@ route = API_ENDPOINTS()
 
 
 # auth/signup
-@auth_blueprint.route(route.signupUser.routeName, methods=route.signupUser.methods)
+@auth_blueprint.route(route.auth_signup.route_name, methods=route.auth_signup.methods)
 def signup():
-    clientBody = request.get_json()
-    if isinstance(clientBody, dict):
-        name = clientBody.get("name")
-        userName = clientBody.get("userName")
-        email = clientBody.get("email")
-        password1 = clientBody.get("password1")
-        password2 = clientBody.get("password2")
-        country = clientBody.get("country") if None else "world"
+    body = request.get_json()
+    if isinstance(body, dict):
+        name = body.get("name")
+        username = body.get("username")
+        email = body.get("email")
+        password1 = body.get("password1")
+        password2 = body.get("password2")
+        country = body.get("country") if None else "world"
 
-        if not (userName or email or password1 or password2):
+        if not (username or email or password1 or password2):
             return make_response(
-                {"error": "userName, email and password are required"}, 400
+                {"error": "username, email and password are required"}, 400
             )
         if password1 != password2:
             return make_response({"error": "Passwords do not match"}, 400)
 
-        return _createUser(
+        return _signup_user(
             name=name,
-            userName=userName,
+            username=username,
             email=email,
             password=password1,
             role=ROLE.USER,  # Defualt role,
-            accountStatus=AccountStatus.active,
+            account_status=AccountStatus.active,
             country=country,
         )
     else:
@@ -67,20 +68,20 @@ def signup():
 
 
 # /auth/login
-@auth_blueprint.route(route.loginUser.routeName, methods=route.loginUser.methods)
+@auth_blueprint.route(route.auth_login.route_name, methods=route.auth_login.methods)
 def login():
     try:
-        clientBody = request.get_json()
-        if isinstance(clientBody, dict):
-            userName = clientBody.get("userName")
-            email = clientBody.get("email")
-            password = clientBody.get("password")
-            if not (userName or email):
+        body = request.get_json()
+        if isinstance(body, dict):
+            username = body.get("username")
+            email = body.get("email")
+            password = body.get("password")
+            if not (username or email):
                 return make_response({"error": "Username or email is required"}, 400)
             if not password:
                 return make_response({"error": "Password is required"}, 400)
 
-            return _authenticateUser(userName=userName, email=email, password=password)
+            return _login_user(username=username, email=email, password=password)
         else:
             return make_response({"error": "Expect json body"}, 401)
     except Exception as e:
@@ -88,68 +89,68 @@ def login():
 
 
 # "/auth/logout"
-@auth_blueprint.route(route.logoutUser.routeName, methods=route.logoutUser.methods)
-@verify_request_middleware(route.logoutUser.routeName)
-def logout(loggedUser: LoggedUser, *args, **kwargs):
-    refreshToken = loggedUser.kwargs.get("refreshToken")
-    if not refreshToken:
+@auth_blueprint.route(route.auth_logout.route_name, methods=route.auth_logout.methods)
+@verify_request_middleware(route.auth_logout.route_name)
+def logout(logged_user: LoggedUser, *args, **kwargs):
+    refresh_token = logged_user.kwargs.get("refresh-token")
+    if not refresh_token:
         return make_response({"error": "refresh token is required"}, 401)
-    sessionUserID = loggedUser.userID
-    allDevices = str(request.args.get("allDevices", False)).lower() == "true"
-    _logout(refreshToken, sessionUserID, allDevices)
+    session_user_id = logged_user.user_id
+    all_devices = str(request.args.get("all_devices", False)).lower() == "true"
+    _logout(refresh_token, session_user_id, all_devices)
 
     res = make_response({"message": "Logged out successfully"}, 200)
     res.delete_cookie(
-        key="accessToken",
+        key="access-token",
     )
     res.delete_cookie(
-        key="refreshToken",
+        key="refresh-token",
     )
     return res
 
 
 # /auth/refresh
-@auth_blueprint.route(route.refreshToken.routeName, methods=route.refreshToken.methods)
-def refreshToken():
+@auth_blueprint.route(route.auth_refresh.route_name, methods=route.auth_refresh.methods)
+def refresh_token():
     # for web
-    refreshToken = request.cookies.get("refreshToken") or request.headers.get(
-        "refreshToken", None
+    refresh_token = request.cookies.get("refresh-token") or request.headers.get(
+        "refresh-token", None
     )
-    if not refreshToken:
+    if not refresh_token:
         return make_response({"error": "Refresh token is required"}, 401)
 
     # verify refresh token
     try:
-        return _refreshTokens(refreshToken)
+        return _refresh_tokens(refresh_token)
     except Exception as e:
         return make_response({"error": str(e)}, 401)
 
 
 @auth_blueprint.route(
-    f"{route.genrateOtp.routeName}/<int:userID>", methods=route.genrateOtp.methods
+    route.auth_generate_otp.route_name, methods=route.auth_generate_otp.methods
 )
-def generateOTP(userID):
-    return _generateOTPforUser(userID)
+def generate_otp(user_id):
+    return _generate_otp_for_user(user_id)
 
 
 @auth_blueprint.route(
-    f"{route.verifyUser.routeName}/<int:userID>/<string:otp>",
-    methods=route.verifyUser.methods,
+    route.auth_verify.route_name,
+    methods=route.auth_verify.methods,
 )
-def verify(userID, otp):
-    return _verifyUser(userID, otp)
+def verify(user_id, otp):
+    return _verify_user(user_id, otp)
 
 
 # /auth/c/user sessionUser only
-@usersBlueprint.route(
+@auth_blueprint.route(
     f"{route.auth_current_user.route_name}", methods=route.auth_current_user.methods
 )
 @verify_request_middleware(route.auth_current_user.route_name)
-def userSessionInfo(loggedUser: LoggedUser, *args, **kwargs):
+def userSessionInfo(logged_user: LoggedUser, *args, **kwargs):
     try:
-        userID = loggedUser.user_id
-        return getUserProfile(
-            _userID=userID,
+        user_id = logged_user.user_id
+        return _get_user_profile(
+            _user_id=user_id,
         )
     except Exception as e:
         return make_response({"error": str(e)}, 500)

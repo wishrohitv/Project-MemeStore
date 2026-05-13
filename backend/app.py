@@ -33,49 +33,44 @@ def run_app():
     app.config["path"] = "backend/public"
     app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
 
-    # # Blueprint for auth
-    # from routes.v1.auth import authBlueprint
+    # Blueprint for auth
+    from routes.v1.auth import auth_blueprint
 
-    # # Blueprint for post collection of posts
-    # from routes.v1.collections import (
-    #     collectionBlueprint,
-    # )
+    # Blueprint for post collection of posts
+    from routes.v1.collections import (
+        collection_blueprint,
+    )
 
-    # # Register Bluprint for homeFeed endpoint
-    # from routes.v1.feed import feedBlueprint
+    # Register Bluprint for homeFeed endpoint
+    from routes.v1.feed import feed_blueprint
 
-    # # Blueprint for notifications
-    # from routes.v1.notifications import notificationBlueprint
+    # Blueprint for notifications
+    from routes.v1.notifications import notification_blueprint
 
-    # # Blueprint for posts
-    # from routes.v1.posts import postsBlueprint
+    # Blueprint for posts
+    from routes.v1.posts import posts_blueprint
 
-    # # Blueprint for posts media content of user
-    # from routes.v1.returnPostMedia import getPostMediaRouteBlueprint
-
-    # # Blueprint for profile image fetch of user
-    # from routes.v1.returnProfileImage import (
-    #     getProfileImageRouteBlueprint,
-    # )
+    # Blueprint for posts, profile media content of user
+    from routes.v1.return_media_asset import return_media_assets_blueprint
 
     # Blueprint for user profile data
     from routes.v1.users import users_blueprint
 
-    # app.register_blueprint(authBlueprint, url_prefix="/api/v1")
-    # app.register_blueprint(getProfileImageRouteBlueprint, url_prefix="/api/v1")
-    # app.register_blueprint(getPostMediaRouteBlueprint, url_prefix="/api/v1")
-    # app.register_blueprint(postsBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(auth_blueprint, url_prefix="/api/v1")
+    app.register_blueprint(return_media_assets_blueprint, url_prefix="/api/v1")
+    app.register_blueprint(posts_blueprint, url_prefix="/api/v1")
     app.register_blueprint(users_blueprint, url_prefix="/api/v1")
-    # app.register_blueprint(feedBlueprint, url_prefix="/api/v1")
-    # app.register_blueprint(collectionBlueprint, url_prefix="/api/v1")
-    # app.register_blueprint(notificationBlueprint, url_prefix="/api/v1")
+    app.register_blueprint(feed_blueprint, url_prefix="/api/v1")
+    app.register_blueprint(collection_blueprint, url_prefix="/api/v1")
+    app.register_blueprint(notification_blueprint, url_prefix="/api/v1")
 
     # Register handler for the custom exception
 
     @app.errorhandler(AppError)
     def handle_custom_error(error: AppError):
         traceback.print_exc()
-        (getattr(error, "code", 500),)
+        print(error.code)
+        # getattr(error, "code", 500)
         # Log the error, return a custom JSON response or render a custom template
         response = (
             jsonify(
@@ -85,9 +80,10 @@ def run_app():
                     "description": error.description,
                 }
             ),
+            error.code or 500,
         )
-        response.status_code = error.code or 500
-        return response
+        # response.status_code = error.code or 500
+        return response[0]
 
     # init_db_setup
     init_db_setup()
