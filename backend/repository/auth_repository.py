@@ -1,4 +1,4 @@
-from database import engine, redis_client
+from database import SessionLocal, engine, redis_client
 from models import (
     AccountStatus,
     Profile,
@@ -37,6 +37,7 @@ from utils import (
     InvalidCredentialsError,
     ResourceNotFoundError,
     SuccessResponse,
+    TokenExpiredError,
     decode_jwt_token,
     delete_media,
     generate_jwt_token,
@@ -45,24 +46,22 @@ from utils import (
     return_hashed_bytes,
 )
 
-Session = sessionmaker(bind=engine)
-session = Session()
 
-
-def _generate_access_and_refresh_token(users: Users) -> AccessRefreshTokens:
+def _generate_access_and_refresh_token(user: Users, message: str) -> SuccessResponse:
+    session = SessionLocal()
     access_obj = {
-        "id": users.id,
-        "name": users.name,
-        "username": users.username,
-        "email": users.email,
-        "join_date": users.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-        "role": users.role,
-        "account_status": users.account_status.value,
+        "id": user.id,
+        "name": user.name,
+        "username": user.username,
+        "email": user.email,
+        "join_date": user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "role": user.role,
+        "account_status": user.account_status.value,
     }
     refresh_obj = {
-        "id": users.id,
-        "name": users.name,
-        "username": users.username,
+        "id": user.id,
+        "name": user.name,
+        "username": user.username,
     }
 
     access_token = generate_jwt_token(
@@ -72,7 +71,7 @@ def _generate_access_and_refresh_token(users: Users) -> AccessRefreshTokens:
         user_data=refresh_obj, expire_in_minute=REFRESH_TOKEN_EXPIRY_MINUTES
     )
     try:
-        stmt = Sessions(user_id=users.id, refresh_token=refresh_token)
+        stmt = Sessions(user_id=user.id, refresh_token=refresh_token)
         session.add(stmt)
         session.commit()
     except Exception as e:
@@ -81,8 +80,30 @@ def _generate_access_and_refresh_token(users: Users) -> AccessRefreshTokens:
     finally:
         # Close the session
         session.close()
-
-    return AccessRefreshTokens(access_token=access_token, refresh_token=refresh_token)
+    res = SuccessResponse(
+        data={"user_id": user.id, "username": user.username},
+        status_code=200,
+        message=message,
+    )
+    res.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=HTTP_ONLY,
+        secure=SECURE_COOKIE,
+        path="/",
+        samesite="None",
+        max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
+    )
+    res.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=HTTP_ONLY,
+        secure=SECURE_COOKIE,
+        path="/",
+        samesite="None",
+        max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
+    )
+    return res
 
 
 def _signup_user(
@@ -94,6 +115,7 @@ def _signup_user(
     account_status: AccountStatus,
     country: str,
 ):
+    session = SessionLocal()
     try:
         # Check if user already exist
         user = (
@@ -142,53 +164,63 @@ def _signup_user(
 
 
 def _generate_otp_for_user(user_id: int):
+    session = SessionLocal()
     # TODO: Implement rate limiting, and check email bounce
     try:
         user = session.query(Users).filter(Users.id == user_id).first()
         if not user:
-            return make_response({"error": "User not found"}, 404)
+            raise ResourceNotFoundError("User not found")
         if user.is_verified:
-            return make_response({"message": "User already verified"}, 400)
+            raise BadRequestError("User already verified")
         otp = generate_otp()
         redis_client.set(f"otp:{user_id}", otp, ex=600)
         send_otp(user.email, str(otp))
         session.close()
-        return make_response({"message": "OTP generated successfully"}, 200)
-
+        return SuccessResponse(
+            data={"message": "OTP generated successfully"}, status_code=200
+        )
+    except AppError:
+        raise
     except Exception as e:
-        print(e)
-        return make_response({"error": "Internal server error"}, 500)
+        raise InternalServerError("Failed to generate OTP") from e
 
 
 def _verify_user(user_id: int, entered_otp: str):
+    session = SessionLocal()
     # TODO: check user's verification state then allow for login
     try:
         user = session.query(Users).filter(Users.id == user_id).first()
         if not user:
-            return make_response({"error": "User not found"}, 404)
+            raise ResourceNotFoundError("User not found")
         if user.is_verified:
-            return make_response({"message": "User already verified"}, 400)
+            raise BadRequestError("User already verified")
 
         stored_otp = redis_client.get(f"otp:{user_id}")
         if not stored_otp:
-            return make_response({"error": "OTP expired"}, 400)
+            raise BadRequestError("OTP expired")
         if stored_otp != entered_otp:
-            return make_response({"error": "Invalid OTP"}, 400)
+            raise BadRequestError("Invalid OTP")
 
         user.is_verified = True
         session.commit()
-        session.refresh(user)
-        session.close()
-        return make_response({"message": "OTP verified successfully"}, 200)
+        return SuccessResponse(
+            data={"message": "OTP verified successfully"}, status_code=200
+        )
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
-        print(e)
-        return make_response({"error": "Internal server error"}, 500)
+        session.rollback()
+        raise InternalServerError("Failed to verify OTP") from e
+    finally:
+        session.close()
 
 
 def _login_user(username, email, password):
     """
     Check user's account status ["active", "suspended", "banned", "deleted"]
     """
+    session = SessionLocal()
     # Query the user
     users = (
         session.query(Users)
@@ -207,36 +239,19 @@ def _login_user(username, email, password):
     if not match_password(password.encode("ascii"), users.password):
         raise ForbiddenError("Invalid password")
 
-    tokens = _generate_access_and_refresh_token(users)
-    res = SuccessResponse(
-        data={"user_id": users.id, "username": users.username},
-        status_code=200,
-        message="Logged in successfully",
-    )
-    res.set_cookie(
-        key="access-token",
-        value=tokens.access_token,
-        httponly=HTTP_ONLY,
-        secure=SECURE_COOKIE,
-        max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-    )
-    res.set_cookie(
-        key="refresh-token",
-        value=tokens.refresh_token,
-        httponly=HTTP_ONLY,
-        secure=SECURE_COOKIE,
-        samesite=None,
-        max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-    )
+    res = _generate_access_and_refresh_token(users, "Logged in successfully")
+
     return res
 
 
 def _refresh_tokens(refresh_token: str):
+    session = SessionLocal()
     try:
+        print(refresh_token)
         decoded_data = decode_jwt_token(refresh_token)
         if not decoded_data:
-            raise Exception("Token expired")
-        user_id = decoded_data["data"]["id"]
+            raise TokenExpiredError("Token expired, Please login again")
+        user_id = decoded_data["payload"]["id"]
         # TODO: check account status too
         # if accountStatus == "active":
         #     pass
@@ -246,77 +261,35 @@ def _refresh_tokens(refresh_token: str):
             .where(Sessions.refresh_token == refresh_token)
         )
         user_result = session.execute(stmt).first()
-        session.close()
+
         if not user_result or refresh_token != user_result[1]:
-            return make_response({"error": "Invalid refresh token"}, 401)
+            raise TokenExpiredError("Invalid refresh token")
         # Delete previous refresh token of user
         stmt = (
             update(Sessions)
-            .where(Sessions.refresh_token == refresh_token)
+            .where(Sessions.refresh_token == refresh_token, Sessions.user_id == user_id)
             .values(refresh_token="")
         )
         session.execute(stmt)
         session.commit()
-        session.close()
 
         user: Users = user_result[0]
 
-        new_access_token = generate_jwt_token(
-            user_data={
-                "id": user.id,
-                "name": user.name,
-                "username": user.username,
-                "email": user.email,
-                "join_date": user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                "role": user.role,
-                "account_status": user.account_status.value,
-            },
-            expire_in_minute=ACCESS_TOKEN_EXPIRY_MINUTES,
-        )
-        new_refresh_token = generate_jwt_token(
-            user_data={
-                "id": user.id,
-                "name": user.name,
-                "username": user.username,
-            },
-            expire_in_minute=REFRESH_TOKEN_EXPIRY_MINUTES,
-        )
-        session.close()
-        stmt = Sessions(user_id=user.id, refresh_token=new_refresh_token)
-        session.add(stmt)
-        session.commit()
-        session.close()
+        res = _generate_access_and_refresh_token(user, "Session successfully refreshed")
 
-        res = make_response(
-            {
-                "message": "Token refreshed successfully",
-                "data": {"user_id": user.id, "username": user.username},
-            },
-            200,
-        )
-        res.set_cookie(
-            key="access_token",
-            value=new_access_token,
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        res.set_cookie(
-            key="refresh_token",
-            value=new_refresh_token,
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            samesite=None,
-            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-        )
         return res
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
-        print(e)
         raise Exception(e)
+    finally:
+        session.close()
 
 
 def _logout(refresh_token: str, user_id: int, all_devices=False):
+    session = SessionLocal()
     try:
         user = None
         if all_devices:
@@ -325,18 +298,27 @@ def _logout(refresh_token: str, user_id: int, all_devices=False):
             user = (
                 session.query(Sessions).filter_by(refresh_token=refresh_token).first()
             )
-
         if not user:
-            raise Exception("User session not found")
+            raise ResourceNotFoundError("User session not found")
+
+        # TODO: Rather than deleting all sessions rows, consider invalidating the refresh token instead
+        # This will help to obtain analytics on active devices
         if all_devices:
             stmt = delete(Sessions).where(Sessions.user_id == user_id)
             session.execute(stmt)
             session.commit()
-            session.close()
+
         else:
             stmt = delete(Sessions).filter_by(refresh_token=refresh_token)
             session.execute(stmt)
             session.commit()
-            session.close()
+
+    except AppError:
+        raise
+
     except Exception as e:
-        raise Exception(e)
+        raise InternalServerError("Failed to logout") from e
+
+    finally:
+        # Close the session
+        session.close()

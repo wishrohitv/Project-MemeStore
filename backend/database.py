@@ -1,11 +1,17 @@
 import redis
 from dotenv import load_dotenv
-from modules import create_engine, os
+from modules import create_engine, os, sessionmaker
 
 load_dotenv()
 
 # Initialize database engine
 engine = create_engine(os.environ.get("DB_URL") or "", pool_pre_ping=True)
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
+)
 
 # Initialize Redis client
 redis_client = redis.Redis.from_url(

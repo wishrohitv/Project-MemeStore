@@ -51,7 +51,7 @@ class API_ENDPOINTS:
     )
     auth_current_user = RouteAccess(
         # Get current session user
-        route_name="/auth/user",  # session user only
+        route_name="/auth/c/user",  # session user only
         role_permission=[ROLE.SUPER_ADMIN, ROLE.MODERATOR, ROLE.USER],
         methods=["GET"],
     )

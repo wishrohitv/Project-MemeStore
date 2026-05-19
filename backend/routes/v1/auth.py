@@ -20,7 +20,7 @@ from repository.auth_repository import (
     _verify_user,
 )
 from repository.user_repository import _get_user_profile
-from utils import BadRequestError, InternalServerError, LoggedUser, UnAuthorizedError
+from utils import BadRequestError, LoggedUser, SuccessResponse, UnAuthorizedError
 
 auth_blueprint = Blueprint("auth", __name__)
 """
@@ -66,10 +66,7 @@ def signup():
 # /auth/login
 @auth_blueprint.route(route.auth_login.route_name, methods=route.auth_login.methods)
 def login():
-    body = request.get_json()
-    if not isinstance(body, dict):
-        raise BadRequestError("Expect json body")
-
+    body: dict[str, str] = request.get_json()
     username = body.get("username")
     email = body.get("email")
     password = body.get("password")
@@ -81,18 +78,18 @@ def login():
     return _login_user(username=username, email=email, password=password)
 
 
-# "/auth/logout"
+# /auth/logout
 @auth_blueprint.route(route.auth_logout.route_name, methods=route.auth_logout.methods)
 @verify_request_middleware(route.auth_logout.route_name)
 def logout(logged_user: LoggedUser, *args, **kwargs):
-    refresh_token = logged_user.kwargs.get("refresh-token")
-    if not refresh_token:
-        return make_response({"error": "refresh token is required"}, 401)
+    # Get refresh token from logged_user
+    refresh_token = logged_user.kwargs["refresh_token"]
+
     session_user_id = logged_user.user_id
-    all_devices = str(request.args.get("all_devices", False)).lower() == "true"
+    all_devices = str(request.args.get("all_device", False)).lower() == "true"
     _logout(refresh_token, session_user_id, all_devices)
 
-    res = make_response({"message": "Logged out successfully"}, 200)
+    res = SuccessResponse({"message": "Logged out successfully"})
     res.delete_cookie(
         key="access-token",
     )
@@ -105,21 +102,18 @@ def logout(logged_user: LoggedUser, *args, **kwargs):
 # /auth/refresh
 @auth_blueprint.route(route.auth_refresh.route_name, methods=route.auth_refresh.methods)
 def refresh_token():
-    # for web
+    # for web, mobile
     refresh_token = request.cookies.get("refresh-token") or request.headers.get(
-        "refresh-token", None
+        "x-refresh-token", None
     )
     if not refresh_token:
-        return make_response({"error": "Refresh token is required"}, 401)
+        raise UnAuthorizedError("Refresh token is required")
 
     # verify refresh token
-    try:
-        return _refresh_tokens(refresh_token)
-    except Exception as e:
-        return make_response({"error": str(e)}, 401)
+    return _refresh_tokens(refresh_token)
 
 
-#
+# /auth/otp/generate
 @auth_blueprint.route(
     route.auth_generate_otp.route_name, methods=route.auth_generate_otp.methods
 )
@@ -129,6 +123,7 @@ def generate_otp():
     return _generate_otp_for_user(user_id)
 
 
+# auth/otp/verify
 @auth_blueprint.route(
     route.auth_verify_otp.route_name,
     methods=route.auth_verify_otp.methods,

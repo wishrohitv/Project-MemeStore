@@ -67,6 +67,16 @@ class UnAuthorizedError(AppError):
         super().__init__(code=401, error="UnAuthorizedError", message=message)
 
 
+class TokenExpiredError(AppError):
+    """Token expired error : The provided token has expired."""
+
+    def __init__(
+        self,
+        message="Token expired",
+    ):
+        super().__init__(code=401, error="TokenExpiredError", message=message)
+
+
 class ForbiddenError(AppError):
     """
     Forbidden error : The server understood the request but refuses to authorize it.

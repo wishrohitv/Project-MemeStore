@@ -15,7 +15,7 @@ def generate_jwt_token(user_data: dict[str, Any], expire_in_minute: int):
     current_time = datetime.now() + timedelta(minutes=expire_in_minute)
     unix_timestamp = current_time.timestamp()  # expiry time
 
-    payload = {"data": user_data, "exp": int(unix_timestamp)}
+    payload = {"payload": user_data, "exp": int(unix_timestamp)}
 
     token = jwt.encode(payload, JWT_HASH_KEY, algorithm="HS256")
     return token

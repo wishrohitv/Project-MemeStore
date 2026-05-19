@@ -1,12 +1,11 @@
 from models import Accessibility, Endpoint
-from modules import json, select, sessionmaker
+from modules import json, select
 
 
 def get_user_role(endpoint: str, user_role: int | None = None) -> bool:
-    from database import engine
+    from database import SessionLocal
 
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = SessionLocal()
 
     get_role = (
         select(
@@ -20,7 +19,7 @@ def get_user_role(endpoint: str, user_role: int | None = None) -> bool:
         .where(Endpoint.endpoint.__eq__(endpoint))
     )
     accessibility_rule = session.execute(get_role).all()
-
+    session.close()
     # check if accessibility_rule not null
     if accessibility_rule:
         # accessibility_rule -> [(15, [1, 2, 3], False, '/posts/uploadPosts', ['POST'])]
