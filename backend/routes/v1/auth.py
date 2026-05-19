@@ -46,9 +46,9 @@ def signup():
     password2 = body.get("password_2")
     country = body.get("country") if None else "world"
 
-    # TODO: handle none value individually
-    if not (username or email or password1 or password2):
+    if not all([username, email, password1, password2]):
         raise BadRequestError("username, email and password are required")
+
     if password1 != password2:
         raise BadRequestError("Confirmation passwords did not match")
 

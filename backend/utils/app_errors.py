@@ -44,7 +44,7 @@ class BadRequestError(AppError):
     """Bad request error : The request was invalid or cannot be served."""
 
     def __init__(self, error="Bad request"):
-        super().__init__(code=400, error="BaddRequestError", message=error)
+        super().__init__(code=400, error="BadRequestError", message=error)
 
 
 class InvalidCredentialsError(AppError):

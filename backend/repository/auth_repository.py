@@ -30,6 +30,7 @@ from modules import (
 from services.mail_service import send_otp
 from utils import (
     AccessRefreshTokens,
+    AppError,
     BadRequestError,
     ForbiddenError,
     InternalServerError,
@@ -115,8 +116,6 @@ def _signup_user(
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
-        # Close the session
-        session.close()
         user_obj = {
             "id": new_user.id,
             "name": new_user.name,
@@ -130,9 +129,16 @@ def _signup_user(
         return SuccessResponse(
             data=user_obj, status_code=201, message="User created successfully"
         )
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
-        raise InternalServerError(str(e))
+        # TODO: Log the exception
+        raise InternalServerError("Error while creating user") from e
+    finally:
+        # Close the session
+        session.close()
 
 
 def _generate_otp_for_user(user_id: int):
