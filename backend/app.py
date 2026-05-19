@@ -51,7 +51,7 @@ def run_app():
     from routes.v1.posts import posts_blueprint
 
     # Blueprint for posts, profile media content of user
-    from routes.v1.return_media_asset import return_media_assets_blueprint
+    from routes.v1.return_media_assets import return_media_assets_blueprint
 
     # Blueprint for user profile data
     from routes.v1.users import users_blueprint

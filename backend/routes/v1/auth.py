@@ -38,33 +38,29 @@ route = API_ENDPOINTS()
 # auth/signup
 @auth_blueprint.route(route.auth_signup.route_name, methods=route.auth_signup.methods)
 def signup():
-    body = request.get_json()
-    if isinstance(body, dict):
-        name = body.get("name")
-        username = body.get("username")
-        email = body.get("email")
-        password1 = body.get("password_1")
-        password2 = body.get("password_2")
-        country = body.get("country") if None else "world"
+    body: dict = request.get_json()
+    name = body.get("name")
+    username = body.get("username")
+    email = body.get("email")
+    password1 = body.get("password_1")
+    password2 = body.get("password_2")
+    country = body.get("country") if None else "world"
 
-        if not (username or email or password1 or password2):
-            return make_response(
-                {"error": "username, email and password are required"}, 400
-            )
-        if password1 != password2:
-            return make_response({"error": "Passwords do not match"}, 400)
+    # TODO: handle none value individually
+    if not (username or email or password1 or password2):
+        raise BadRequestError("username, email and password are required")
+    if password1 != password2:
+        raise BadRequestError("Confirmation passwords did not match")
 
-        return _signup_user(
-            name=name,
-            username=username,
-            email=email,
-            password=password1,
-            role=ROLE.USER,  # Defualt role,
-            account_status=AccountStatus.active,
-            country=country,
-        )
-    else:
-        return make_response({"error": "Expect json body"}, 401)
+    return _signup_user(
+        name=name,
+        username=username,
+        email=email,
+        password=password1,
+        role=ROLE.USER,  # Defualt role,
+        account_status=AccountStatus.active,
+        country=country,
+    )
 
 
 # /auth/login

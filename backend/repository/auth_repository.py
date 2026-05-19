@@ -29,9 +29,11 @@ from modules import (
 )
 from services.mail_service import send_otp
 from utils import (
+    AccessRefreshTokens,
     BadRequestError,
+    ForbiddenError,
     InternalServerError,
-    LoggedUser,
+    InvalidCredentialsError,
     ResourceNotFoundError,
     SuccessResponse,
     decode_jwt_token,
@@ -46,6 +48,42 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
+def _generate_access_and_refresh_token(users: Users) -> AccessRefreshTokens:
+    access_obj = {
+        "id": users.id,
+        "name": users.name,
+        "username": users.username,
+        "email": users.email,
+        "join_date": users.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "role": users.role,
+        "account_status": users.account_status.value,
+    }
+    refresh_obj = {
+        "id": users.id,
+        "name": users.name,
+        "username": users.username,
+    }
+
+    access_token = generate_jwt_token(
+        user_data=access_obj, expire_in_minute=ACCESS_TOKEN_EXPIRY_MINUTES
+    )
+    refresh_token = generate_jwt_token(
+        user_data=refresh_obj, expire_in_minute=REFRESH_TOKEN_EXPIRY_MINUTES
+    )
+    try:
+        stmt = Sessions(user_id=users.id, refresh_token=refresh_token)
+        session.add(stmt)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise InternalServerError(str(e)) from e
+    finally:
+        # Close the session
+        session.close()
+
+    return AccessRefreshTokens(access_token=access_token, refresh_token=refresh_token)
+
+
 def _signup_user(
     name: str,
     username: str,
@@ -53,7 +91,7 @@ def _signup_user(
     password: str,
     role: int,
     account_status: AccountStatus,
-    country,
+    country: str,
 ):
     try:
         # Check if user already exist
@@ -145,80 +183,46 @@ def _login_user(username, email, password):
     """
     Check user's account status ["active", "suspended", "banned", "deleted"]
     """
-    try:
-        # Query the user
-        users = (
-            session.query(Users)
-            .where(or_(Users.email == email, Users.username == username))
-            .first()
-        )
-        session.close()
-        if not users:
-            return make_response({"message": "user does not exist"}, 404)
-        if users.account_status == AccountStatus.suspended:
-            return make_response({"message": "user is suspended"}, 403)
-        if users.account_status == AccountStatus.banned:
-            return make_response({"message": "user is banned"}, 403)
-        if users.account_status == AccountStatus.deleted:
-            return make_response({"message": "user is deleted"}, 403)
-        if not match_password(password.encode("ascii"), users.password):
-            return make_response({"error": "Invalid password"}, 401)
-        access_obj = {
-            "id": users.id,
-            "name": users.name,
-            "username": users.username,
-            "email": users.email,
-            "join_date": users.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "role": users.role,
-            "account_status": users.account_status.value,
-        }
-        refresh_obj = {
-            "id": users.id,
-            "name": users.name,
-            "username": users.username,
-        }
+    # Query the user
+    users = (
+        session.query(Users)
+        .where(or_(Users.email == email, Users.username == username))
+        .first()
+    )
+    session.close()
+    if not users:
+        raise ResourceNotFoundError("User not found")
+    if users.account_status == AccountStatus.suspended:
+        raise ForbiddenError("User is suspended")
+    if users.account_status == AccountStatus.banned:
+        raise ForbiddenError("User is banned")
+    if users.account_status == AccountStatus.deleted:
+        raise ForbiddenError("User is deleted")
+    if not match_password(password.encode("ascii"), users.password):
+        raise ForbiddenError("Invalid password")
 
-        access_token = generate_jwt_token(
-            user_data=access_obj, expire_in_minute=ACCESS_TOKEN_EXPIRY_MINUTES
-        )
-        refresh_token = generate_jwt_token(
-            user_data=refresh_obj, expire_in_minute=REFRESH_TOKEN_EXPIRY_MINUTES
-        )
-
-        stmt = Sessions(user_id=users.id, refreshtoken=refresh_token)
-        session.add(stmt)
-        session.commit()
-        # Close the session
-        session.close()
-
-        res = make_response(
-            {
-                "message": "Logged in successfully",
-                "data": {"user_id": users.id, "username": users.username},
-            },
-            200,
-        )
-        res.set_cookie(
-            key="access-token",
-            value=access_token,
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        res.set_cookie(
-            key="refresh-token",
-            value=refresh_token,
-            httponly=HTTP_ONLY,
-            secure=SECURE_COOKIE,
-            samesite=None,
-            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-        )
-        return res
-
-    except Exception as e:
-        session.rollback()
-        print("hii")
-        raise InternalServerError(str(e)) from e
+    tokens = _generate_access_and_refresh_token(users)
+    res = SuccessResponse(
+        data={"user_id": users.id, "username": users.username},
+        status_code=200,
+        message="Logged in successfully",
+    )
+    res.set_cookie(
+        key="access-token",
+        value=tokens.access_token,
+        httponly=HTTP_ONLY,
+        secure=SECURE_COOKIE,
+        max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
+    )
+    res.set_cookie(
+        key="refresh-token",
+        value=tokens.refresh_token,
+        httponly=HTTP_ONLY,
+        secure=SECURE_COOKIE,
+        samesite=None,
+        max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
+    )
+    return res
 
 
 def _refresh_tokens(refresh_token: str):

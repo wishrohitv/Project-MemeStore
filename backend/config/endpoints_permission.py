@@ -1,4 +1,4 @@
-from utils.route_access import RouteAccess
+from utils.data_models.route_access import RouteAccess
 
 from config.roles import ROLE
 
