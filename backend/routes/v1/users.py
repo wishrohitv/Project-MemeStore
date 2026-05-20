@@ -24,6 +24,7 @@ from repository.user_repository import (
 )
 from utils import (
     BadRequestError,
+    ConflictError,
     InternalServerError,
     LoggedUser,
     SuccessResponse,
@@ -139,21 +140,14 @@ def users_delete():
 @verify_request_middleware(route.user_remove_follower.route_name)
 def remove_follower(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    body = request.get_json()
-    if isinstance(body, dict):
-        target_user_id = body.get("user_id")
-        if not isinstance(target_user_id, int):
-            return make_response({"error": f"Invalid {target_user_id} datatype"})
-        if target_user_id == session_user_id:
-            return make_response({"error": "user can't unfollow himself"}, 409)
-        else:
-            return _remove_follower(session_user_id, target_user_id)
-
+    target_user_id: int = kwargs.get("user_id")
+    if target_user_id == session_user_id:
+        raise ConflictError("User can't unfollow himself")
     else:
-        return make_response({"error": "Expect json body"}, 401)
+        return _remove_follower(session_user_id, target_user_id)
 
 
-#
+# /users/<int:user_id>/follower POST
 @users_blueprint.route(
     route.user_add_follower.route_name, methods=route.user_add_follower.methods
 )
@@ -162,36 +156,38 @@ def add_follower(logged_user: LoggedUser, *agrs, **kwargs):
     session_user_id = logged_user.user_id
     target_user_id = kwargs.get("user_id")
 
-    if not isinstance(target_user_id, int):
-        return make_response({"error": f"Invalid {target_user_id} datatype"})
     if target_user_id == session_user_id:
-        return make_response({"error": "user can't follow himself"}, 409)
+        raise ConflictError("User can't follow himself")
     else:
         return _add_follower(session_user_id, target_user_id)
 
 
+# /users/<int:user_id>/block POST
 @users_blueprint.route(route.user_block.route_name, methods=route.user_block.methods)
 @verify_request_middleware(route.user_block.route_name)
 def block_user(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    user_id = kwargs.get("user_id")
-    if not user_id or not isinstance(user_id, int):
-        return make_response({"error": f"Invalid user_id {user_id} datatype"}, 400)
-    return _block_user(session_user_id, user_id)
+    target_user_id = kwargs.get("user_id")
+    if target_user_id == session_user_id:
+        raise ConflictError("User can't block himself")
+    return _block_user(session_user_id, target_user_id)
 
 
+# /users/<int:user_id>/block DELETE
 @users_blueprint.route(
     route.user_unblock.route_name, methods=route.user_unblock.methods
 )
 @verify_request_middleware(route.user_unblock.route_name)
 def unblock_user(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    user_id = kwargs.get("user_id")
-    if not user_id or not isinstance(user_id, int):
-        return make_response({"error": f"Invalid user_id {user_id} datatype"}, 400)
-    return _unblock_user(session_user_id, user_id)
+    target_user_id = kwargs.get("user_id")
+    if target_user_id == session_user_id:
+        raise ConflictError("User can't block himself")
+    return _unblock_user(session_user_id, target_user_id)
 
 
+# TODO : Improve reasons
+# /users/<int:user_id>/report POST
 @users_blueprint.route(
     route.user_report_users.route_name,
     methods=route.user_report_users.methods,
@@ -199,8 +195,7 @@ def unblock_user(logged_user: LoggedUser, *args, **kwargs):
 @verify_request_middleware(route.user_report_users.route_name)
 def report_user(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    user_id = kwargs.get("user_id")
-    if not user_id or not isinstance(user_id, int):
-        return make_response({"error": f"Invalid user_id {user_id} datatype"}, 400)
+    target_user_id = kwargs.get("user_id")
+
     reason = request.get_json().get("reason")
-    return _report_user(session_user_id, user_id, reason or "")
+    return _report_user(session_user_id, target_user_id, reason or "")

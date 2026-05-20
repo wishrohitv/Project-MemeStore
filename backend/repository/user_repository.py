@@ -34,6 +34,7 @@ from services.mail_service import send_otp
 from utils import (
     AppError,
     BadRequestError,
+    ConflictError,
     InternalServerError,
     LoggedUser,
     ResourceNotFoundError,
@@ -58,22 +59,28 @@ def _add_follower(session_user_id: int, user_id: int):
         is_already_follow = session.scalar(
             is_already_follow
         )  # Scalar select first row from table
-        session.close()
+
         # If is_already_follow
         if not is_already_follow:
             new_follower = Follower(user_id=user_id, follower_id=session_user_id)
             session.add(new_follower)
             session.commit()
-            session.close()
-            return make_response(
-                {"message": "follower added successfully", "isFollowing": True}, 201
+
+            return SuccessResponse(
+                data={"is_following": True},
+                message="follower added successfully",
+                status_code=201,
             )
         else:
-            return make_response({"error": "user already follows requested user"}, 409)
+            raise ConflictError("User already follows requested user")
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
-        print(e)
-        return make_response({"error": f"{e}"}, 500)
+        raise InternalServerError("Error while following user") from e
+    finally:
+        session.close()
 
 
 def _remove_follower(
@@ -85,6 +92,7 @@ def _remove_follower(
     Follower can unfollow user
     User can remove another user from following list
     """
+    session = SessionLocal()
     try:
         if user_remove_follower:
             is_already_follow = select(
@@ -103,10 +111,9 @@ def _remove_follower(
             is_already_follow
         )  # Scalar select first row from table
 
-        session.close()
         # If is_already_follow
         if not is_already_follow:
-            return make_response({"error": "User is not following requested user"}, 409)
+            raise ConflictError("User is not following requested user")
 
         if user_remove_follower:
             stmt = delete(Follower).where(
@@ -118,12 +125,17 @@ def _remove_follower(
             )
         session.execute(stmt)
         session.commit()
-        return make_response(
-            {"message": "user unfollows requested user", "isFollowing": False}, 200
+        return SuccessResponse(
+            data={"is_following": False},
+            status_code=201,
+            message="user unfollows requested user",
         )
+    except AppError:
+        raise
     except Exception as e:
-        print(e)
-        return make_response({"error": f"{e}"}, 500)
+        raise InternalServerError("Error while unfollowing user") from e
+    finally:
+        session.close()
 
 
 def _get_user_profile(
@@ -324,6 +336,7 @@ def _update_user(
 
 
 def _block_user(session_user_id: int, user_id: int):
+    session = SessionLocal()
     try:
         # Check has user already blocked or not
         stmt = select(
@@ -333,27 +346,30 @@ def _block_user(session_user_id: int, user_id: int):
             )
         )
         user = session.scalar(stmt)
-        session.close()
+
         if not user:
             blocked_user = BlockedUsers(user_id=user_id, blocked_by=session_user_id)
             session.add(blocked_user)
             session.commit()
-            session.close()
-            return make_response(
-                {"message": "User blocked successfully", "isBlocked": True}, 201
+
+            return SuccessResponse(
+                message="User blocked successfully",
+                data={"is_blocked": True},
+                status_code=201,
             )
 
-        return make_response(
-            {"error": "User is already blocked", "isBlocked": True}, 409
-        )
+        raise ConflictError("User is already blocked")
+    except AppError:
+        raise
     except Exception as e:
         session.rollback()
+        raise InternalServerError("Error while blocking user") from e
+    finally:
         session.close()
-        print(e)
-        return make_response({"error": f"{e}"}, 500)
 
 
 def _unblock_user(session_user_id: int, user_id: int):
+    session = SessionLocal()
     try:
         # Check has user already blocked or not
         stmt = select(
@@ -363,7 +379,7 @@ def _unblock_user(session_user_id: int, user_id: int):
             )
         )
         user = session.scalar(stmt)
-        session.close()
+
         # Remove the user from the table
         if user:
             stmt = delete(BlockedUsers).where(
@@ -372,32 +388,40 @@ def _unblock_user(session_user_id: int, user_id: int):
             )
             session.execute(stmt)
             session.commit()
-            session.close()
-            return make_response(
-                {"message": "User unblocked successfully", "isBlocked": False}, 201
+
+            return SuccessResponse(
+                message="User unblocked successfully",
+                data={"is_blocked": False},
+                status_code=200,
             )
 
-        return make_response(
-            {"error": "User has already unblocked the person", "isBlocked": False}, 409
-        )
+        raise ConflictError("User has already unblocked the person")
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
+        raise InternalServerError("Error while unblocking user") from e
+    finally:
         session.close()
-        print(e)
-        return make_response({"error": f"{e}"}, 500)
 
 
 def _report_user(session_user_id: int, user_id: int, reason: str):
+    session = SessionLocal()
     try:
         stmt = ReportedUsers(
             reportedBy=session_user_id, user_id=user_id, description=reason
         )
         session.add(stmt)
         session.commit()
-        session.close()
-        return make_response({"message": "User reported successfully"}, 201)
+        return SuccessResponse(
+            message="User reported successfully", data={}, status_code=201
+        )
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
+        raise InternalServerError("Error while reporting user") from e
+    finally:
         session.close()
-        print(e)
-        return make_response({"error": f"{e}"}, 500)
