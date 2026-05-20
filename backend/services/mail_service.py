@@ -11,9 +11,9 @@ resend.api_key = os.environ.get("RESEND_API_KEY")
 def send_otp(to: str, otp: str):
     try:
         params: resend.Emails.SendParams = {
-            "from": "Verify Email <verify@updates.memer.in>",
+            "from": "Verify email <verify@updates.memer.in>",
             "to": [to],
-            "subject": "Verify Email",
+            "subject": "Verify your email",
             "html": f"<p>Your OTP is: {otp}</p>",
         }
         return resend.Emails.send(params)

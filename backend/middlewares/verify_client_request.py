@@ -32,38 +32,33 @@ def verify_request_middleware(endpoint: str):
                 refresh_token = request.cookies.get("refresh-token")
 
             if access_token:
-                try:
-                    decoded_token = decode_jwt_token(access_token)
-                    if decoded_token:
-                        # Match the user id and role for this endpoint
-                        has_access_right = get_user_role(
-                            endpoint, decoded_token["payload"]["role"]
+                decoded_token = decode_jwt_token(access_token)
+                if decoded_token:
+                    # Match the user id and role for this endpoint
+                    has_access_right = get_user_role(
+                        endpoint, decoded_token["payload"]["role"]
+                    )
+
+                    if has_access_right:
+                        return func(
+                            logged_user=LoggedUser(
+                                user_id=decoded_token["payload"]["id"],
+                                role_id=decoded_token["payload"]["role"],
+                                role_name=ROLE().rolesIds[
+                                    decoded_token["payload"]["role"]
+                                ],
+                                access_token=access_token,
+                                refresh_token=refresh_token,
+                            ),
+                            *args,
+                            **kwargs,
                         )
-
-                        if has_access_right:
-                            return func(
-                                logged_user=LoggedUser(
-                                    user_id=decoded_token["payload"]["id"],
-                                    role_id=decoded_token["payload"]["role"],
-                                    role_name=ROLE().rolesIds[
-                                        decoded_token["payload"]["role"]
-                                    ],
-                                    access_token=access_token,
-                                    refresh_token=refresh_token,
-                                ),
-                                *args,
-                                **kwargs,
-                            )
-                        else:
-                            # Either user role or endpoint not found
-                            raise UnAuthorizedError("Invalid user role or route")
-
                     else:
-                        raise UnAuthorizedError("Auth token expired")
-                except AppError:
-                    raise
-                except Exception as e:
-                    raise InternalServerError("Error while verifying token") from e
+                        # Either user role or endpoint not found
+                        raise UnAuthorizedError("Invalid user role or route")
+
+                else:
+                    raise UnAuthorizedError("Auth token expired")
 
             elif apiEndpointsPartialAccess.get(endpoint):
                 # Give user partial access
