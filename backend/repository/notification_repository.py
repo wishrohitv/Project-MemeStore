@@ -1,11 +1,8 @@
-from database import engine
+from database import SessionLocal
 from models import Notifications
 from models.enums import NotificationType
-from modules import make_response, or_, sessionmaker
-from utils import Log
-
-Session = sessionmaker(bind=engine)
-session = Session()
+from modules import make_response, or_
+from utils import InternalServerError, Log, SuccessResponse
 
 
 def _create_notification(
@@ -13,6 +10,7 @@ def _create_notification(
     notice: dict,
     type: NotificationType,
 ):
+    session = SessionLocal()
     try:
         notification = Notifications(
             user_id=user_id,
@@ -21,12 +19,12 @@ def _create_notification(
         )
         session.add(notification)
         session.commit()
-        session.close()
+
     except Exception as e:
         session.rollback()
+        raise InternalServerError(str(e))
+    finally:
         session.close()
-        Log.critical(f"Error creating notification: {str(e)}")
-        raise Exception(str(e))
 
 
 def _get_notifications(session_user_id: int, mention: bool = False, offset: int = 0):

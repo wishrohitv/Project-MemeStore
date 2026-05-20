@@ -307,7 +307,7 @@ class API_ENDPOINTS:
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["GET"],
     )
-    ollection_create = RouteAccess(
+    collection_create = RouteAccess(
         # Create a new collection
         route_name="/collections",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
@@ -334,14 +334,14 @@ class API_ENDPOINTS:
         methods=["DELETE"],
     )
     get_notifications = RouteAccess(
-        route_name="/notifications/<int:user_id>",
+        route_name="/notifications",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["GET"],
     )
     track_notifications = RouteAccess(
-        route_name="/notifications/clicked",
+        route_name="/notifications/<int:notification_id>/clicked",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
-        methods=["PUT"],
+        methods=["PATCH"],
     )
 
     @property

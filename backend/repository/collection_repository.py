@@ -1,10 +1,7 @@
-from database import engine
+from database import SessionLocal
 from models import CollectionData, Collections
 from modules import datetime, delete, or_, sessionmaker, update
-from utils import RepoError
-
-Session = sessionmaker(bind=engine)
-session = Session()
+from utils import AppError, InternalServerError, ResourceNotFoundError, SuccessResponse
 
 
 def _collections():
@@ -16,17 +13,21 @@ def _create_collection(
     session_user_id: int,
     description: str | None = None,
 ):
+    session = SessionLocal()
     try:
         stmt = Collections(name=name, description=description, owner=session_user_id)
         session.add(stmt)
         session.commit()
         session.close()
+    except AppError:
+        raise
     except Exception as e:
         session.rollback()
-        raise RepoError(500, f"Error while creating collection :{e}")
+        raise InternalServerError("Error while creating collections") from e
 
 
 def _add_post_to_collection(collection_id: int, session_user_id: int, post_id: int):
+    session = SessionLocal()
     try:
         collection = (
             session.query(Collections)
@@ -36,17 +37,22 @@ def _add_post_to_collection(collection_id: int, session_user_id: int, post_id: i
             .first()
         )
         if not collection:
-            raise RepoError(404, "Collection not found or unauthorized")
+            raise ResourceNotFoundError("Collection not found")
         stmt = CollectionData(collection_id=collection_id, post_id=post_id)
         session.add(stmt)
         session.commit()
-        session.close()
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
-        raise RepoError(500, f"Error while creating collection :{e}")
+        raise InternalServerError("Error while adding post to collection") from e
+    finally:
+        session.close()
 
 
 def _remove_post_to_collection(collection_id: int, session_user_id: int, post_id: int):
+    session = SessionLocal()
     try:
         collection = (
             session.query(Collections)
@@ -56,19 +62,24 @@ def _remove_post_to_collection(collection_id: int, session_user_id: int, post_id
             .first()
         )
         if not collection:
-            raise RepoError(404, "Collection not found or unauthorized")
+            raise ResourceNotFoundError("Collection not found or unauthorized")
         stmt = delete(CollectionData).filter_by(
             collection_id=collection_id, post_id=post_id
         )
         session.execute(stmt)
         session.commit()
-        session.close()
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
-        raise RepoError(500, f"Error while removing post from collection :{e}")
+        raise InternalServerError("Error while removing post from collection") from e
+    finally:
+        session.close()
 
 
 def _delete_collection(collection_id: int, session_user_id: int):
+    session = SessionLocal()
     try:
         collection = (
             session.query(Collections)

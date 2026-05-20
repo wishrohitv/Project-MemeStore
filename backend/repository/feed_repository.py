@@ -1,4 +1,4 @@
-from database import engine
+from database import SessionLocal
 from models import Bookmark, Category, Likes, Posts, Profile, Reposts, Users
 from modules import (
     API_ROOT_URL,
@@ -13,9 +13,7 @@ from modules import (
     sessionmaker,
     url_for,
 )
-
-Session = sessionmaker(bind=engine)
-session = Session()
+from utils import AppError, BadRequestError, InternalServerError, SuccessResponse
 
 
 def _get_home_feed(
@@ -25,15 +23,23 @@ def _get_home_feed(
     fetch_template: bool = False,
     session_user_id: int | None = None,
 ):
-    # Fetch only public posts and isReply false
-    conditions = [Posts.visibility, Posts.is_reply.is_(False)]
-    if fetch_template:
-        conditions.append(Posts.is_template.is_(True))
-    feed = _query_posts(conditions, category, offset, limit, session_user_id)
-    if feed and len(feed) >= 0:
-        return make_response({"payload": feed}, 200)
-    else:
-        return make_response({"payload": []}, 200)
+    session = SessionLocal()
+    try:
+        # Fetch only public posts and isReply false
+        conditions = [Posts.visibility, Posts.is_reply.is_(False)]
+        if fetch_template:
+            conditions.append(Posts.is_template.is_(True))
+        feed = _query_posts(conditions, category, offset, limit, session_user_id)
+        if feed and len(feed) >= 0:
+            return make_response({"payload": feed}, 200)
+        else:
+            return make_response({"payload": []}, 200)
+    except AppError:
+        raise
+    except Exception as e:
+        raise InternalServerError("Error while fetching home feed") from e
+    finally:
+        session.close()
 
 
 def _query_posts(
@@ -43,6 +49,7 @@ def _query_posts(
     limit: int = 10,
     session_user_id: int | None = None,
 ):
+    session = SessionLocal()
     """
     Global feed and post and replie query function
     """
@@ -156,9 +163,12 @@ def _query_posts(
 
     except Exception as e:
         raise
+    finally:
+        session.close()
 
 
 def _get_parent_post(post_id: int, session_user_id: int | None = None):
+    session = SessionLocal()
     try:
         conditions = []
         # Fetch post by ID
@@ -218,3 +228,5 @@ def _get_parent_post(post_id: int, session_user_id: int | None = None):
         return {"payload": post}
     except Exception as e:
         return {"error": "Internal Server Error"}
+    finally:
+        session.close()

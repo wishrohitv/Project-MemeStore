@@ -1,14 +1,12 @@
 from config import API_ENDPOINTS, ROLE
-from database import engine
+from database import SessionLocal
 from models import Accessibility, Category, Endpoint, Role
 from modules import sessionmaker
-
-Session = sessionmaker(bind=engine)
-session = Session()
 
 
 # Setup initial data in database
 def init_db_setup():
+    session = SessionLocal()
     check_role = session.query(Role).all()
 
     # Check if db has role or not then add role
@@ -19,7 +17,6 @@ def init_db_setup():
 
         session.add_all(role_obj_list)
         session.commit()
-        session.close()
 
     # _______________ Add initial endpoints
     check_endpoint = session.query(Endpoint).all()
@@ -33,7 +30,6 @@ def init_db_setup():
 
         session.add_all(endpoint_obj_list)
         session.commit()
-        session.close()
 
     # _______________
     # Add accessibility in database
@@ -53,7 +49,6 @@ def init_db_setup():
 
         session.add_all(access_obj_list)
         session.commit()
-        session.close()
 
     # _______________
     check_category = session.query(Category).all()
@@ -76,4 +71,4 @@ def init_db_setup():
 
         session.add_all(cat_obj_list)
         session.commit()
-        session.close()
+    session.close()

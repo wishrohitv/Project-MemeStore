@@ -7,7 +7,7 @@ from repository.collection_repository import (
     _delete_collection,
     _remove_post_to_collection,
 )
-from utils import LoggedUser
+from utils import BadRequestError, LoggedUser, SuccessResponse
 
 collection_blueprint = Blueprint("collections", __name__)
 
@@ -23,66 +23,60 @@ def collection(logged_user: LoggedUser, *args, **kwargs):
     return make_response({}, 201)
 
 
-# /collections
+# /collections POST
 @collection_blueprint.route(
-    route.collection.route_name, methods=route.collection.methods
+    route.collection_create.route_name, methods=route.collection_create.methods
 )
-@verify_request_middleware(route.collection.route_name)
+@verify_request_middleware(route.collection_create.route_name)
 def create_collection(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
     body = request.get_json()
     name = body.get("name")
     description = body.get("description")
     if not name:
-        return make_response({"error": "Collection name is required"}, 400)
-    try:
-        _create_collection(name, session_user_id, description)
-        return make_response({"message": "Collection created successfully"}, 201)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+        raise BadRequestError("Collection name is required")
+
+    _create_collection(name, session_user_id, description)
+    return make_response({"message": "Collection created successfully"}, 201)
 
 
-# /collections/<int:collectionID>/<int:postID>
+# /collections/<int:collection_id>/<int:post_id> POST
 @collection_blueprint.route(
     route.collection_add_post.route_name,
     methods=route.collection_add_post.methods,
 )
 @verify_request_middleware(route.collection_add_post.route_name)
-def addPost(logged_user: LoggedUser, *args, **kwargs):
+def add_post(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    collectionID = kwargs.get("collectionID")
-    postID = kwargs.get("postID")
-    if not collectionID or not postID:
-        return make_response({"error": "Collection ID and Post ID are required"}, 400)
-    try:
-        _add_post_to_collection(collectionID, session_user_id, postID)
-        return make_response({"message": "Post added to collection successfully"}, 201)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    collection_id = kwargs["collection_id"]
+    post_id = kwargs["post_id"]
+
+    _add_post_to_collection(collection_id, session_user_id, post_id)
+    return SuccessResponse(
+        data={}, message="Post added to collection successfully", status_code=201
+    )
 
 
-# /collections/<int:collection_id>/<int:post_id>
+# /collections/<int:collection_id>/<int:post_id> DELETE
 @collection_blueprint.route(
     f"{route.collection_remove_post.route_name}",
     methods=route.collection_remove_post.methods,
 )
 @verify_request_middleware(route.collection_remove_post.route_name)
-def removePosts(logged_user: LoggedUser, *args, **kwargs):
+def remove_posts(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    collectionID = kwargs.get("collection_id")
-    postID = kwargs.get("post_id")
-    if not collectionID or not postID:
-        return make_response({"error": "Collection ID and Post ID are required"}, 400)
-    try:
-        _remove_post_to_collection(collectionID, session_user_id, postID)
-        return make_response(
-            {"message": "Post removed from collection successfully"}, 200
-        )
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    collection_id = kwargs["collection_id"]
+    post_id = kwargs["post_id"]
+
+    _remove_post_to_collection(collection_id, session_user_id, post_id)
+    return SuccessResponse(
+        data={},
+        message="Post removed from collection successfully",
+        status_code=200,
+    )
 
 
-# /collections DELETE
+# /collections/<int:collection_id> DELETE
 @collection_blueprint.route(
     route.collection_delete.route_name,
     methods=route.collection_delete.methods,
@@ -90,11 +84,11 @@ def removePosts(logged_user: LoggedUser, *args, **kwargs):
 @verify_request_middleware(route.collection_delete.route_name)
 def delete_collection(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
-    collectionID = kwargs.get("collectionID")
-    if not collectionID:
-        return make_response({"error": "Collection ID is required"}, 400)
-    try:
-        _delete_collection(collectionID, session_user_id)
-        return make_response({"message": "Collection deleted successfully"}, 200)
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    collection_id = kwargs["collection_id"]
+
+    _delete_collection(collection_id, session_user_id)
+    return SuccessResponse(
+        data={},
+        message="Collection deleted successfully",
+        status_code=200,
+    )
