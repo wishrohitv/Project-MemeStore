@@ -12,10 +12,7 @@ class SuccessResponse(Response):
         message: str = "Request successful",
     ):
         body = json.dumps(
-            {
-                "data": data,
-                "message": message,
-            }
+            {"data": data, "message": message, "status_code": status_code}
         )
 
         super().__init__(

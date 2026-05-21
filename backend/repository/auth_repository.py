@@ -22,10 +22,10 @@ from modules import (
     make_response,
     or_,
     os,
+    request,
     select,
     sessionmaker,
     update,
-    url_for,
 )
 from services.mail_service import send_otp
 from utils import (
@@ -48,6 +48,10 @@ from utils import (
 
 
 def _generate_access_and_refresh_token(user: Users, message: str) -> SuccessResponse:
+
+    client_type = request.headers.get("x-client-type")
+    if not client_type or client_type not in ["web", "mobile"]:
+        raise InvalidCredentialsError("Invalid client type")
     session = SessionLocal()
     access_obj = {
         "id": user.id,
@@ -80,29 +84,35 @@ def _generate_access_and_refresh_token(user: Users, message: str) -> SuccessResp
     finally:
         # Close the session
         session.close()
+
+    payload = {"user_id": user.id, "username": user.username}
+    if client_type == "mobile":
+        payload["access_token"] = access_token
+        payload["refresh_token"] = refresh_token
     res = SuccessResponse(
-        data={"user_id": user.id, "username": user.username},
+        data=payload,
         status_code=200,
         message=message,
     )
-    res.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=HTTP_ONLY,
-        secure=SECURE_COOKIE,
-        path="/",
-        samesite="None",
-        max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
-    )
-    res.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=HTTP_ONLY,
-        secure=SECURE_COOKIE,
-        path="/",
-        samesite="None",
-        max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
-    )
+    if client_type == "web":
+        res.set_cookie(
+            key="access-token",
+            value=access_token,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            path="/",
+            samesite="None",
+            max_age=ACCESS_TOKEN_EXPIRY_MINUTES * 60,
+        )
+        res.set_cookie(
+            key="refresh-token",
+            value=refresh_token,
+            httponly=HTTP_ONLY,
+            secure=SECURE_COOKIE,
+            path="/",
+            samesite="None",
+            max_age=REFRESH_TOKEN_EXPIRY_MINUTES * 60,
+        )
     return res
 
 

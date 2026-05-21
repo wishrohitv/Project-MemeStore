@@ -1,12 +1,9 @@
-from database import engine
+from database import SessionLocal
 from models import Users
 from models.enums import NotificationType
 from modules import sessionmaker
 from repository.notification_repository import _create_notification
 from utils import Log, get_usernames
-
-Session = sessionmaker(bind=engine)
-session = Session()
 
 
 def mention(
@@ -14,6 +11,7 @@ def mention(
     post_id: int,
     text: str,
 ) -> None | Exception:
+    session = SessionLocal()
     try:
         # Extract mentioned usernames from the text
         mentioned_usernames = get_usernames(text)
@@ -63,8 +61,9 @@ def mention(
                 )
     except Exception as e:
         session.close()
-        Log.critical(str(e))
         raise Exception(str(e))
+    finally:
+        session.close()
 
 
 def suggestion(

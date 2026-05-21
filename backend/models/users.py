@@ -35,7 +35,7 @@ class Users(Base):
     profile: Mapped[Profile] = relationship(
         backref="profile",
         uselist=False,
-        cascade="delete",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
