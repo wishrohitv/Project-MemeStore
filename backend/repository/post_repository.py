@@ -28,6 +28,7 @@ from modules import (
     update,
     url_for,
 )
+from services.cloudinary_service import delete_media
 from tasks import add_task_in_queue, mention, reply
 from utils import (
     AppError,
@@ -38,7 +39,6 @@ from utils import (
     ResourceNotFoundError,
     SuccessResponse,
     UnAuthorizedError,
-    delete_media,
 )
 
 from .feed_repository import _query_posts
@@ -59,6 +59,7 @@ def _create_post(
     visibility: bool = True,
     replying_to: list[str] | None = None,
 ):
+    session = SessionLocal()
     try:
         new_post = Posts(
             user_id=user_id,
@@ -80,7 +81,6 @@ def _create_post(
         session.refresh(new_post)
 
         # Create mention notification
-        session.close()
 
         # If the post is a reply, create reply notifications for the users being replied to
         if is_reply:
@@ -106,12 +106,17 @@ def _create_post(
                         text=text,
                     )
                 )
-        return make_response({"message": "post upload successfully"}, 200)
+        return SuccessResponse(
+            message="post upload successfully", status_code=200, data={}
+        )
+    except AppError:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
+        raise InternalServerError("Error while uploading post to database") from e
+    finally:
         session.close()
-        Log.critical(str(e))
-        raise Exception(str(e))
 
 
 def _post_toggle_like(session_user_id: int, post_id: int):

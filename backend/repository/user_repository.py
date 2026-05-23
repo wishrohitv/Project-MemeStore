@@ -30,6 +30,7 @@ from modules import (
     update,
     url_for,
 )
+from services.cloudinary_service import delete_media
 from services.mail_service import send_otp
 from utils import (
     AppError,
@@ -40,7 +41,6 @@ from utils import (
     ResourceNotFoundError,
     SuccessResponse,
     decode_jwt_token,
-    delete_media,
     generate_jwt_token,
     generate_otp,
     match_password,

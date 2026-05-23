@@ -28,15 +28,17 @@ from repository.post_repository import (
     _update_post,
     _user_posts,
 )
+from services.cloudinary_service import upload_media
 from utils import (
+    AppError,
     BadRequestError,
     ConflictError,
+    InternalServerError,
     Log,
     LoggedUser,
     ResourceNotFoundError,
     SuccessResponse,
     UnAuthorizedError,
-    upload_media,
 )
 
 posts_blueprint = Blueprint("posts", __name__)
@@ -163,102 +165,88 @@ def upload_posts(logged_user: LoggedUser, *args, **kwargs):
 
     if is_reply and not parent_post_id:
         raise BadRequestError("Parent post ID is required for reply to a post")
-    try:
-        # Handle files
-        file = request.files.get(
-            "files"
-        )  # i.e. <FileStorage: 'mario-removebg-preview.png' ('image/png')>
-        _media_public_id = str(
-            uuid.uuid4()
-        )  # Initially any random id otherwise None if file not found
-        _file_type = None  # i.e "image/jpeg"
-        _file_extension = None
-        _media_url = None
 
-        p_form = request.form
-        post_visibility = p_form.get("post_visibility")
-        post_title = p_form.get("post_title")
-        post_replying_to = p_form.get(
-            "post_replying_to"
-        )  # List(string) of usernames and parse it in python list using json.loads
-        post_tags = p_form.get("post_tags")
-        post_visibility = (
-            True if not post_visibility else post_visibility.lower() == "true"
-        )
-        post_age_rating = (p_form.get("age_rating") or "pg13").lower()
+    # Handle files
+    file = request.files.get(
+        "files"
+    )  # i.e. <FileStorage: 'mario-removebg-preview.png' ('image/png')>
+    _media_public_id = str(
+        uuid.uuid4()
+    )  # Initially any random id otherwise None if file not found
+    _file_type = None  # i.e "image/jpeg"
+    _file_extension = None
+    _media_url = None
 
-        if file:
-            file_mime_type = file.mimetype
-            _file_type = file_mime_type.split("/")[0]
-            if file_mime_type in ALLOWED_POST_FILE_MIMETYPE:
-                _file_extension = ALLOWED_POST_FILE_MIMETYPE.get(file_mime_type)
+    p_form = request.form
+    post_visibility = p_form.get("post_visibility")
+    post_title = p_form.get("post_title")
+    post_replying_to = p_form.get(
+        "post_replying_to"
+    )  # List(string) of usernames and parse it in python list using json.loads
+    post_tags = p_form.get("post_tags")
+    post_visibility = True if not post_visibility else post_visibility.lower() == "true"
+    post_age_rating = (p_form.get("age_rating") or "pg13").lower()
 
-            else:
-                return make_response(
-                    {"error": f"unsupported file type {file_mime_type}"}, 401
-                )
-            file_size = file.stream.seek(0, os.SEEK_END)
+    # Check if text and file both is not None
+    if not post_title and not file:
+        raise BadRequestError("Text or file is required")
+    if post_title and post_title.strip() == "":
+        raise BadRequestError("Text is required")
 
-            allowed_file_size = ALLOWED_POST_FILE_SIZE.get(file_mime_type)
-            if not (file_size <= allowed_file_size):
-                return make_response(
-                    {
-                        "error": "File size exceeded",
-                        "message": f"File size must not exceed {allowed_file_size / 1024 / 1024} MB",
-                    },
-                    406,
-                )
-            # Move pointer to Zero
-            file.stream.seek(0)  # Moves the file pointer back to the beginning
+    if post_replying_to and not isinstance(json.loads(post_replying_to), list):
+        raise BadRequestError("post_replying_to must be a list of strings of usernames")
 
-            if USE_CLOUDINARY_STORAGE:
-                cloud_response = upload_media(
-                    file=file.stream, public_id=_media_public_id
-                )
-                if not (cloud_response):
-                    return make_response({"error": "Failed to upload media"}, 500)
-                _media_url = cloud_response.get("url")
-                _media_public_id = cloud_response.get("public_id")
-            else:
-                file.save(
-                    os.path.join(
-                        PUBLIC_DIRECTORY_POSTS,
-                        secure_filename(f"{_media_public_id}.{_file_extension}"),
-                    )
-                )
+    if file:
+        file_mime_type = file.mimetype
+        _file_type = file_mime_type.split("/")[0]
+        if file_mime_type in ALLOWED_POST_FILE_MIMETYPE:
+            _file_extension = ALLOWED_POST_FILE_MIMETYPE.get(file_mime_type)
+
         else:
-            _media_public_id = None
+            raise BadRequestError(f"Unsupported file type {file_mime_type}")
 
-        # Check if text and file both is not None
-        if not post_title and not _media_public_id:
-            return make_response({"error": "Text or file is required"}, 400)
-        if post_title.strip() == "":
-            return make_response({"error": "Text is required"}, 400)
+        file_size = file.stream.seek(0, os.SEEK_END)
 
-        if post_replying_to and not isinstance(json.loads(post_replying_to), list):
-            return make_response(
-                {"error": "post_replying_to must be a list of strings of usernames"},
-                400,
+        allowed_file_size = ALLOWED_POST_FILE_SIZE[file_mime_type]
+        if not (file_size <= allowed_file_size):
+            raise BadRequestError(
+                f"File size exceeded, file size must not exceed {allowed_file_size / 1024 / 1024} MB"
             )
-        _create_post(
-            user_id=session_user_id,
-            text=post_title,
-            tags=post_tags,
-            visibility=post_visibility,
-            file_type=_file_type,  # i.e "image/jpeg"
-            file_extension=_file_extension,
-            media_url=_media_url,
-            media_public_id=_media_public_id,
-            category=1,
-            age_rating=post_age_rating,
-            is_reply=is_reply,
-            parent_post_id=parent_post_id,
-            replying_to=json.loads(post_replying_to) if post_replying_to else None,
-        )
-        return make_response({"message": "post uploaded successfully"}, 201)
-    except Exception as e:
-        Log.error(f"Failed to upload post: {e}")
-        return make_response({"error": f"{e}"}, 500)
+
+        # Move pointer to Zero
+        file.stream.seek(0)  # Moves the file pointer back to the beginning
+
+        if USE_CLOUDINARY_STORAGE:
+            cloud_response = upload_media(file=file.stream, public_id=_media_public_id)
+            if not (cloud_response):
+                raise InternalServerError("Failed to upload media")
+            _media_url = cloud_response.get("url")
+            _media_public_id = cloud_response.get("public_id")
+        else:
+            file.save(
+                os.path.join(
+                    PUBLIC_DIRECTORY_POSTS,
+                    secure_filename(f"{_media_public_id}.{_file_extension}"),
+                )
+            )
+    else:
+        _media_public_id = None
+
+    return _create_post(
+        user_id=session_user_id,
+        text=post_title,
+        tags=post_tags,
+        visibility=post_visibility,
+        file_type=_file_type,  # i.e "image/jpeg"
+        file_extension=_file_extension,
+        media_url=_media_url,
+        media_public_id=_media_public_id,
+        category=1,
+        age_rating=post_age_rating,
+        is_reply=is_reply,
+        parent_post_id=parent_post_id,
+        replying_to=json.loads(post_replying_to) if post_replying_to else None,
+    )
 
 
 # /posts/<int:post_id>/repost POST
@@ -314,7 +302,7 @@ def update_post(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
     post_id = kwargs["post_id"]
 
-    body = request.json
+    body = request.get_json()
     title = body.get("title")
     tags = body.get("tags")
     age_rating = body.get("age_rating")

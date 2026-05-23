@@ -27,6 +27,7 @@ from modules import (
     sessionmaker,
     update,
 )
+from services.cloudinary_service import delete_media
 from services.mail_service import send_otp
 from utils import (
     AccessRefreshTokens,
@@ -39,7 +40,6 @@ from utils import (
     SuccessResponse,
     TokenExpiredError,
     decode_jwt_token,
-    delete_media,
     generate_jwt_token,
     generate_otp,
     match_password,

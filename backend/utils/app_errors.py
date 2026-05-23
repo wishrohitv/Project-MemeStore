@@ -47,6 +47,13 @@ class BadRequestError(AppError):
         super().__init__(code=400, error="BadRequestError", message=error)
 
 
+class NotAcceptableError(AppError):
+    """Not accesptable error : The request was invalid or cannot be served."""
+
+    def __init__(self, error="Not accesptable"):
+        super().__init__(code=400, error="NotAcceptableError", message=error)
+
+
 class InvalidCredentialsError(AppError):
     """Invalid credentials error : The provided credentials are invalid."""
 

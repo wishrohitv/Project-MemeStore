@@ -22,13 +22,13 @@ from repository.user_repository import (
     _update_profile_img,
     _update_user,
 )
+from services.cloudinary_service import upload_media
 from utils import (
     BadRequestError,
     ConflictError,
     InternalServerError,
     LoggedUser,
     SuccessResponse,
-    upload_media,
 )
 
 users_blueprint = Blueprint("users", __name__)
