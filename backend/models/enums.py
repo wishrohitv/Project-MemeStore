@@ -22,4 +22,13 @@ class NotificationType(PyEnum.Enum):
     reply = "reply"
     warning = "warning"
     danger = "danger"
-    systemUpdate = "systemUpdate"
+    systemUpdate = "system_update"
+    follow = "follow"
+
+
+# OAuth providers
+class OAuthProvider(PyEnum.Enum):
+    google = "google"
+    x = "x"
+    discord = "discord"
+    apple = "apple"

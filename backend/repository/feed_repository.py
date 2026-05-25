@@ -30,10 +30,9 @@ def _get_home_feed(
         if fetch_template:
             conditions.append(Posts.is_template.is_(True))
         feed = _query_posts(conditions, category, offset, limit, session_user_id)
-        if feed and len(feed) >= 0:
-            return make_response({"payload": feed}, 200)
-        else:
-            return make_response({"payload": []}, 200)
+        return SuccessResponse(
+            data=feed, message="Home feed fetched successfully", status_code=200
+        )
     except AppError:
         raise
     except Exception as e:
@@ -53,79 +52,83 @@ def _query_posts(
     """
     Global feed and post and replie query function
     """
-    # Get feed data from database alog with userName of author of post
-    like = aliased(Likes)
-    like_count = (
-        select(func.count(like.user_id))
-        .where(like.post_id == Posts.id)
-        .correlate(Posts)
-        .scalar_subquery()
-    )
-    repost = aliased(Reposts)
-    repost_count = (
-        select(func.count(repost.user_id))
-        .where(repost.post_id == Posts.id)
-        .correlate(Posts)
-        .scalar_subquery()
-    )
-    bookmark = aliased(Bookmark)
-    bookmark_count = (
-        select(func.count(bookmark.user_id))
-        .where(bookmark.post_id == Posts.id)
-        .correlate(Posts)
-        .scalar_subquery()
-    )
-
-    reply = aliased(Posts)
-    repliesCount = (
-        select(func.count(reply.id))
-        .where(reply.parent_post_id == Posts.id, reply.is_reply.is_(True))
-        .scalar_subquery()
-    )
-    stmt = (
-        select(
-            Users.username,
-            Posts,
-            Profile.media_url,
-            Profile.media_public_id,
-            Profile.file_extension,
-            like_count.label("like_count"),
-            repost_count.label("repost_count"),
-            bookmark_count.label("bookmark_count"),
-            repliesCount.label("replies_count"),
-            exists(
-                select(Likes).where(
-                    Likes.post_id == Posts.id, Likes.user_id == session_user_id
-                )
-            ).label("is_liked"),
-            exists(
-                select(Bookmark).where(
-                    Bookmark.post_id == Posts.id, Bookmark.user_id == session_user_id
-                )
-            ).label("is_bookmarked"),
-            exists(
-                select(Reposts).where(
-                    Reposts.post_id == Posts.id, Reposts.user_id == session_user_id
-                )
-            ).label("is_reposted"),
-        )
-        .join_from(Users, Posts)
-        .join_from(Users, Profile)
-        .where(*conditions)
-        .limit(limit)
-        .offset(offset)
-    )
-    get_feed = session.execute(stmt).all()
-
-    # Close the session
-    session.close()
     try:
+        # Get feed data from database alog with userName of author of post
+        like = aliased(Likes)
+        like_count = (
+            select(func.count(like.user_id))
+            .where(like.post_id == Posts.id)
+            .correlate(Posts)
+            .scalar_subquery()
+        )
+        repost = aliased(Reposts)
+        repost_count = (
+            select(func.count(repost.user_id))
+            .where(repost.post_id == Posts.id)
+            .correlate(Posts)
+            .scalar_subquery()
+        )
+        bookmark = aliased(Bookmark)
+        bookmark_count = (
+            select(func.count(bookmark.user_id))
+            .where(bookmark.post_id == Posts.id)
+            .correlate(Posts)
+            .scalar_subquery()
+        )
+
+        reply = aliased(Posts)
+        repliesCount = (
+            select(func.count(reply.id))
+            .where(reply.parent_post_id == Posts.id, reply.is_reply.is_(True))
+            .scalar_subquery()
+        )
+        stmt = (
+            select(
+                Users.username,
+                Posts,
+                Profile.media_url,
+                Profile.media_public_id,
+                Profile.file_extension,
+                like_count.label("like_count"),
+                repost_count.label("repost_count"),
+                bookmark_count.label("bookmark_count"),
+                repliesCount.label("replies_count"),
+                exists(
+                    select(Likes).where(
+                        Likes.post_id == Posts.id, Likes.user_id == session_user_id
+                    )
+                ).label("is_liked"),
+                exists(
+                    select(Bookmark).where(
+                        Bookmark.post_id == Posts.id,
+                        Bookmark.user_id == session_user_id,
+                    )
+                ).label("is_bookmarked"),
+                exists(
+                    select(Reposts).where(
+                        Reposts.post_id == Posts.id, Reposts.user_id == session_user_id
+                    )
+                ).label("is_reposted"),
+            )
+            .join_from(Users, Posts)
+            .join_from(Users, Profile)
+            .where(*conditions)
+            .limit(limit)
+            .offset(offset)
+        )
+        get_feed = session.execute(stmt).all()
+
         feed_obj = [
             {
-                "username": feed[0],
+                "user": {
+                    "profile_img_url": feed[2]
+                    if USE_CLOUDINARY_STORAGE
+                    else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_image', filename=f'{feed[3]}.{feed[4]}')}",
+                    "username": feed[0],
+                    "user_id": feed[1].user_id,
+                },
                 "post_id": feed[1].id,
-                "user_id": feed[1].user_id,
-                "title": feed[1].text,
+                "text": feed[1].text,
                 "tags": feed[1].tags,
                 "replying_to": feed[1].replying_to,
                 "file_type": feed[1].file_type,
@@ -145,9 +148,6 @@ def _query_posts(
                 "post_media_url": feed[1].media_url
                 if USE_CLOUDINARY_STORAGE
                 else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_post_media', filename=f'{feed[1].media_public_id}.{feed[1].file_extension}')}",
-                "profile_img_url": feed[2]
-                if USE_CLOUDINARY_STORAGE
-                else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_image', filename=f'{feed[3]}.{feed[4]}')}",
                 "like_count": feed[5],
                 "repost_count": feed[6],
                 "bookmark_count": feed[7],
@@ -220,12 +220,12 @@ def _get_parent_post(post_id: int, session_user_id: int | None = None):
             ].age_rating.value,  # Return Enum class from db and get its value from
             "post_media_url": result[1].media_url
             if USE_CLOUDINARY_STORAGE
-            else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_post_media', fileName=f'{result[1].media_public_id}.{result[1].file_extension}')}",
-            "profileImgUrl": result[2]
+            else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_post_media', filename=f'{result[1].media_public_id}.{result[1].file_extension}')}",
+            "profile_img_url": result[2]
             if USE_CLOUDINARY_STORAGE
-            else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_image', fileName=f'{result[3]}.{result[4]}')}",
+            else f"{API_ROOT_URL or request.host_url}{url_for('return_assets.serve_image', filename=f'{result[3]}.{result[4]}')}",
         }
-        return {"payload": post}
+        return {"data": post}
     except Exception as e:
         return {"error": "Internal Server Error"}
     finally:
