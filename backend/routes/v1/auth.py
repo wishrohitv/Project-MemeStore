@@ -141,10 +141,7 @@ def verify():
 )
 @verify_request_middleware(route.auth_current_user.route_name)
 def userSessionInfo(logged_user: LoggedUser, *args, **kwargs):
-    try:
-        user_id = logged_user.user_id
-        return _get_user_profile(
-            _user_id=user_id,
-        )
-    except Exception as e:
-        return make_response({"error": str(e)}, 500)
+    user_id = logged_user.user_id
+    return _get_user_profile(
+        _user_id=user_id,
+    )
