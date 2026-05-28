@@ -1,5 +1,3 @@
-from flask import request
-
 # App name
 APP_NAME: str = "Meme Store"
 
@@ -66,12 +64,12 @@ PORT: int = 5000
 HOST: str = "0.0.0.0"
 
 # Public directory to store clients media data
-PUBLIC_DIRECTORY_PROFILES: str = "./public/profiles"
-PUBLIC_DIRECTORY_POSTS: str = "./public/posts"
+PUBLIC_DIRECTORY_PROFILES: str = "public/profiles"
+PUBLIC_DIRECTORY_POSTS: str = "public/posts"
 
 API_ROOT_URL: str | None = None  # Domain name
 
-LOGGING_PATH: str = "./logs"
+LOGGING_PATH: str = "logs"
 
 ACCESS_TOKEN_EXPIRY_MINUTES: int = 30  # Minute
 

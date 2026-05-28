@@ -85,9 +85,7 @@ def get_profile_image(username):
 def serve_image(filename):
     if os.path.exists(os.path.join(PUBLIC_DIRECTORY_PROFILES, filename)):
         Log.info(f"user_profile {filename} found")
-        return send_file(
-            f"{PUBLIC_DIRECTORY_PROFILES.replace('/backend', '')}/{filename}"
-        )
+        return send_file(f"{PUBLIC_DIRECTORY_PROFILES}/{filename}")
     else:
         Log.warning(f"userProfile {filename} not found, Sending default image")
-        return send_from_directory(PUBLIC_DIRECTORY_PROFILES, "icon")
+        return send_file(f"{PUBLIC_DIRECTORY_PROFILES}/icon")

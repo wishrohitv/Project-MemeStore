@@ -30,7 +30,7 @@ def run_app():
         origins=origins.split(",") if origins else ["*"],
     )
 
-    app.config["path"] = "backend/public"
+    app.config["path"] = "public"
     app.config["MAX_CONTENT_LENGTH"] = SEREVR_ALLOWED_UPLOAD_FILE_SIZE
 
     # Blueprint for auth
