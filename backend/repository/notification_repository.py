@@ -28,6 +28,7 @@ def _create_notification(
 
 
 def _get_notifications(session_user_id: int, mention: bool = False, offset: int = 0):
+    session = SessionLocal()
     condition = []
     if mention:
         condition.append(Notifications.type == NotificationType.mention)
@@ -68,3 +69,5 @@ def _get_notifications(session_user_id: int, mention: bool = False, offset: int 
     except Exception as e:
         Log.error(e)
         return make_response({"error": "Internal sever error"}, 500)
+    finally:
+        session.close()

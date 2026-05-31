@@ -21,6 +21,7 @@ from modules import (
     delete,
     exists,
     func,
+    functools,
     jsonify,
     make_response,
     or_,
@@ -33,6 +34,7 @@ from modules import (
 )
 from services.cloudinary_service import delete_media
 from services.mail_service import send_otp
+from tasks import add_task_in_queue, follow
 from utils import (
     AppError,
     BadRequestError,
@@ -67,6 +69,8 @@ def _add_follower(session_user_id: int, user_id: int):
             session.add(new_follower)
             session.commit()
 
+            # Notify the user that they are being followed
+            add_task_in_queue(functools.partial(follow, user_id, session_user_id))
             return SuccessResponse(
                 data={"is_following": True},
                 message="follower added successfully",

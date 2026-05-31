@@ -94,6 +94,7 @@ def reply(
     mentioned_by_user_id: int,  # user ID of post/reply author who mentioned others in the thread
     text: str,  # title of the post or ""
 ) -> None | Exception:
+    session = SessionLocal()
     try:
 
         def create_mention_notification(
@@ -183,9 +184,29 @@ def reply(
             )
 
     except Exception as e:
-        session.close()
         Log.critical(str(e))
         raise Exception(str(e))
+    finally:
+        session.close()
+
+
+def follow(user_id: int, follower_user_id: int) -> None:
+    session = SessionLocal()
+    try:
+        user = session.query(Users).filter(Users.id == user_id).first()
+        if user is None:
+            return
+        notic = {
+            "follower": user.username,
+            "alert": "New follower",
+            "text": f"{user.username} started following you.",
+        }
+        _create_notification(user_id, notic, NotificationType.follow)
+    except Exception as e:
+        Log.critical(str(e))
+        raise Exception(str(e))
+    finally:
+        session.close()
 
 
 def warning(text: str) -> None:
