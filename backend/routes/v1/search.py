@@ -8,7 +8,7 @@ search_blueprint = Blueprint("search", __name__)
 route = API_ENDPOINTS()
 
 
-@search_blueprint.route("/", methods=["GET"])
+@search_blueprint.route(route.search.route_name, methods=route.search.methods)
 def search():
     query = request.args.get("q")
     limit = request.args.get("limit", default=10)
@@ -23,7 +23,9 @@ def search():
     return SuccessResponse(data={}, message="Fetch data successfully", status_code=200)
 
 
-@search_blueprint.route("/predict", methods=["GET"])
+@search_blueprint.route(
+    route.search_suggestion.route_name, methods=route.search_suggestion.methods
+)
 def search_predict():
     query = request.args.get("q")
     if not query:
@@ -32,7 +34,7 @@ def search_predict():
     return SuccessResponse(data={}, message="Fetch data successfully", status_code=200)
 
 
-@search_blueprint.route("/trending", methods=["GET"])
+@search_blueprint.route(route.trending.route_name, methods=route.trending.methods)
 def trending():
     """
     Trending hashtags
@@ -41,7 +43,9 @@ def trending():
     return SuccessResponse(data={}, message="Fetch data successfully", status_code=200)
 
 
-@search_blueprint.route("/trending/<string:hash_tag>/post", methods=["GET"])
+@search_blueprint.route(
+    route.trending_posts.route_name, methods=route.trending_posts.methods
+)
 def trending_posts(hash_tag: str):
     """
     Trending posts

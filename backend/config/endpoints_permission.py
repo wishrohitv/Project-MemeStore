@@ -345,6 +345,29 @@ class API_ENDPOINTS:
         methods=["PATCH"],
     )
 
+    # Search
+    search = RouteAccess(
+        route_name="/search",
+        role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+
+    search_suggestion = RouteAccess(
+        route_name="/trending/suggestion",
+        role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+    trending = RouteAccess(
+        route_name="/trending",
+        role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+    trending_posts = RouteAccess(
+        route_name="/trending/<string:hash_tag>/post",
+        role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+
     @property
     def api_endpoints(self) -> dict[str, RouteAccess]:
         """
