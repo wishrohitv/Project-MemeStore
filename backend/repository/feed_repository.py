@@ -30,6 +30,7 @@ def _get_home_feed(
         if fetch_template:
             conditions.append(Posts.is_template.is_(True))
         feed = _query_posts(conditions, category, offset, limit, session_user_id)
+
         return SuccessResponse(
             data=feed, message="Home feed fetched successfully", status_code=200
         )
@@ -214,7 +215,7 @@ def _get_parent_post(post_id: int, session_user_id: int | None = None):
             "file_type": result[1].file_type,
             "media_public_id": result[1].media_public_id,
             "file_extension": result[1].file_extension,
-            "created_at": result[1].created_at,
+            "created_at": result[1].created_at.isoformat(),
             "age_rating": result[
                 1
             ].age_rating.value,  # Return Enum class from db and get its value from
