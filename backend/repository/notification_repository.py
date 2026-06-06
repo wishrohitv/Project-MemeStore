@@ -2,7 +2,14 @@ from database import SessionLocal
 from models import Notifications
 from models.enums import NotificationType
 from modules import make_response, or_
-from utils import InternalServerError, Log, SuccessResponse
+from utils import (
+    AppError,
+    BadRequestError,
+    InternalServerError,
+    Log,
+    ResourceNotFoundError,
+    SuccessResponse,
+)
 
 
 def _create_notification(
@@ -53,21 +60,29 @@ def _get_notifications(session_user_id: int, mention: bool = False, offset: int 
         )
 
         if not result:
-            return make_response([], 200)
+            raise ResourceNotFoundError("No notification found")
         notifications = [
             {
                 "id": notice.id,
                 "type": notice.type.value,
                 "notice": notice.notice,
-                "created_at": notice.created_at,
-                "updated_at": notice.updated_at,
-                "read_at": notice.read_at,
+                "created_at": notice.created_at.isoformat(),
+                "updated_at": notice.updated_at.isoformat(),
+                "read_at": notice.read_at.isoformat()
+                if notice.read_at is not None
+                else notice.read_at,
             }
             for notice in result
         ]
-        return make_response(notifications, 200)
+        return SuccessResponse(
+            data=notifications,
+            message="Notification fetch successfully",
+            status_code=200,
+        )
+    except AppError:
+        raise
     except Exception as e:
         Log.error(e)
-        return make_response({"error": "Internal sever error"}, 500)
+        raise InternalServerError("Error while fetching notifications") from e
     finally:
         session.close()
