@@ -76,7 +76,7 @@ def _get_notifications(session_user_id: int, mention: bool = False, offset: int 
         ]
         return SuccessResponse(
             data=notifications,
-            message="Notification fetch successfully",
+            message="Notification fetched successfully",
             status_code=200,
         )
     except AppError:

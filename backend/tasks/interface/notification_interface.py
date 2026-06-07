@@ -197,7 +197,7 @@ def follow(user_id: int, follower_user_id: int) -> None:
         if user is None:
             return
         notic = {
-            "user": user.username,
+            "username": user.username,
             "alert": "New follower",
             "text": f"{user.username} started following you.",
         }
