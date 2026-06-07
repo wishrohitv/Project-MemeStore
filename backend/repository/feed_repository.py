@@ -1,3 +1,4 @@
+from alembic.command import stamp
 from database import SessionLocal
 from models import Bookmark, Category, Likes, Posts, Profile, Reposts, Users
 from modules import (
@@ -44,7 +45,7 @@ def _get_home_feed(
 
 def _query_posts(
     conditions,
-    category: list = [],
+    category: list[str] = [],
     offset: int = 0,
     limit: int = 10,
     session_user_id: int | None = None,
@@ -54,7 +55,7 @@ def _query_posts(
     Global feed and post and replie query function
     """
     try:
-        # Get feed data from database alog with userName of author of post
+        # Get feed data from database along with userName of author of post
         like = aliased(Likes)
         like_count = (
             select(func.count(like.user_id))
