@@ -23,6 +23,9 @@ import random
 # Regex module
 import re
 
+# Import secrets module
+import secrets
+
 # Import threding and queue for background tasks
 import threading
 

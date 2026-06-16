@@ -1,7 +1,7 @@
 from config import API_ENDPOINTS, ROLE
 from database import SessionLocal
-from models import Accessibility, Category, Endpoint, Role
-from modules import sessionmaker
+from models import Accessibility, Category, Endpoint, Profile, Role, Users
+from modules import json, secrets
 
 
 # Setup initial data in database
@@ -71,4 +71,33 @@ def init_db_setup():
 
         session.add_all(cat_obj_list)
         session.commit()
+
+    # Add initial users
+    check_users = session.query(Users).limit(1).all()
+
+    if len(check_users) == 0:
+        user_obj_list = []
+        with open("./data/users.json", encoding="utf-8") as f:
+            users: dict = json.load(f)
+            for key, user in users.items():
+                user_obj_list.append(
+                    Users(
+                        id=user["id"],
+                        username=user["username"],
+                        email=user["email"],
+                        password=secrets.token_bytes(16),
+                        role=user["role"],
+                        is_verified=user["is_verified"],
+                        name=user.get("name") or "",
+                        profile=Profile(
+                            user_id=user["id"],
+                            bio=user.get("bio") or "",
+                            country=user.get("country") or "",
+                        ),
+                    )
+                )
+
+        session.add_all(user_obj_list)
+        session.commit()
+
     session.close()
