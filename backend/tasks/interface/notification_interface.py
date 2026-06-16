@@ -89,14 +89,15 @@ def suggestion(
 def reply(
     parent_post_id: int,
     post_id: int,
-    mentioned_usernames_by_system: list[
-        str
-    ],  # list of usernames mentioned by system in the reply in the thread
     mentioned_by_user_id: int,  # user ID of post/reply author who mentioned others in the thread
     text: str,  # title of the post or ""
+    mentioned_usernames_by_system: list[str]
+    | None,  # list of usernames mentioned by system in the reply in the thread
 ) -> None | Exception:
     session = SessionLocal()
     try:
+        if mentioned_usernames_by_system is None:
+            return
 
         def create_mention_notification(
             mentioned_username: str,

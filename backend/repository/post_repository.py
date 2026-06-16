@@ -31,7 +31,7 @@ from modules import (
 )
 from services.cloudinary_service import delete_media
 from tasks import add_task_in_queue
-from tasks.interface import like, mention, reply
+from tasks.interface import like, mention, process_user_requests, reply
 from tasks.interface import repost as repost_interface
 from utils import (
     AppError,
@@ -109,6 +109,17 @@ def _create_post(
                         text=text,
                     )
                 )
+        # process bot service if bot is tagged
+        if text:
+            add_task_in_queue(
+                functools.partial(
+                    process_user_requests,
+                    text=text,
+                    current_post_id=new_post.id,
+                    replying_to=replying_to,
+                    parent_post_id=parent_post_id,
+                )
+            )
         return SuccessResponse(
             message="post upload successfully", status_code=200, data={}
         )
