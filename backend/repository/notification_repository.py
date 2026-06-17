@@ -5,10 +5,12 @@ from modules import make_response, or_
 from utils import (
     AppError,
     BadRequestError,
+    ConflictError,
     InternalServerError,
     Log,
     ResourceNotFoundError,
     SuccessResponse,
+    datetime_utc,
 )
 
 
@@ -34,7 +36,9 @@ def _create_notification(
         session.close()
 
 
-def _get_notifications(session_user_id: int, mention: bool = False, offset: int = 0):
+def _get_notifications(
+    session_user_id: int, mention: bool = False, limit: int = 15, offset: int = 0
+):
     session = SessionLocal()
     condition = []
     if mention:
@@ -55,7 +59,7 @@ def _get_notifications(session_user_id: int, mention: bool = False, offset: int 
             session.query(Notifications)
             .filter(*condition)
             .offset(offset)
-            .limit(10)
+            .limit(limit)
             .all()
         )
 
@@ -79,6 +83,34 @@ def _get_notifications(session_user_id: int, mention: bool = False, offset: int 
             message="Notification fetched successfully",
             status_code=200,
         )
+    except AppError:
+        raise
+    except Exception as e:
+        Log.error(e)
+        raise InternalServerError("Error while fetching notifications") from e
+    finally:
+        session.close()
+
+
+def _track_notification_click(session_user_id: int, notification_id: int):
+    session = SessionLocal()
+    try:
+        notification = (
+            session.query(Notifications)
+            .filter_by(user_id=session_user_id, id=notification_id)
+            .first()
+        )
+        if not notification:
+            raise BadRequestError("Invalid notification id")
+
+        if notification.read_at:
+            raise ConflictError("Notificatoin is already read")
+
+        # Update the notification
+        notification.read_at = datetime_utc()
+        session.commit()
+
+        return SuccessResponse(data={})
     except AppError:
         raise
     except Exception as e:
