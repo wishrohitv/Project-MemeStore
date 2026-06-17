@@ -342,12 +342,17 @@ class API_ENDPOINTS:
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["DELETE"],
     )
-    get_notifications = RouteAccess(
+    notifications = RouteAccess(
         route_name="/notifications",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["GET"],
     )
-    track_notifications = RouteAccess(
+    notifications_unread_count = RouteAccess(
+        route_name="/notifications/unread-count",
+        role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
+        methods=["GET"],
+    )
+    notifications_track = RouteAccess(
         route_name="/notifications/<int:notification_id>/clicked",
         role_permission=[ROLE.USER, ROLE.SUPER_ADMIN, ROLE.MODERATOR],
         methods=["PATCH"],

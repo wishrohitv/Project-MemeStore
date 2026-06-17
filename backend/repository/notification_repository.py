@@ -1,7 +1,7 @@
 from database import SessionLocal
 from models import Notifications
 from models.enums import NotificationType
-from modules import make_response, or_
+from modules import func, or_, select
 from utils import (
     AppError,
     BadRequestError,
@@ -111,6 +111,24 @@ def _track_notification_click(session_user_id: int, notification_id: int):
         session.commit()
 
         return SuccessResponse(data={})
+    except AppError:
+        raise
+    except Exception as e:
+        session.rollback()
+        Log.error(e)
+        raise InternalServerError("Error while fetching notifications") from e
+    finally:
+        session.close()
+
+
+def _unread_count_notification(session_user_id: int):
+    session = SessionLocal()
+    try:
+        stmt = select(func.count(Notifications.id)).filter_by(
+            user_id=session_user_id, read_at=None
+        )
+        result = session.execute(stmt).scalar()
+        return SuccessResponse(data={"count": result or 0})
     except AppError:
         raise
     except Exception as e:

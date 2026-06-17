@@ -1,4 +1,3 @@
-from alembic.command import stamp
 from database import SessionLocal
 from models import Bookmark, Category, Likes, Posts, Profile, Reposts, Users
 from modules import (

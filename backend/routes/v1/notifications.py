@@ -1,9 +1,10 @@
 from config import API_ENDPOINTS
 from middlewares.verify_client_request import verify_request_middleware
-from modules import Blueprint, make_response, request
+from modules import Blueprint, request
 from repository.notification_repository import (
     _get_notifications,
     _track_notification_click,
+    _unread_count_notification,
 )
 from utils import (
     BadRequestError,
@@ -22,9 +23,9 @@ logger = Logging(__name__)
 
 # /notifications GET
 @notification_blueprint.route(
-    f"{route.get_notifications.route_name}", methods=route.get_notifications.methods
+    f"{route.notifications.route_name}", methods=route.notifications.methods
 )
-@verify_request_middleware(route.get_notifications.route_name)
+@verify_request_middleware(route.notifications.route_name)
 def get_notifications(logged_user: LoggedUser, *args, **kwargs):
 
     session_user_id = logged_user.user_id
@@ -35,11 +36,23 @@ def get_notifications(logged_user: LoggedUser, *args, **kwargs):
     return _get_notifications(session_user_id, mention, limit=limit, offset=offset)
 
 
+# /notifications/unread-count GET
+@notification_blueprint.route(
+    f"{route.notifications_unread_count.route_name}",
+    methods=route.notifications_unread_count.methods,
+)
+@verify_request_middleware(route.notifications_unread_count.route_name)
+def unread_count_notifications(logged_user: LoggedUser, *args, **kwargs):
+
+    session_user_id = logged_user.user_id
+    return _unread_count_notification(session_user_id)
+
+
 # /notifications/<int:notification_id>/clicked PATCH
 @notification_blueprint.route(
-    route.track_notifications.route_name, methods=route.track_notifications.methods
+    route.notifications_track.route_name, methods=route.notifications_track.methods
 )
-@verify_request_middleware(route.track_notifications.route_name)
+@verify_request_middleware(route.notifications_track.route_name)
 def track_notification_click(logged_user: LoggedUser, *args, **kwargs):
     session_user_id = logged_user.user_id
     notification_id = kwargs["notification_id"]
